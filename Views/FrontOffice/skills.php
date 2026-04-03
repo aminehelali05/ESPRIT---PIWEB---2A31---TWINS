@@ -17,12 +17,12 @@
       <a href="TemplateHome.php" class="navbar-brand"><div class="brand-icon">â¬¡</div>Diversity.is</a>
       <div class="navbar-nav" id="navbar-nav">
         <a href="TemplateHome.php">Home</a>
-        <a href="auth.html">Sign In</a>
-        <a href="social.html">Feed</a>
-        <a href="skills.html" class="active">Skills</a>
-        <a href="projects.html">Projects</a>
-        <a href="reviews.html">Reviews</a>
-        <a href="challenges.html">Challenges</a>
+        <a href="auth.php">Sign In</a>
+        <a href="social.php">Feed</a>
+        <a href="skills.php" class="active">Skills</a>
+        <a href="projects.php">Projects</a>
+        <a href="reviews.php">Reviews</a>
+        <a href="challenges.php">Challenges</a>
       </div>
       <div class="navbar-actions">
         <!-- Theme Toggle -->
@@ -41,10 +41,10 @@
               <strong>Admin User</strong>
               <span>admin@diversity.is</span>
             </div>
-            <a href="profile.html" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="dashboard.html" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
+            <a href="../BackOffice/DashboardTemplate.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
-            <a href="auth.html" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
+            <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
         </div>
       </div>

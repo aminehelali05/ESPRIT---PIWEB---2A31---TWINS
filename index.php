@@ -1,3 +1,3 @@
 <?php
-header('Location: Views/BackOffice/ListUsers.php');
+header('Location: Views/FrontOffice/TemplateHome.php');
 exit;
