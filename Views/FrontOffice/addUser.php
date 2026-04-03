@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 include_once __DIR__ . '/../../Controllers/UserController.php';
 
 $userController = new UserController();
@@ -29,7 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             date('Y-m-d H:i:s')
         );
         $userController->addUser($user);
-        $success = 'Account created. You can sign in now.';
+        header('Location: auth.php?registered=1');
+        exit;
     }
 }
 ?>
@@ -56,12 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <?php if ($success !== ''): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?> <a href="auth.php">Sign In</a></div><?php endif; ?>
           <form method="POST" class="auth-form">
             <div class="form-row">
-              <div class="form-group"><label class="form-label">First name</label><input class="form-input" name="first_name" required></div>
-              <div class="form-group"><label class="form-label">Last name</label><input class="form-input" name="last_name" required></div>
+              <div class="form-group"><label class="form-label">First name</label><input class="form-input" name="first_name" required value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>"></div>
+              <div class="form-group"><label class="form-label">Last name</label><input class="form-input" name="last_name" required value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>"></div>
             </div>
-            <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" name="email" required></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" name="email" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"></div>
             <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" name="password" required></div>
-            <div class="form-group"><label class="form-label">Phone (optional)</label><input class="form-input" name="phone"></div>
+            <div class="form-group"><label class="form-label">Phone (optional)</label><input class="form-input" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>"></div>
             <button class="btn btn-primary btn-lg auth-submit" type="submit">Create account</button>
           </form>
           <p class="auth-toggle-text">Already have an account? <a href="auth.php">Sign In</a></p>
@@ -71,3 +72,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </section>
 </body>
 </html>
+

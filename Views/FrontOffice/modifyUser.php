@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 include_once __DIR__ . '/../../Controllers/UserController.php';
 
 $userController = new UserController();
@@ -78,3 +78,4 @@ if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
 </section>
 </body>
 </html>
+

@@ -1,4 +1,11 @@
-﻿<!DOCTYPE html>
+﻿<?php
+include_once __DIR__ . '/../../Controllers/UserController.php';
+
+$profileController = new UserController();
+$profileUsers = $profileController->listUsers();
+$profileUserId = isset($profileUsers[0]) ? (int) $profileUsers[0]->getId() : 1;
+?>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
@@ -42,7 +49,7 @@
               <span>admin@diversity.is</span>
             </div>
             <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/ListUsers.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="../BackOffice/DashboardTemplate.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
@@ -100,9 +107,9 @@
 
           <!-- Actions -->
           <div class="profile-actions">
-            <button class="btn btn-primary btn-sm" id="editToggleBtn">
+            <a class="btn btn-primary btn-sm" id="editToggleBtn" href="modifyUser.php?id=<?= $profileUserId ?>">
               <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Edit Details
-            </button>
+            </a>
             <button class="profile-action-icon" title="Export Data">
               <i data-lucide="download" class="w-4 h-4"></i>
             </button>
@@ -394,4 +401,5 @@
   <script src="../assets/js/profile.js"></script>
 </body>
 </html>
+
 
