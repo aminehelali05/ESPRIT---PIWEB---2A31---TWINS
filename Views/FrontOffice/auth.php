@@ -28,7 +28,7 @@
         <a href="challenges.php">Challenges</a>
       </div>
       <div class="navbar-actions">
-        <a href="addUser.php" class="btn btn-primary btn-sm">Create Account</a>
+        <a href="profile.php#crud" class="btn btn-primary btn-sm">Create Account</a>
         <!-- Theme Toggle -->
         <button class="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -46,7 +46,7 @@
               <span>admin@diversity.is</span>
             </div>
             <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/DashboardTemplate.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="../BackOffice/UserDashboard.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
@@ -106,7 +106,7 @@
               </button>
             </div>
             <p class="auth-toggle-text">
-              Don't have an account? <a href="addUser.php" class="auth-link">Create one</a>
+              Don't have an account? <a href="profile.php#crud" class="auth-link">Create one</a>
             </p>
           </div>
 
@@ -154,5 +154,6 @@
   <script src="../assets/js/auth.js"></script>
 </body>
 </html>
+
 
 
