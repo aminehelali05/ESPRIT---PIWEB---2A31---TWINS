@@ -1,488 +1,535 @@
 <?php
-require __DIR__ . '/../RebuildUsers/user_list.php';
-return;
+session_start();
+require_once __DIR__ . '/../../Controllers/UserController.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../FrontOffice/login.php');
+    exit;
+}
 
 $controller = new UserController();
 $search = trim($_GET['search'] ?? '');
-$page = max(1, (int) ($_GET['p'] ?? 1));
-$success = '';
-$error = '';
+$page = max(1, (int) ($_GET['page'] ?? 1));
 
-// Handle Delete
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
     $id = (int) ($_POST['id'] ?? 0);
-    if ($id > 0) {
+
+    if ($action === 'delete' && $id > 0) {
         $controller->deleteUser($id);
-        $query = $search !== '' ? '&search=' . urlencode($search) : '';
-        header('Location: user_list.php?success=deleted' . $query);
+        header('Location: user_list.php?msg=deleted');
+        exit;
+    }
+
+    if ($action === 'toggle_block' && $id > 0) {
+        $controller->toggleBlock($id);
+        header('Location: user_list.php?msg=updated');
         exit;
     }
 }
 
-// Handle Block/Unblock
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_block') {
-    $id = (int) ($_POST['id'] ?? 0);
-    if ($id > 0) {
-        $targetUser = $controller->getUserById($id);
-        if ($targetUser) {
-            $targetUser->setIsBlocked($targetUser->getIsBlocked() ? 0 : 1);
-            $controller->updateUser($targetUser, $id);
-            header('Location: user_list.php?success=' . ($targetUser->getIsBlocked() ? 'blocked' : 'unblocked'));
-            exit;
-        }
-    }
-}
-
-if (isset($_GET['success'])) {
-    $map = [
-        'created' => 'User created successfully.',
-        'updated' => 'User updated successfully.',
-        'deleted' => 'User deleted successfully.',
-        'blocked' => 'User has been blocked.',
-        'unblocked' => 'User has been unblocked.'
-    ];
-    $success = $map[$_GET['success']] ?? '';
-}
-
 $result = $controller->getUsersPage($page, 10, $search);
 $users = $result['users'];
-$pages = $result['pages'];
-$currentPage = $result['page'];
-$total = $result['total'];
-
-// Stats
 $totalUsers = $controller->countUsers();
-$totalAdmins = $controller->countByRole('admin');
-$totalManagers = $controller->countByRole('manager');
-
-$sessionName = $_SESSION['user_name'] ?? 'Admin User';
-$sessionEmail = $_SESSION['user_email'] ?? 'admin@voicesofpeace.org';
-$initials = '';
-foreach (explode(' ', $sessionName) as $chunk) {
-    if ($chunk !== "") $initials .= strtoupper(substr($chunk, 0, 1));
-}
-$initials = substr($initials ?: 'AU', 0, 2);
+$activeUsers = $controller->countActiveUsers();
+$adminUsers = $controller->countByRole('admin');
 ?>
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management — Voices Of Peace</title>
-    <meta name="description" content="Manage platform users, roles, and access — Voices Of Peace Admin Dashboard">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { border: 'rgba(255,255,255,0.08)', surface: 'rgba(255,255,255,0.02)' } } }
-        }
-    </script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
-        html:not(.dark) ::-webkit-scrollbar-thumb { background: #d4d4d8; }
-        html:not(.dark) ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
-        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .dark .glass { background: rgba(9,9,11,0.6); border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-        /* 3D Card hover */
-        .card-3d { transition: transform 0.4s cubic-bezier(.25,.46,.45,.94), box-shadow 0.4s ease; transform-style: preserve-3d; }
-        .card-3d:hover { transform: translateY(-6px) rotateX(2deg) rotateY(-2deg); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.25); }
-
-        /* Fade in animation */
-        @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        .fade-in-up { animation: fadeInUp 0.5s cubic-bezier(.4,0,.2,1) forwards; opacity: 0; }
-        .fade-in-up:nth-child(1) { animation-delay: 0s; }
-        .fade-in-up:nth-child(2) { animation-delay: 0.08s; }
-        .fade-in-up:nth-child(3) { animation-delay: 0.16s; }
-        .fade-in-up:nth-child(4) { animation-delay: 0.24s; }
-
-        /* Row hover glow */
-        .table-row-hover { transition: background 0.2s, transform 0.2s; }
-        .table-row-hover:hover { transform: scale(1.003); }
-
-        /* Pulse glow on badge */
-        @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.3); } 50% { box-shadow: 0 0 0 6px rgba(99,102,241,0); } }
-        .pulse-glow { animation: pulseGlow 2s infinite; }
-
-        /* Sidebar mobile */
-        .sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
-        .sidebar-backdrop.active { display: block; }
-        @media (max-width: 1023px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.open { transform: translateX(0); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="../assets/css/user-module.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-400 font-sans antialiased selection:bg-indigo-500/30 overflow-hidden transition-colors duration-300">
-    <!-- Background Glow -->
-    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none opacity-40 dark:opacity-100 transition-opacity">
-        <div class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-900/10 rounded-full blur-[100px]"></div>
-        <div class="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[100px]"></div>
-    </div>
+<body>
+  <div class="um-page">
+    <div class="um-dashboard">
+      <aside class="um-card um-sidebar">
+        <div class="um-brand" style="margin-bottom:14px;"><span class="um-brand-dot">VoP</span> Admin</div>
+        <a class="um-nav-link active" href="user_list.php"><i data-lucide="users" class="w-4 h-4"></i> Users</a>
+        <a class="um-nav-link" href="../FrontOffice/dashboard.php"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Main Dashboard</a>
+        <a class="um-nav-link" href="../FrontOffice/profile.php"><i data-lucide="user-round" class="w-4 h-4"></i> Profile</a>
+      </aside>
 
-    <!-- Sidebar Backdrop (mobile) -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+      <main class="um-main">
+        <header class="um-topbar um-card" style="padding:10px 14px; margin:0;">
+          <div>
+            <strong>User Management</strong>
+            <div style="color:var(--text-muted); font-size:.86rem;">Migrated structure from Projet-2Aref dashboard + strict MVC CRUD</div>
+          </div>
+          <button class="um-theme-toggle" type="button" data-theme-toggle><i data-lucide="moon-star" class="w-4 h-4"></i></button>
+        </header>
 
-    <div class="flex h-screen w-full">
-        <!-- Sidebar -->
-        <aside class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white/80 dark:bg-zinc-950/50 border-r border-zinc-200 dark:border-zinc-800/50 backdrop-blur-xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col" id="sidebar">
-            <div class="flex items-center justify-between h-16 px-6 border-b border-zinc-200 dark:border-zinc-800/50">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gradient-to-tr from-indigo-600 to-emerald-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                        <span class="font-bold text-xs">VoP</span>
+        <section class="um-stats">
+          <article class="um-card um-stat tilt-hover"><h3><?= (int) $totalUsers ?></h3><p>Total users</p></article>
+          <article class="um-card um-stat tilt-hover"><h3><?= (int) $activeUsers ?></h3><p>Active</p></article>
+          <article class="um-card um-stat tilt-hover"><h3><?= (int) $adminUsers ?></h3><p>Admins</p></article>
+          <article class="um-card um-stat tilt-hover"><h3><?= (int) $result['pages'] ?></h3><p>Pages</p></article>
+        </section>
+
+        <section class="um-card" style="padding:16px;">
+          <form method="GET" class="um-actions" style="justify-content:space-between; align-items:center;">
+            <div class="um-actions" style="flex:1;">
+              <input class="um-input" type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by name or email" style="max-width:380px;">
+              <button class="um-btn um-btn-soft" type="submit">Filter</button>
+            </div>
+            <a class="um-btn um-btn-primary" href="user_create.php">Create User</a>
+          </form>
+
+          <div class="um-table-wrap" style="margin-top:14px;">
+            <table class="um-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Country</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+              <?php if (!$users): ?>
+                <tr><td colspan="7" style="color:var(--text-muted);">No users found.</td></tr>
+              <?php else: foreach ($users as $user): ?>
+                <tr>
+                  <td>#<?= (int) $user->getId() ?></td>
+                  <td><?= htmlspecialchars($user->getFullName()) ?></td>
+                  <td><?= htmlspecialchars($user->getEmail()) ?></td>
+                  <td><span class="um-pill"><?= htmlspecialchars($user->getRole()) ?></span></td>
+                  <td>
+                    <?php if ((int) $user->getIsBlocked() === 1): ?>
+                      <span class="um-pill um-pill-danger">Blocked</span>
+                    <?php else: ?>
+                      <span class="um-pill um-pill-success">Active</span>
+                    <?php endif; ?>
+                  </td>
+                  <td><?= htmlspecialchars($user->getCountry() ?: '-') ?></td>
+                  <td>
+                    <div class="um-actions">
+                      <a class="um-btn-icon" href="user_details.php?id=<?= (int) $user->getId() ?>" title="Details"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                      <a class="um-btn-icon" href="user_edit.php?id=<?= (int) $user->getId() ?>" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></a>
+                      <form method="POST" data-confirm-action="Delete this user?">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" value="<?= (int) $user->getId() ?>">
+                        <button class="um-btn-icon" type="submit" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                      </form>
+                      <form method="POST">
+                        <input type="hidden" name="action" value="toggle_block">
+                        <input type="hidden" name="id" value="<?= (int) $user->getId() ?>">
+                        <button class="um-btn-icon" type="submit" title="Toggle Block"><i data-lucide="shield-ban" class="w-4 h-4"></i></button>
+                      </form>
                     </div>
-                    <h1 class="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Voices Of Peace</h1>
+                  </td>
+                </tr>
+              <?php endforeach; endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../assets/js/user-module.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>
+<?php return; ?>
+
+<?php
+session_start();
+require_once __DIR__ . '/../../Controllers/UserController.php';
+
+$userController = new UserController();
+$result = $userController->getUsersPage(1, 100); // just fetch all for dashboard
+$users = $result['users'];
+
+// Quick Stats
+$totalUsers = $userController->countUsers();
+$activeUsers = $userController->countActiveUsers();
+$adminUsers = $userController->countByRole('admin');
+?>
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Diversity.is</title>
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Advanced 3D & Animation Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+  <style>
+    /* Extreme Premium UI Upgrades */
+    body {
+        background: #0f172a;
+        overflow-x: hidden;
+    }
+    #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: -1;
+    }
+    .dash-stat-card, .dash-card, .kpi-mini {
+        background: rgba(30, 41, 59, 0.6) !important;
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5) !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        transform-style: preserve-3d;
+    }
+    .dash-stat-card:hover, .kpi-mini:hover {
+        box-shadow: 0 25px 45px -5px rgba(99, 102, 241, 0.3) !important;
+        border-color: rgba(99, 102, 241, 0.5) !important;
+    }
+    .dash-grid-2 .dash-card:hover {
+        box-shadow: 0 25px 45px -5px rgba(236, 72, 153, 0.2) !important;
+    }
+    h2.page-title {
+        background: linear-gradient(to right, #818cf8, #34d399);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0px 5px 15px rgba(52, 211, 153, 0.2);
+    }
+    .dash-table tbody tr {
+        transition: all 0.3s ease;
+        background: rgba(255,255,255,0.02);
+    }
+    .dash-table tbody tr:hover {
+        background: rgba(99, 102, 241, 0.1) !important;
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 10;
+        position: relative;
+    }
+    .sidebar {
+        background: rgba(15, 23, 42, 0.8) !important;
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255,255,255,0.05);
+    }
+    .dashboard-header {
+        background: rgba(15, 23, 42, 0.6) !important;
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    td img, td .badge-pill, .table-action-btn {
+        transition: all 0.3s ease;
+    }
+    td img:hover {
+        transform: scale(1.2) rotate(10deg);
+        box-shadow: 0 0 15px rgba(99,102,241,0.8);
+    }
+    .table-action-btn:hover {
+        transform: translateY(-3px) scale(1.2);
+        color: #f472b6 !important;
+    }
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(1deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+  </style>
+</head>
+<body class="grid-dot-bg dashboard-body">
+  <div id="particles-js"></div>
+  <div class="dashboard-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">⬡</div>
+          <span class="sidebar-brand-text">Diversity.is</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#overview" class="sidebar-link active" data-page="overview"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></a>
+        <a href="#users" class="sidebar-link" data-page="users"><i data-lucide="users" class="w-4 h-4"></i><span>User Management</span></a>
+        <a href="#clients" class="sidebar-link" data-page="clients"><i data-lucide="briefcase" class="w-4 h-4"></i><span>Clients</span></a>
+        <a href="#employees" class="sidebar-link" data-page="employees"><i data-lucide="contact" class="w-4 h-4"></i><span>Employees</span></a>
+        <a href="#products" class="sidebar-link" data-page="products"><i data-lucide="package" class="w-4 h-4"></i><span>Products</span></a>
+        <a href="#sales" class="sidebar-link" data-page="sales"><i data-lucide="shopping-cart" class="w-4 h-4"></i><span>Sales</span></a>
+        <a href="#suppliers" class="sidebar-link" data-page="suppliers"><i data-lucide="truck" class="w-4 h-4"></i><span>Suppliers</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="../FrontOffice/auth.html" class="sidebar-link sidebar-logout"><i data-lucide="log-out" class="w-4 h-4"></i><span>Sign Out</span></a>
+      </div>
+    </aside>
+
+    <main class="dashboard-main" id="dashboardMain">
+      <header class="dashboard-header">
+        <div class="header-left">
+          <button class="header-menu-btn" id="headerToggle"><i data-lucide="menu" class="w-5 h-5"></i></button>
+          <div class="header-search">
+            <i data-lucide="search" class="w-4 h-4 search-icon"></i>
+            <input type="text" placeholder="Search dashboard modules..." class="search-input" id="globalSearchInput">
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" aria-label="Toggle theme">
+            <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button class="header-icon-btn" id="notifBtn"><i data-lucide="bell" class="w-5 h-5"></i><span class="notif-badge">4</span></button>
+          <div class="header-divider"></div>
+          <div class="nav-profile">
+            <button class="nav-profile-btn" aria-label="User menu">
+              <div class="nav-avatar">AD</div>
+              <span class="user-role-label hidden-mobile" style="font-size: 0.8rem; margin-left: var(--space-xs); font-weight: 500;">Admin User</span>
+            </button>
+            <div class="nav-dropdown">
+              <div class="nav-dropdown-header">
+                <strong>Admin User</strong>
+                <span>admin@diversity.is</span>
+              </div>
+              <a href="../FrontOffice/profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
+              <a href="../../index.php" class="nav-dropdown-item"><i data-lucide="home" class="w-4 h-4"></i> Back to Home</a>
+              <a href="../FrontOffice/auth.html" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-content">
+        <section class="dash-page active" id="overview">
+          <div class="page-header">
+            <div>
+              <h2 class="page-title">Diversity.is Dashboard</h2>
+              <p class="page-subtitle">A complete command center for users, operations, and AI-guided decisions.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="document.querySelector('[data-page=\'users\']').click(); document.getElementById('openUserModalBtn').click();"><i data-lucide="plus" class="w-4 h-4"></i> Add User</button>
+          </div>
+
+          <div class="stats-row">
+            <div class="dash-stat-card floating-element" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+              <div class="dash-stat-top" style="transform: translateZ(30px);">
+                <div>
+                  <p class="dash-stat-label">Total Users</p>
+                  <h3 class="dash-stat-value"><?= $totalUsers ?></h3>
+                  <p class="dash-stat-trend trend-up"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Real-time CRUD synced</p>
                 </div>
-                <button class="lg:hidden text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" id="sidebarClose">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                <div class="dash-stat-icon icon-indigo" style="transform: translateZ(40px); background: linear-gradient(135deg, #6366f1, #a855f7); color:white; box-shadow: 0 0 20px rgba(99,102,241,0.5);"><i data-lucide="users" class="w-5 h-5"></i></div>
+              </div>
+            </div>
+            <div class="dash-stat-card floating-element" style="animation-delay: 1s;" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+              <div class="dash-stat-top" style="transform: translateZ(30px);">
+                <div>
+                  <p class="dash-stat-label">Active Profiles</p>
+                  <h3 class="dash-stat-value"><?= $activeUsers ?></h3>
+                  <p class="dash-stat-trend trend-up"><i data-lucide="activity" class="w-3.5 h-3.5"></i> Online and productive</p>
+                </div>
+                <div class="dash-stat-icon icon-emerald" style="transform: translateZ(40px); background: linear-gradient(135deg, #10b981, #3b82f6); color:white; box-shadow: 0 0 20px rgba(16,185,129,0.5);"><i data-lucide="user-check" class="w-5 h-5"></i></div>
+              </div>
+            </div>
+            <div class="dash-stat-card floating-element" style="animation-delay: 2s;" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+              <div class="dash-stat-top" style="transform: translateZ(30px);">
+                <div>
+                  <p class="dash-stat-label">Admin Accounts</p>
+                  <h3 class="dash-stat-value"><?= $adminUsers ?></h3>
+                  <p class="dash-stat-trend trend-up"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Governance and control</p>
+                </div>
+                <div class="dash-stat-icon icon-purple" style="transform: translateZ(40px); background: linear-gradient(135deg, #d946ef, #f43f5e); color:white; box-shadow: 0 0 20px rgba(217,70,239,0.5);"><i data-lucide="shield" class="w-5 h-5"></i></div>
+              </div>
+            </div>
+            <div class="dash-stat-card floating-element" style="animation-delay: 3s;" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+              <div class="dash-stat-top" style="transform: translateZ(30px);">
+                <div>
+                  <p class="dash-stat-label">AI Suggestions</p>
+                  <h3 class="dash-stat-value" id="overviewSuggestions" data-target="12">12</h3>
+                  <p class="dash-stat-trend trend-up"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Ready to apply</p>
+                </div>
+                <div class="dash-stat-icon icon-amber" style="transform: translateZ(40px); background: linear-gradient(135deg, #f59e0b, #ed8936); color:white; box-shadow: 0 0 20px rgba(245,158,11,0.5);"><i data-lucide="bot" class="w-5 h-5"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-grid-2">
+            <div class="dash-card">
+              <h3 class="dash-card-title">Live Activity</h3>
+              <div class="dash-activity-list" id="activityList">
+                <div style="padding: 1rem; color: var(--text-muted);">Loaded dynamically...</div>
+              </div>
+            </div>
+            <div class="dash-card">
+              <h3 class="dash-card-title">Quick Actions</h3>
+              <div class="quick-actions-grid">
+                <button class="quick-action-btn" onclick="document.querySelector('[data-page=\'users\']').click(); document.getElementById('openUserModalBtn').click();">
+                  <div class="quick-action-icon icon-indigo"><i data-lucide="user-plus" class="w-5 h-5 icon-gradient-primary"></i></div>
+                  <span>Create User</span>
                 </button>
+                <button class="quick-action-btn">
+                  <div class="quick-action-icon icon-emerald"><i data-lucide="brain-circuit" class="w-5 h-5 icon-gradient-success"></i></div>
+                  <span>AI Summary</span>
+                </button>
+                <button class="quick-action-btn">
+                  <div class="quick-action-icon icon-amber"><i data-lucide="line-chart" class="w-5 h-5 icon-gradient-warning"></i></div>
+                  <span>Sales View</span>
+                </button>
+                <button class="quick-action-btn">
+                  <div class="quick-action-icon icon-purple"><i data-lucide="truck" class="w-5 h-5 icon-gradient-purple"></i></div>
+                  <span>Suppliers</span>
+                </button>
+              </div>
             </div>
-            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                <div class="px-3 mb-2 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Administration</div>
-                <a href="user_list.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group active text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-zinc-800/50">
-                    <i data-lucide="users" class="stroke-[1.5] w-4 h-4 mr-3 text-indigo-600 dark:text-indigo-400"></i>
-                    <span>Users List</span>
-                </a>
-                <a href="user_create.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all">
-                    <i data-lucide="user-plus" class="stroke-[1.5] w-4 h-4 mr-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"></i>
-                    <span>Add User</span>
-                </a>
+          </div>
+        </section>
 
-                <div class="px-3 mt-6 mb-2 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Front Office</div>
-                <a href="../FrontOffice/profile.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all">
-                    <i data-lucide="user-circle" class="stroke-[1.5] w-4 h-4 mr-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"></i>
-                    <span>My Profile</span>
-                </a>
-                <a href="../FrontOffice/home.php" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all">
-                    <i data-lucide="home" class="stroke-[1.5] w-4 h-4 mr-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"></i>
-                    <span>Home Page</span>
-                </a>
-            </nav>
-            <div class="p-4 border-t border-zinc-200 dark:border-zinc-800/50">
-                <a href="../FrontOffice/auth.php" class="flex w-full items-center px-3 py-2 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors">
-                    <i data-lucide="log-out" class="stroke-[1.5] w-4 h-4 mr-3"></i>
-                    <span>Sign out</span>
-                </a>
+        <section class="dash-page" id="users">
+          <div class="page-breadcrumbs"><span>Dashboard</span><i data-lucide="chevron-right" class="w-3 h-3"></i><span>User Management</span></div>
+          <div class="page-header" style="margin-top: var(--space-xs);">
+            <div>
+              <h2 class="page-title">User Management</h2>
             </div>
-        </aside>
+            <a href="user_create.php" class="btn btn-primary btn-sm" id="openUserModalBtn"><i data-lucide="plus" class="w-4 h-4"></i> New User</a>
+          </div>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative transition-colors duration-300" id="mainContent">
-            <!-- Header -->
-            <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-200 dark:border-zinc-800/50 glass z-20 sticky top-0 transition-colors duration-300">
-                <div class="flex items-center gap-4 w-full max-w-xl">
-                    <button class="lg:hidden text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100" id="sidebarToggle">
-                        <i data-lucide="menu" class="stroke-[1.5] w-5 h-5"></i>
-                    </button>
-                    <form method="GET" class="relative group w-full" id="searchForm">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="search" class="h-4 w-4 text-zinc-400 dark:text-zinc-600 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors"></i>
-                        </div>
-                        <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" class="block w-full pl-10 pr-3 py-1.5 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-lg leading-5 text-zinc-900 dark:text-zinc-200 placeholder-zinc-500 dark:placeholder-zinc-600 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 sm:text-sm transition-all" placeholder="Search users by name or email...">
-                    </form>
-                    <?php if ($search !== ''): ?>
-                        <a href="user_list.php" class="text-sm font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 whitespace-nowrap transition-colors">Clear</a>
-                    <?php endif; ?>
+          <div class="kpi-mini-grid">
+            <div class="kpi-mini"><span>Total users</span><strong><?= $totalUsers ?></strong></div>
+            <div class="kpi-mini"><span>Active now</span><strong><?= $activeUsers ?></strong></div>
+            <div class="kpi-mini"><span>Admins</span><strong><?= $adminUsers ?></strong></div>
+            <div class="kpi-mini"><span>New this month</span><strong>8</strong></div>
+          </div>
+
+          <div class="dash-card">
+            <div class="filters-row">
+              <div class="filter-group form-group">
+                <label>Search</label>
+                <div class="input-with-icon">
+                  <i data-lucide="search" class="w-4 h-4 text-secondary"></i>
+                  <input type="text" class="form-control" id="usersSearchInput" placeholder="Name, email, location...">
                 </div>
-                <div class="flex items-center gap-3">
-                    <button onclick="document.documentElement.classList.toggle('dark');" class="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 rounded-lg transition-all focus:outline-none" id="themeToggle">
-                        <i data-lucide="sun" class="hidden dark:block stroke-[1.5] w-5 h-5"></i>
-                        <i data-lucide="moon" class="block dark:hidden stroke-[1.5] w-5 h-5"></i>
-                    </button>
-                    <div class="h-4 w-px bg-zinc-200 dark:bg-zinc-800 mx-1"></div>
-                    <div class="flex items-center gap-3 p-1 rounded-lg">
-                        <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500/20 to-emerald-500/20 border border-zinc-200 dark:border-zinc-700 overflow-hidden flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                            <?= htmlspecialchars($initials) ?>
-                        </div>
-                        <div class="hidden sm:block text-left">
-                            <span class="block text-xs font-medium text-zinc-700 dark:text-zinc-300"><?= htmlspecialchars($sessionName) ?></span>
-                        </div>
-                    </div>
-                </div>
-            </header>
+              </div>
+              <div class="filter-group form-group" style="min-width: 170px;">
+                <label>Role</label>
+                <select class="form-control" id="usersRoleFilter">
+                  <option value="all">All roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="member">Member</option>
+                  <option value="user">User</option>
+                </select>
+              </div>
+              <div class="filter-group form-group" style="min-width: 170px;">
+                <label>Status</label>
+                <select class="form-control" id="usersStatusFilter">
+                  <option value="all">All status</option>
+                  <option value="active">Active</option>
+                  <option value="offline">Offline</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
+            </div>
 
-            <!-- Page Content -->
-            <div class="flex-1 overflow-y-auto p-6 lg:p-8 scroll-smooth bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
-
-                <!-- Page Header -->
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-                    <div>
-                        <h2 class="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">User Management</h2>
-                        <p class="text-sm text-zinc-500 mt-1">Manage platform users, roles, and access control.</p>
-                    </div>
-                    <a href="user_create.php" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5 flex items-center gap-2 w-fit">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i> Add New User
-                    </a>
-                </div>
-
-                <!-- Success Message -->
-                <?php if ($success): ?>
-                <div class="mb-6 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-3 text-emerald-800 dark:text-emerald-300 fade-in-up" id="successAlert">
-                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 dark:text-emerald-400 flex-shrink-0"></i>
-                    <p class="text-sm font-medium flex-1"><?= htmlspecialchars($success) ?></p>
-                    <button onclick="this.parentElement.remove();" class="text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-200 transition-colors">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                </div>
-                <?php endif; ?>
-
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <div class="card-3d bg-white dark:bg-zinc-900/20 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-indigo-500/30 transition-colors shadow-sm dark:shadow-none fade-in-up">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Total Users</p>
-                                <h3 class="text-2xl font-medium text-zinc-900 dark:text-zinc-100 mt-2 tracking-tight"><?= $totalUsers ?></h3>
-                                <p class="text-xs text-emerald-500 mt-1 font-medium">Platform members</p>
+            <div class="table-wrap">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                    <th>Last Active</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <?php foreach($users as $u): ?>
+                    <tr>
+                        <td>#<?= $u->getId() ?></td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <?php if($u->getAvatarUrl()): ?>
+                                    <img src="<?= htmlspecialchars($u->getAvatarUrl()) ?>" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                                <?php else: ?>
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); display:flex; align-items:center; justify-content:center; font-weight:600; font-size: 0.8rem;">
+                                      <?= htmlspecialchars($u->getInitials()) ?>
+                                    </div>
+                                <?php endif; ?>
+                                <div>
+                                    <div style="font-weight: 500;"><?= htmlspecialchars($u->getFullName()) ?></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);"><?= htmlspecialchars($u->getEmail()) ?></div>
+                                </div>
                             </div>
-                            <div class="p-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-500/20">
-                                <i data-lucide="users" class="stroke-[1.5] w-5 h-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-3d bg-white dark:bg-zinc-900/20 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-emerald-500/30 transition-colors shadow-sm dark:shadow-none fade-in-up">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Admins</p>
-                                <h3 class="text-2xl font-medium text-zinc-900 dark:text-zinc-100 mt-2 tracking-tight"><?= $totalAdmins ?></h3>
-                                <p class="text-xs text-emerald-500 mt-1 font-medium">Administrators</p>
-                            </div>
-                            <div class="p-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-500/20">
-                                <i data-lucide="shield" class="stroke-[1.5] w-5 h-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-3d bg-white dark:bg-zinc-900/20 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-purple-500/30 transition-colors shadow-sm dark:shadow-none fade-in-up">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Managers</p>
-                                <h3 class="text-2xl font-medium text-zinc-900 dark:text-zinc-100 mt-2 tracking-tight"><?= $totalManagers ?></h3>
-                                <p class="text-xs text-purple-500 mt-1 font-medium">Team leaders</p>
-                            </div>
-                            <div class="p-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg border border-purple-500/20">
-                                <i data-lucide="crown" class="stroke-[1.5] w-5 h-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-3d bg-white dark:bg-zinc-900/20 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5 hover:border-amber-500/30 transition-colors shadow-sm dark:shadow-none fade-in-up">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Regular Users</p>
-                                <h3 class="text-2xl font-medium text-zinc-900 dark:text-zinc-100 mt-2 tracking-tight"><?= $totalUsers - $totalAdmins - $totalManagers ?></h3>
-                                <p class="text-xs text-amber-500 mt-1 font-medium">Standard accounts</p>
-                            </div>
-                            <div class="p-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-500/20">
-                                <i data-lucide="user" class="stroke-[1.5] w-5 h-5"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Users Table -->
-                <div class="bg-white dark:bg-zinc-900/20 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden shadow-sm dark:shadow-none fade-in-up" style="animation-delay:0.3s;">
-                    <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800/50 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-200">All Users</h3>
-                            <p class="text-xs text-zinc-500 mt-0.5"><?= $total ?> total · Page <?= $currentPage ?> of <?= $pages ?></p>
-                        </div>
-                        <?php if ($search !== ''): ?>
-                            <span class="text-xs px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-200 dark:border-indigo-800/50">
-                                Search: "<?= htmlspecialchars($search) ?>"
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-zinc-700 dark:text-zinc-300" id="usersTable">
-                            <thead class="bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800/50">
-                                <tr>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">User</th>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Role</th>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden md:table-cell">Country</th>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell">XP</th>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell">Joined</th>
-                                    <th class="py-3 px-5 text-xs font-semibold text-zinc-500 uppercase tracking-wider text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800/30">
-                                <?php if (count($users) === 0): ?>
-                                    <tr><td colspan="7" class="py-16 text-center">
-                                        <div class="flex flex-col items-center gap-3">
-                                            <i data-lucide="search-x" class="w-12 h-12 text-zinc-300 dark:text-zinc-700"></i>
-                                            <p class="text-zinc-500 text-sm">No users found.</p>
-                                            <?php if ($search !== ''): ?>
-                                                <a href="user_list.php" class="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline">Clear search</a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td></tr>
-                                <?php else: foreach ($users as $user): ?>
-                                    <tr class="table-row-hover hover:bg-zinc-50 dark:hover:bg-zinc-800/20 transition-colors">
-                                        <td class="py-4 px-5">
-                                            <div class="flex items-center gap-3">
-                                                <?php if ($user->getAvatarUrl()): ?>
-                                                    <img src="<?= htmlspecialchars($user->getAvatarUrl()) ?>" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-700 flex-shrink-0">
-                                                <?php else: ?>
-                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500/80 to-emerald-500/80 flex flex-shrink-0 items-center justify-center text-white font-medium text-sm shadow-sm">
-                                                        <?= htmlspecialchars($user->getInitials()) ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <div class="min-w-0">
-                                                    <div class="font-medium text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-2">
-                                                        <?= htmlspecialchars($user->getFullName()) ?>
-                                                        <?php if ((int)$user->getIsBlocked()): ?>
-                                                            <span class="text-[10px] px-1.5 py-0.5 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded font-semibold">BLOCKED</span>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                    <div class="text-xs text-zinc-500 truncate"><?= htmlspecialchars($user->getEmail()) ?></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-5">
-                                            <?php
-                                            $roleColors = [
-                                                'admin' => 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/50',
-                                                'manager' => 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800/50',
-                                                'user' => 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700',
-                                            ];
-                                            $role = strtolower($user->getRole() ?: 'user');
-                                            $roleClass = $roleColors[$role] ?? $roleColors['user'];
-                                            ?>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold capitalize border <?= $roleClass ?>">
-                                                <?= htmlspecialchars($user->getRole() ?: 'User') ?>
-                                            </span>
-                                        </td>
-                                        <td class="py-4 px-5">
-                                            <?php if ((int)$user->getStatus() === 1): ?>
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                                                </span>
-                                            <?php else: ?>
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Inactive
-                                                </span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="py-4 px-5 hidden md:table-cell text-zinc-500 text-xs">
-                                            <?= htmlspecialchars($user->getCountry() ?: '—') ?>
-                                        </td>
-                                        <td class="py-4 px-5 hidden lg:table-cell">
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-16 bg-zinc-200 dark:bg-zinc-800 rounded-full h-1.5">
-                                                    <div class="bg-indigo-500 h-1.5 rounded-full" style="width: <?= min(100, (int)$user->getXp() / 5) ?>%"></div>
-                                                </div>
-                                                <span class="text-xs text-zinc-500 font-medium"><?= (int)$user->getXp() ?></span>
-                                            </div>
-                                        </td>
-                                        <td class="py-4 px-5 hidden lg:table-cell text-zinc-500 text-xs">
-                                            <?= htmlspecialchars(substr($user->getCreatedAt(), 0, 10) ?: 'N/A') ?>
-                                        </td>
-                                        <td class="py-4 px-5 text-right">
-                                            <div class="flex items-center justify-end gap-1">
-                                                <a href="user_details.php?id=<?= (int)$user->getId() ?>" class="p-1.5 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors" title="View Details">
-                                                    <i data-lucide="eye" class="w-4 h-4"></i>
-                                                </a>
-                                                <a href="user_edit.php?id=<?= (int)$user->getId() ?>" class="p-1.5 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors" title="Edit">
-                                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
-                                                </a>
-                                                <button onclick="confirmDelete(<?= (int)$user->getId() ?>, '<?= htmlspecialchars(addslashes($user->getFullName()), ENT_QUOTES) ?>')" class="p-1.5 text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors" title="Delete">
-                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <?php if ($pages > 1): ?>
-                    <div class="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800/50 flex items-center justify-between">
-                        <p class="text-xs text-zinc-500">Showing page <?= $currentPage ?> of <?= $pages ?></p>
-                        <nav class="flex items-center gap-1">
-                            <?php if ($currentPage > 1): ?>
-                                <a href="user_list.php?p=<?= $currentPage - 1 ?><?= $search !== '' ? '&search=' . urlencode($search) : '' ?>" class="px-3 py-1.5 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
-                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                                </a>
+                        </td>
+                        <td><span class="badge-pill"><?= htmlspecialchars(ucfirst($u->getRole())) ?></span></td>
+                        <td>
+                            <?php if($u->getIsBlocked() == 1): ?>
+                                <span class="badge-pill" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger);"><span style="display:inline-block; width:6px; height:6px; background:var(--color-danger); border-radius:50%; margin-right:6px;"></span> Blocked</span>
+                            <?php else: ?>
+                                <span class="badge-pill" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);"><span style="display:inline-block; width:6px; height:6px; background:var(--color-success); border-radius:50%; margin-right:6px;"></span> Active</span>
                             <?php endif; ?>
-                            <?php for ($i = 1; $i <= $pages; $i++): ?>
-                                <a href="user_list.php?p=<?= $i ?><?= $search !== '' ? '&search=' . urlencode($search) : '' ?>" class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors <?= $i === $currentPage ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5' ?>"><?= $i ?></a>
-                            <?php endfor; ?>
-                            <?php if ($currentPage < $pages): ?>
-                                <a href="user_list.php?p=<?= $currentPage + 1 ?><?= $search !== '' ? '&search=' . urlencode($search) : '' ?>" class="px-3 py-1.5 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
-                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                                </a>
-                            <?php endif; ?>
-                        </nav>
-                    </div>
-                    <?php endif; ?>
-                </div>
+                        </td>
+                        <td><?= htmlspecialchars($u->getCountry() ?: 'N/A') ?></td>
+                        <td><?= $u->getLastSeen() ? date('M j, Y H:i', strtotime($u->getLastSeen())) : 'Never' ?></td>
+                        <td style="text-align:right;">
+                            <div style="display:flex; justify-content:flex-end; gap:0.5rem;">
+                                <a class="table-action-btn table-action-edit" href="user_edit.php?id=<?= $u->getId() ?>" title="Edit"><i class="lucide-icon" data-lucide="edit-2" style="width:16px;height:16px"></i></a>
+                                <form method="POST" action="user_list.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    <input type="hidden" name="delete_user_id" value="<?= $u->getId() ?>">
+                                    <button type="submit" class="table-action-btn table-action-delete" title="Delete"><i class="lucide-icon" data-lucide="trash-2" style="width:16px;height:16px"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+              </table>
+              <?php if(empty($users)): ?>
+              <div class="empty-state" id="usersEmptyState">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <p>No users match this filter set.</p>
+              </div>
+              <?php endif; ?>
             </div>
-        </main>
-    </div>
+          </div>
+          <!-- Additional UI components remain as they were in HTML template -->
+        </section>
 
-    <!-- Hidden delete form -->
-    <form id="deleteForm" method="POST" style="display:none;">
-        <input type="hidden" name="action" value="delete">
-        <input type="hidden" name="id" id="deleteUserId">
-    </form>
+      </div>
+    </main>
+  </div>
 
-    <script>
-        lucide.createIcons();
+  <script src="../assets/js/main.js"></script>
+  <!-- <script src="../assets/js/dashboard.js"></script> Commented out if it handles raw JS fetching that overrides our PHP -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    lucide.createIcons();
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {"value": 50, "density": {"enable": true, "value_area": 1000}},
+        "color": {"value": ["#6366f1", "#10b981", "#ec4899"]},
+        "shape": {"type": "circle"},
+        "opacity": {"value": 0.4, "random": true, "anim": {"enable": true, "speed": 1, "opacity_min": 0.1, "sync": false}},
+        "size": {"value": 3, "random": true, "anim": {"enable": true, "speed": 2, "size_min": 0.1, "sync": false}},
+        "line_linked": {"enable": true, "distance": 150, "color": "#cbd5e1", "opacity": 0.1, "width": 1},
+        "move": {"enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false}
+      },
+      "interactivity": {
+        "detect_on": "window",
+        "events": {"onhover": {"enable": true, "mode": "bubble"}, "onclick": {"enable": true, "mode": "repulse"}, "resize": true},
+        "modes": {"bubble": {"distance": 200, "size": 6, "duration": 2, "opacity": 0.8, "speed": 3}, "repulse": {"distance": 200, "duration": 0.4}}
+      },
+      "retina_detect": true
+    });
 
-        // SweetAlert delete confirmation
-        function confirmDelete(id, name) {
-            Swal.fire({
-                title: 'Delete User?',
-                html: `Are you sure you want to delete <strong>${name}</strong>? This action cannot be undone.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="mr-1">🗑️</i> Yes, delete',
-                cancelButtonText: 'Cancel',
-                customClass: { popup: 'swal2-popup-custom' },
-                background: document.documentElement.classList.contains('dark') ? '#18181b' : '#ffffff',
-                color: document.documentElement.classList.contains('dark') ? '#e4e4e7' : '#18181b',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteUserId').value = id;
-                    document.getElementById('deleteForm').submit();
-                }
-            });
-        }
-
-        // Sidebar toggle (mobile)
-        const sidebar = document.getElementById('sidebar');
-        const backdrop = document.getElementById('sidebarBackdrop');
-        document.getElementById('sidebarToggle')?.addEventListener('click', () => {
-            sidebar.classList.add('open');
-            backdrop.classList.add('active');
+    // basic tab switching for dashboard
+    document.querySelectorAll('.sidebar-link[data-page]').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            document.querySelectorAll('.dash-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(link.getAttribute('data-page')).classList.add('active');
         });
-        document.getElementById('sidebarClose')?.addEventListener('click', closeSidebar);
-        backdrop?.addEventListener('click', closeSidebar);
-        function closeSidebar() {
-            sidebar.classList.remove('open');
-            backdrop.classList.remove('active');
-        }
-
-        // Auto-dismiss success alert
-        const successAlert = document.getElementById('successAlert');
-        if (successAlert) {
-            setTimeout(() => {
-                successAlert.style.transition = 'opacity 0.5s, transform 0.5s';
-                successAlert.style.opacity = '0';
-                successAlert.style.transform = 'translateY(-8px)';
-                setTimeout(() => successAlert.remove(), 500);
-            }, 4000);
-        }
-    </script>
+    });
+  </script>
 </body>
 </html>

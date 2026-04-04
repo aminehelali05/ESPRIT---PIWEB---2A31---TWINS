@@ -5,6 +5,21 @@ include_once __DIR__ . '/../../Controllers/UserController.php';
 if (isset($_GET['logout'])) {
   session_unset();
   session_destroy();
+  header('Location: login.php');
+  exit;
+}
+
+if (isset($_GET['register'])) {
+  header('Location: register.php');
+  exit;
+}
+
+header('Location: login.php');
+exit;
+
+if (isset($_GET['logout'])) {
+  session_unset();
+  session_destroy();
   header('Location: auth.php');
   exit;
 }
