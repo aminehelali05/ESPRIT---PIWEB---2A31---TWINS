@@ -310,4 +310,96 @@ class UserController
         $row = $query->fetch();
         return (int) ($row['cnt'] ?? 0);
     }
+
+    public function countActiveUsers()
+    {
+        $sql = "SELECT COUNT(*) as cnt FROM {$this->table} WHERE status = 1";
+        $db = config::getConnexion();
+        $query = $db->prepare($sql);
+        $query->execute();
+        $row = $query->fetch();
+        return (int) ($row['cnt'] ?? 0);
+    }
+
+    public function toggleBlock($id)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            return false;
+        }
+
+        $user = $this->getUserById($id);
+        if (!$user) {
+            return false;
+        }
+
+        $user->setIsBlocked((int) $user->getIsBlocked() === 1 ? 0 : 1);
+        $this->updateUser($user, $id);
+
+        return (int) $user->getIsBlocked();
+    }
+
+    public function updateProfile($id, array $data)
+    {
+        $id = (int) $id;
+        if ($id <= 0) {
+            return false;
+        }
+
+        $sql = "UPDATE {$this->table}
+                SET first_name = :first_name,
+                    last_name = :last_name,
+                    email = :email,
+                    phone = :phone,
+                    country = :country,
+                    bio = :bio,
+                    title = :title,
+                    skills = :skills,
+                    avatar_url = :avatar_url,
+                    updated_at = NOW()
+                WHERE id = :id";
+
+        $db = config::getConnexion();
+
+        try {
+            $query = $db->prepare($sql);
+            return $query->execute([
+                'first_name' => trim((string) ($data['first_name'] ?? '')),
+                'last_name' => trim((string) ($data['last_name'] ?? '')),
+                'email' => trim((string) ($data['email'] ?? '')),
+                'phone' => trim((string) ($data['phone'] ?? '')),
+                'country' => trim((string) ($data['country'] ?? '')),
+                'bio' => trim((string) ($data['bio'] ?? '')),
+                'title' => trim((string) ($data['title'] ?? '')),
+                'skills' => trim((string) ($data['skills'] ?? '')),
+                'avatar_url' => trim((string) ($data['avatar_url'] ?? '')) ?: null,
+                'id' => $id,
+            ]);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function changePassword($id, $newPassword)
+    {
+        $id = (int) $id;
+        $newPassword = (string) $newPassword;
+
+        if ($id <= 0 || strlen($newPassword) < 6) {
+            return false;
+        }
+
+        $sql = "UPDATE {$this->table} SET password = :password, updated_at = NOW() WHERE id = :id";
+        $db = config::getConnexion();
+
+        try {
+            $query = $db->prepare($sql);
+            return $query->execute([
+                'password' => password_hash($newPassword, PASSWORD_DEFAULT),
+                'id' => $id,
+            ]);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 }

@@ -2,6 +2,13 @@
 session_start();
 include_once __DIR__ . '/../../Controllers/UserController.php';
 
+if (isset($_GET['logout'])) {
+  session_unset();
+  session_destroy();
+  header('Location: auth.php');
+  exit;
+}
+
 $userController = new UserController();
 $loginError = '';
 $registerError = '';
