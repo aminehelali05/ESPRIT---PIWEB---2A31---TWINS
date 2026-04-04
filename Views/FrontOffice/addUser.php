@@ -1,5 +1,5 @@
 ﻿<?php
-header('Location: profile.php#crud');
+header('Location: profile.php');
 exit;
 
 

@@ -1,3 +1,3 @@
 <?php
-header('Location: UserDashboard.php');
+header('Location: user_form.php');
 exit;
