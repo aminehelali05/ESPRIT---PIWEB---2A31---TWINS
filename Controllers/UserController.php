@@ -5,10 +5,12 @@ include_once(__DIR__ . '/../Models/User.php');
 class UserController
 {
     private $table;
+    private $lastError;
 
     public function __construct()
     {
         $this->table = $this->resolveTableName();
+        $this->lastError = null;
     }
 
     private function resolveTableName()
@@ -27,6 +29,11 @@ class UserController
     public function getTableName()
     {
         return $this->table;
+    }
+
+    public function getLastError()
+    {
+        return $this->lastError;
     }
 
     private function hydrateUser(array $row): User
@@ -61,10 +68,11 @@ class UserController
 
     public function addUser(User $user)
     {
+        $this->lastError = null;
         $sql = "INSERT INTO {$this->table} (first_name, last_name, email, password, phone, role, status,
-                avatar_url, badge, country, bio, title, skills, xp, is_blocked, created_at)
+                avatar_url, badge, country, bio, title, skills, xp, is_blocked, last_seen, created_at)
                 VALUES (:first_name, :last_name, :email, :password, :phone, :role, :status,
-                :avatar_url, :badge, :country, :bio, :title, :skills, :xp, :is_blocked, :created_at)";
+                :avatar_url, :badge, :country, :bio, :title, :skills, :xp, :is_blocked, :last_seen, :created_at)";
         $db = config::getConnexion();
         try {
             $query = $db->prepare($sql);
@@ -84,21 +92,24 @@ class UserController
                 'skills'      => $user->getSkills(),
                 'xp'          => $user->getXp(),
                 'is_blocked'  => $user->getIsBlocked(),
+                'last_seen'   => $user->getLastSeen(),
                 'created_at'  => $user->getCreatedAt() ?: date('Y-m-d H:i:s')
             ]);
             return $db->lastInsertId();
         } catch (Exception $e) {
-            echo 'Error: ' . $e->getMessage();
+            $this->lastError = $e->getMessage();
+            error_log('UserController::addUser failed - ' . $e->getMessage());
             return false;
         }
     }
 
     public function updateUser(User $user, $id)
     {
+        $this->lastError = null;
         $sql = "UPDATE {$this->table} SET first_name=:first_name, last_name=:last_name, email=:email,
                 password=:password, phone=:phone, role=:role, status=:status,
                 avatar_url=:avatar_url, badge=:badge, country=:country, bio=:bio,
-            title=:title, skills=:skills, xp=:xp, is_blocked=:is_blocked,
+            title=:title, skills=:skills, xp=:xp, is_blocked=:is_blocked, last_seen=:last_seen,
             face_descriptor=:face_descriptor, face_images_path=:face_images_path,
             face_enrolled=:face_enrolled, face_enrolled_at=:face_enrolled_at
                 WHERE id=:id";
@@ -121,31 +132,39 @@ class UserController
                 'skills'      => $user->getSkills(),
                 'xp'          => $user->getXp(),
                 'is_blocked'  => $user->getIsBlocked(),
+                'last_seen'   => $user->getLastSeen(),
                 'face_descriptor' => $user->getFaceDescriptor(),
                 'face_images_path' => $user->getFaceImagesPath(),
                 'face_enrolled' => $user->getFaceEnrolled(),
                 'face_enrolled_at' => $user->getFaceEnrolledAt(),
                 'id'          => $id
             ]);
+            return true;
         } catch (Exception $e) {
-            echo 'Error: ' . $e->getMessage();
+            $this->lastError = $e->getMessage();
+            error_log('UserController::updateUser failed - ' . $e->getMessage());
+            return false;
         }
     }
 
     public function deleteUser($id)
     {
+        $this->lastError = null;
         $sql = "DELETE FROM {$this->table} WHERE id=:id";
         $db = config::getConnexion();
         try {
             $query = $db->prepare($sql);
-            $query->execute(['id' => $id]);
+            return $query->execute(['id' => $id]);
         } catch (Exception $e) {
-            echo 'Error: ' . $e->getMessage();
+            $this->lastError = $e->getMessage();
+            error_log('UserController::deleteUser failed - ' . $e->getMessage());
+            return false;
         }
     }
 
     public function listUsers($search = '')
     {
+        $this->lastError = null;
         $sql = "SELECT * FROM {$this->table}";
         $params = [];
         if ($search !== '') {
@@ -164,7 +183,8 @@ class UserController
             }
             return $users;
         } catch (Exception $e) {
-            echo 'Error: ' . $e->getMessage();
+            $this->lastError = $e->getMessage();
+            error_log('UserController::listUsers failed - ' . $e->getMessage());
             return [];
         }
     }

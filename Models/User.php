@@ -91,7 +91,6 @@ class User
     public function setCreatedAt($v) { $this->created_at = $v; }
     public function setUpdatedAt($v) { $this->updated_at = $v; }
 
-    // --- HELPERS ---
     public function getFullName() {
         return trim($this->first_name . ' ' . $this->last_name);
     }

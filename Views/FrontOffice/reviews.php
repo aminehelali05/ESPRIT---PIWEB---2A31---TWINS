@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Give and receive meaningful feedback on Diversity.is.">
-  <title>Reviews & Ratings â€” Diversity.is</title>
-  <link rel="stylesheet" href="../assets/css/global.css">
-  <link rel="stylesheet" href="../assets/css/reviews.css">
+  <title>Reviews & Ratings — Diversity.is</title>
+  <link rel="stylesheet" href="../../assets/css/global.css">
+  <link rel="stylesheet" href="../../assets/css/reviews.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="grid-dot-bg">
@@ -14,9 +14,10 @@
 
   <nav class="navbar" id="navbar">
     <div class="container">
-      <a href="home.php" class="navbar-brand"><div class="brand-icon">â¬¡</div>Diversity.is</a>
+      <a href="home.php" class="navbar-brand"><div class="brand-icon">⬡</div>Diversity.is</a>
       <div class="navbar-nav" id="navbar-nav">
         <a href="home.php">Home</a>
+        <a href="auth.php">Sign In</a>
         <a href="social.php">Feed</a>
         <a href="skills.php">Skills</a>
         <a href="projects.php">Projects</a>
@@ -24,7 +25,6 @@
         <a href="challenges.php">Challenges</a>
       </div>
       <div class="navbar-actions">
-        <a href="auth.php" class="btn btn-primary btn-sm">Sign In</a>
         <!-- Theme Toggle -->
         <button class="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -42,7 +42,7 @@
               <span>admin@diversity.is</span>
             </div>
             <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/user_list.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="../BackOffice/dashboard.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
@@ -69,20 +69,20 @@
         <div class="rating-big">
           <span class="rating-number">4.9</span>
           <div class="rating-stars-display" data-rating="4.9">
-            <span class="star filled">â˜…</span>
-            <span class="star filled">â˜…</span>
-            <span class="star filled">â˜…</span>
-            <span class="star filled">â˜…</span>
-            <span class="star half-filled">â˜…</span>
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+            <span class="star filled">★</span>
+            <span class="star half-filled">★</span>
           </div>
           <p class="text-small">Based on 127 reviews</p>
         </div>
         <div class="rating-breakdown">
-          <div class="rating-row"><span class="text-small">5 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:82%"></div></div><span class="text-small">104</span></div>
-          <div class="rating-row"><span class="text-small">4 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:12%"></div></div><span class="text-small">15</span></div>
-          <div class="rating-row"><span class="text-small">3 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:4%"></div></div><span class="text-small">5</span></div>
-          <div class="rating-row"><span class="text-small">2 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:2%"></div></div><span class="text-small">2</span></div>
-          <div class="rating-row"><span class="text-small">1 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:1%"></div></div><span class="text-small">1</span></div>
+          <div class="rating-row"><span class="text-small">5 ★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:82%"></div></div><span class="text-small">104</span></div>
+          <div class="rating-row"><span class="text-small">4 ★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:12%"></div></div><span class="text-small">15</span></div>
+          <div class="rating-row"><span class="text-small">3 ★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:4%"></div></div><span class="text-small">5</span></div>
+          <div class="rating-row"><span class="text-small">2 ★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:2%"></div></div><span class="text-small">2</span></div>
+          <div class="rating-row"><span class="text-small">1 ★</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:1%"></div></div><span class="text-small">1</span></div>
         </div>
       </div>
     </div>
@@ -94,11 +94,11 @@
       <div class="write-review glass-card fade-in-section">
         <h3 class="text-h3">Write a Review</h3>
         <div class="interactive-stars" id="interactive-stars">
-          <span class="star-input" data-value="1">â˜…</span>
-          <span class="star-input" data-value="2">â˜…</span>
-          <span class="star-input" data-value="3">â˜…</span>
-          <span class="star-input" data-value="4">â˜…</span>
-          <span class="star-input" data-value="5">â˜…</span>
+          <span class="star-input" data-value="1">★</span>
+          <span class="star-input" data-value="2">★</span>
+          <span class="star-input" data-value="3">★</span>
+          <span class="star-input" data-value="4">★</span>
+          <span class="star-input" data-value="5">★</span>
         </div>
         <p class="rating-text text-small" id="rating-text">Select a rating</p>
         <textarea class="form-input review-textarea" placeholder="Share your experience..." rows="4" id="review-textarea"></textarea>
@@ -120,7 +120,7 @@
             <div class="avatar" style="width:40px;height:40px;font-size:0.85rem;background:linear-gradient(135deg,#A855F7,#6366F1)"><span>SK</span></div>
             <div>
               <p class="review-author">Sarah Kim</p>
-              <div class="review-stars">â˜…â˜…â˜…â˜…â˜…</div>
+              <div class="review-stars">★★★★★</div>
             </div>
             <span class="text-small" style="margin-left:auto">3 days ago</span>
           </div>
@@ -135,7 +135,7 @@
             <div class="avatar" style="width:40px;height:40px;font-size:0.85rem;background:linear-gradient(135deg,#22C55E,#22D3EE)"><span>MR</span></div>
             <div>
               <p class="review-author">Mike Rodriguez</p>
-              <div class="review-stars">â˜…â˜…â˜…â˜…â˜…</div>
+              <div class="review-stars">★★★★★</div>
             </div>
             <span class="text-small" style="margin-left:auto">1 week ago</span>
           </div>
@@ -150,7 +150,7 @@
             <div class="avatar" style="width:40px;height:40px;font-size:0.85rem;background:linear-gradient(135deg,#F59E0B,#F43F5E)"><span>AJ</span></div>
             <div>
               <p class="review-author">Anna Johnson</p>
-              <div class="review-stars">â˜…â˜…â˜…â˜…<span style="color:rgba(255,255,255,0.2)">â˜…</span></div>
+              <div class="review-stars">★★★★<span style="color:rgba(255,255,255,0.2)">★</span></div>
             </div>
             <span class="text-small" style="margin-left:auto">2 weeks ago</span>
           </div>
@@ -165,7 +165,7 @@
             <div class="avatar" style="width:40px;height:40px;font-size:0.85rem;background:linear-gradient(135deg,#6366F1,#22D3EE)"><span>LP</span></div>
             <div>
               <p class="review-author">Lisa Park</p>
-              <div class="review-stars">â˜…â˜…â˜…â˜…â˜…</div>
+              <div class="review-stars">★★★★★</div>
             </div>
             <span class="text-small" style="margin-left:auto">3 weeks ago</span>
           </div>
@@ -180,11 +180,8 @@
 
   <div style="height:var(--space-4xl)"></div>
 
-  <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/mouse-tracking.js"></script>
-  <script src="../assets/js/reviews.js"></script>
+  <script src="../../assets/js/main.js"></script>
+  <script src="../../assets/js/mouse-tracking.js"></script>
+  <script src="../../assets/js/reviews.js"></script>
 </body>
 </html>
-
-
-

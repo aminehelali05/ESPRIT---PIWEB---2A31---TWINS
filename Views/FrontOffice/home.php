@@ -1,348 +1,298 @@
-﻿<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+include_once(__DIR__ . '/../../Controllers/AuthController.php');
+
+if (!AuthController::isAuthenticated()) {
+    $_SESSION['flash_error'] = 'Please sign in to access Home.';
+    header('Location: auth.php');
+    exit;
+}
+
+$currentUser = AuthController::currentUser();
+$firstName = trim((string) ($currentUser['first_name'] ?? 'Member'));
+$lastName = trim((string) ($currentUser['last_name'] ?? ''));
+$displayName = trim($firstName . ' ' . $lastName);
+$displayName = $displayName !== '' ? $displayName : 'Member';
+$displayEmail = (string) ($currentUser['email'] ?? 'member@diversity.is');
+$navInitials = strtoupper(substr($firstName, 0, 1) . substr($lastName !== '' ? $lastName : 'M', 0, 1));
+
+$reputationScore = 84;
+$level = 'Level 12';
+$streak = 7;
+$dailyXp = 25;
+?>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Professional Collaboration Platform â€” Build, collaborate, and grow with a modern team workspace.">
-  <title>Diversity.is â€” Professional Collaboration Platform</title>
-  <link rel="stylesheet" href="../assets/css/global.css">
-  <link rel="stylesheet" href="../assets/css/home.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <meta name="description" content="Diversity.is Home — social discovery, opportunities, and daily collaboration engagement hub.">
+  <title>Home — Diversity.is</title>
+  <link rel="stylesheet" href="../../assets/css/global.css">
+  <link rel="stylesheet" href="../../assets/css/home.css">
 </head>
-<body class="grid-dot-bg">
-
-  <!-- Gradient Mesh Background -->
+<body class="grid-dot-bg home-page-body">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <canvas id="gradient-canvas"></canvas>
 
-  <!-- Navbar -->
-  <nav class="navbar" id="navbar">
+  <nav class="navbar" id="navbar" aria-label="Primary navigation">
     <div class="container">
-      <a href="home.php" class="navbar-brand">
-        <div class="brand-icon">â¬¡</div>
+      <a href="home.php" class="navbar-brand" aria-label="Diversity home">
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </span>
         Diversity.is
       </a>
-      <div class="navbar-nav" id="navbar-nav">
+      <div class="navbar-nav" id="navbar-nav" role="menubar">
         <a href="home.php" class="active">Home</a>
-        <a href="social.php">Feed</a>
-        <a href="skills.php">Skills</a>
+        <a href="social.php">Network</a>
         <a href="projects.php">Projects</a>
-        <a href="reviews.php">Reviews</a>
         <a href="challenges.php">Challenges</a>
+        <a href="profile.php">Profile</a>
+        <a href="../BackOffice/dashboard.php">Dashboard</a>
       </div>
       <div class="navbar-actions">
-        <a href="auth.php" class="btn btn-primary btn-sm">Sign In</a>
-        <!-- Theme Toggle -->
+        <label class="home-global-search" aria-label="Global search">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          <input type="text" placeholder="Search people, posts, projects..." id="homeGlobalSearch" aria-label="Search people, posts, projects">
+        </label>
+        <button class="header-icon-btn" id="notifBtn" aria-label="Open notifications"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg><span class="notif-badge">4</span></button>
+        <div class="nav-profile">
+          <button class="nav-profile-btn" aria-label="User menu">
+            <div class="nav-avatar"><?= htmlspecialchars($navInitials) ?></div>
+          </button>
+          <div class="nav-dropdown">
+            <div class="nav-dropdown-header">
+              <strong><?= htmlspecialchars($displayName) ?></strong>
+              <span><?= htmlspecialchars($displayEmail) ?></span>
+            </div>
+            <a href="profile.php" class="nav-dropdown-item"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> My Profile</a>
+            <a href="../BackOffice/dashboard.php" class="nav-dropdown-item"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zm-10 10a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg> Dashboard</a>
+            <a href="projects.php" class="nav-dropdown-item"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg> My Projects</a>
+            <a href="../../index.php?action=logout" class="nav-dropdown-item nav-dropdown-item-danger"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg> Sign Out</a>
+          </div>
+        </div>
         <button class="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-
-        <!-- Profile Dropdown -->
-        <div class="nav-profile">
-          <button class="nav-profile-btn" aria-label="User menu">
-            <div class="nav-avatar">AD</div>
-          </button>
-          <div class="nav-dropdown">
-            <div class="nav-dropdown-header">
-              <strong>Admin User</strong>
-              <span>admin@diversity.is</span>
-            </div>
-            <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/user_list.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
-            <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
-            <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
-          </div>
-        </div>
       </div>
-      <div class="nav-toggle" id="nav-toggle">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle mobile menu" aria-controls="navbar-nav" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
-  <!-- ===== HERO SECTION ===== -->
-  <section class="section hero" id="hero">
-    <div class="floating-shapes">
-      <div class="floating-shape" data-parallax="-0.15"></div>
-      <div class="floating-shape" data-parallax="-0.25"></div>
-      <div class="floating-shape" data-parallax="-0.1"></div>
-    </div>
-    
-    <!-- 3D Floating Abstract Shapes -->
-    <div class="hero-shapes" id="hero-shapes">
-      <div class="hero-shape shape-1" data-parallax="-0.2">
-        <div class="shape-inner"></div>
-      </div>
-      <div class="hero-shape shape-2" data-parallax="-0.35">
-        <div class="shape-inner"></div>
-      </div>
-      <div class="hero-shape shape-3" data-parallax="-0.15">
-        <div class="shape-inner"></div>
-      </div>
-      <div class="hero-shape shape-4" data-parallax="-0.3">
-        <div class="shape-inner"></div>
-      </div>
-    </div>
-
-    <div class="container hero-content">
-      <div class="hero-badge fade-in-section">
-        <span class="badge-dot"></span>
-        Next-Gen Collaboration
-      </div>
-      <h1 class="text-hero hero-title fade-in-section">
-        Build.<br>
-        <span class="text-gradient">Collaborate.</span><br>
-        Grow.
-      </h1>
-      <p class="text-body-lg hero-subtitle fade-in-section">
-        A unified platform where professionals connect, share skills,<br class="hide-mobile">
-        manage projects, and grow together.
-      </p>
-      <div class="hero-actions fade-in-section">
-        <a href="auth.php" class="btn btn-primary btn-lg">
-          Get Started
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="#modules" class="btn btn-secondary btn-lg">
-          Explore Modules
-        </a>
-      </div>
-
-      <!-- Stats -->
-      <div class="hero-stats fade-in-section">
-        <div class="stat-item">
-          <span class="stat-number" data-target="12000">0</span><span class="stat-suffix">+</span>
-          <span class="stat-label">Professionals</span>
+  <main class="home-hub" id="main-content" tabindex="-1">
+    <div class="home-grid container">
+      <aside class="home-left glass-card" aria-label="Quick profile and navigation">
+        <div class="left-profile">
+          <div class="left-avatar"><?= htmlspecialchars($navInitials) ?></div>
+          <div>
+            <h4><?= htmlspecialchars($displayName) ?></h4>
+            <p><?= htmlspecialchars($level) ?></p>
+          </div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number" data-target="3500">0</span><span class="stat-suffix">+</span>
-          <span class="stat-label">Projects</span>
+        <nav class="left-nav">
+          <a class="active" href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> Home Feed</a>
+          <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> My Network</a>
+          <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg> Collaborations</a>
+          <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> Challenges</a>
+          <a href="skills.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> Skills & Certs</a>
+        </nav>
+        <div class="left-gamification">
+          <div class="mini-score">
+            <span>Reputation</span>
+            <strong><?= $reputationScore ?></strong>
+          </div>
+          <div class="mini-score">
+            <span>Daily Streak 🔥</span>
+            <strong><?= $streak ?> days</strong>
+          </div>
         </div>
-        <div class="stat-divider"></div>
-        <div class="stat-item">
-          <span class="stat-number" data-target="850">0</span><span class="stat-suffix">+</span>
-          <span class="stat-label">Skills</span>
-        </div>
-      </div>
-    </div>
-  </section>
+      </aside>
 
-  <!-- ===== MODULES OVERVIEW ===== -->
-  <section class="section section-modules" id="modules">
-    <div class="container">
-      <div class="section-header fade-in-section">
-        <span class="section-tag">Platform Modules</span>
-        <h2 class="text-h1">Everything you need,<br><span class="text-gradient">in one place.</span></h2>
-        <p class="text-body-lg">Six powerful modules designed to supercharge your professional journey.</p>
-      </div>
-
-      <div class="modules-grid grid grid-3 fade-in-section">
-        <!-- Module 1: Auth & Profile -->
-        <a href="auth.php" class="module-card glass-card tilt-card stagger-item" id="module-auth">
-          <div class="module-icon">
-            <svg class="icon-gradient-primary" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <section class="home-main" aria-label="Home feed content">
+        <article class="home-hero-card glass-card fade-in-section" aria-labelledby="home-hero-title">
+          <div class="home-hero-left">
+            <p class="hero-greeting">Good morning, <?= htmlspecialchars($firstName) ?> 👋</p>
+            <h1 id="home-hero-title">Welcome back to your collaboration hub</h1>
+            <p class="hero-sub">Stay connected, discover opportunities, and earn XP through daily collaboration moments.</p>
+            <div class="hero-points" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px;">
+              <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg>
+                Smart Insights
+              </span>
+              <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M21 12l-9 5-9-5"/></svg>
+                Premium Collaboration
+              </span>
+              <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                Reputation Growth
+              </span>
+            </div>
+            <div class="hero-cta-row">
+              <a href="challenges.php" class="btn btn-primary btn-sm">Take Daily Quiz (+<?= (int) $dailyXp ?> XP)</a>
+              <a href="../BackOffice/dashboard.php" class="btn btn-secondary btn-sm">Open Dashboard Insights</a>
+            </div>
           </div>
-          <h3 class="module-title">User Profiles</h3>
-          <p class="module-desc">Create your professional identity with rich profiles, skills showcasing, and certificate management.</p>
-          <div class="module-arrow">â†’</div>
-        </a>
-
-        <!-- Module 2: Social -->
-        <a href="social.php" class="module-card glass-card tilt-card stagger-item" id="module-social">
-          <div class="module-icon module-icon-cyan">
-            <svg class="icon-gradient-primary" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div class="home-hero-right">
+            <div class="reputation-ring" style="--progress: <?= (int) $reputationScore ?>;">
+              <div class="ring-inner"><strong><?= (int) $reputationScore ?></strong><span>REP</span></div>
+            </div>
+            <p class="ring-label"><?= htmlspecialchars($level) ?> • <?= (int) $streak ?>-day streak</p>
           </div>
-          <h3 class="module-title">Social Feed</h3>
-          <p class="module-desc">Share updates, discuss ideas, and engage with the community through posts and comments.</p>
-          <div class="module-arrow">â†’</div>
-        </a>
-
-        <!-- Module 3: Skills -->
-        <a href="skills.php" class="module-card glass-card tilt-card stagger-item" id="module-skills">
-          <div class="module-icon module-icon-purple">
-            <svg class="icon-gradient-purple" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <h3 class="module-title">Skills & Certs</h3>
-          <p class="module-desc">Showcase your expertise, earn certificates, and track your professional growth over time.</p>
-          <div class="module-arrow">â†’</div>
-        </a>
-
-        <!-- Module 4: Projects -->
-        <a href="projects.php" class="module-card glass-card tilt-card stagger-item" id="module-projects">
-          <div class="module-icon module-icon-green">
-            <svg class="icon-gradient-success" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <h3 class="module-title">Projects</h3>
-          <p class="module-desc">Manage collaborative projects, track timelines, and coordinate your team effortlessly.</p>
-          <div class="module-arrow">â†’</div>
-        </a>
-
-        <!-- Module 5: Reviews -->
-        <a href="reviews.php" class="module-card glass-card tilt-card stagger-item" id="module-reviews">
-          <div class="module-icon module-icon-amber">
-            <svg class="icon-gradient-warning" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-          </div>
-          <h3 class="module-title">Reviews</h3>
-          <p class="module-desc">Give and receive meaningful feedback with an interactive rating and review system.</p>
-          <div class="module-arrow">â†’</div>
-        </a>
-
-        <!-- Module 6: Challenges -->
-        <a href="challenges.php" class="module-card glass-card tilt-card stagger-item" id="module-challenges">
-          <div class="module-icon module-icon-rose">
-            <svg class="icon-gradient-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <h3 class="module-title">Challenges</h3>
-          <p class="module-desc">Test your knowledge with daily quizzes and coding challenges to level up your skills.</p>
-          <div class="module-arrow">â†’</div>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-value" id="value">
-    <div class="container">
-      <div class="section-header fade-in-section">
-        <span class="section-tag">Why Diversity.is</span>
-        <h2 class="text-h1">Built for modern teams,<br><span class="text-gradient">designed for real impact.</span></h2>
-        <p class="text-body-lg">A complete experience that combines collaboration, growth, and execution in one beautiful workspace.</p>
-      </div>
-      <div class="value-grid grid grid-3 fade-in-section">
-        <article class="value-card glass-card tilt-card stagger-item">
-          <i data-lucide="layers" class="w-6 h-6 icon-gradient-primary"></i>
-          <h3>Unified Workspace</h3>
-          <p>Profiles, projects, reviews, social collaboration, and dashboard intelligence in one place.</p>
         </article>
-        <article class="value-card glass-card tilt-card stagger-item">
-          <i data-lucide="sparkles" class="w-6 h-6 icon-gradient-purple"></i>
-          <h3>AI-Ready Workflows</h3>
-          <p>Assistive insights and smart suggestions to help teams decide faster and execute better.</p>
-        </article>
-        <article class="value-card glass-card tilt-card stagger-item">
-          <i data-lucide="shield-check" class="w-6 h-6 icon-gradient-success"></i>
-          <h3>Trust and Quality</h3>
-          <p>Role-aware operations, transparent progress, and measurable outcomes across every module.</p>
-        </article>
-      </div>
-    </div>
-  </section>
 
-  <section class="section section-testimonials" id="testimonials">
-    <div class="container">
-      <div class="section-header fade-in-section">
-        <span class="section-tag">Community Voices</span>
-        <h2 class="text-h1">Loved by creators,<br><span class="text-gradient">teams, and managers.</span></h2>
-      </div>
-      <div class="testimonials-grid grid grid-3 fade-in-section">
-        <article class="testimonial-card glass-card stagger-item">
-          <p>â€œDiversity.is helped us reduce onboarding chaos and made project collaboration feel effortless.â€</p>
-          <h4>Lina O.</h4>
-          <span>Product Lead</span>
-        </article>
-        <article class="testimonial-card glass-card stagger-item">
-          <p>â€œThe dashboard is clean, powerful, and fast. We finally have visibility without complexity.â€</p>
-          <h4>Marc D.</h4>
-          <span>Operations Manager</span>
-        </article>
-        <article class="testimonial-card glass-card stagger-item">
-          <p>â€œOur team engagement jumped in two weeks thanks to the social + skills ecosystem.â€</p>
-          <h4>Rania K.</h4>
-          <span>Community Builder</span>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-faq" id="faq">
-    <div class="container">
-      <div class="section-header fade-in-section">
-        <span class="section-tag">FAQ</span>
-        <h2 class="text-h1">Everything clear,<br><span class="text-gradient">before you even start.</span></h2>
-      </div>
-      <div class="faq-list fade-in-section">
-        <details class="faq-item glass-card" open>
-          <summary>Is Diversity.is suitable for small and large teams?</summary>
-          <p>Yes. The platform scales from solo creators to multi-team organizations with modular workflows.</p>
-        </details>
-        <details class="faq-item glass-card">
-          <summary>Can I use dashboard features without complex setup?</summary>
-          <p>Absolutely. The dashboard is designed for immediate productivity with clear actions and guided insights.</p>
-        </details>
-        <details class="faq-item glass-card">
-          <summary>Do I need to pay to start?</summary>
-          <p>No. You can start for free and grow as your team and needs expand.</p>
-        </details>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== CTA SECTION ===== -->
-  <section class="section section-cta" id="cta">
-    <div class="floating-shapes">
-      <div class="floating-shape"></div>
-      <div class="floating-shape"></div>
-    </div>
-    <div class="container flex-center">
-      <div class="cta-card glass-card fade-in-section">
-        <div class="cta-glow"></div>
-        <span class="section-tag">Ready to start?</span>
-        <h2 class="text-h1">Join the <span class="text-gradient">Platform</span></h2>
-        <p class="text-body-lg">Connect with thousands of professionals, showcase your talent, and accelerate your career.</p>
-        <div class="cta-actions">
-          <a href="auth.php" class="btn btn-primary btn-lg">Create Free Account</a>
-          <a href="profile.php" class="btn btn-secondary btn-lg">View Demo Profile</a>
-        </div>
-        <div class="cta-features">
-          <div class="cta-feature">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Free forever
+        <article class="composer-card glass-card fade-in-section" aria-label="Post composer">
+          <div class="composer-top">
+            <div class="left-avatar small"><?= htmlspecialchars($navInitials) ?></div>
+            <button class="composer-input" id="openComposerBtn">What’s happening in your projects today?</button>
           </div>
-          <div class="cta-feature">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            No credit card
+          <div class="composer-actions">
+            <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg> Attach Project</button>
+            <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg> Tag Skill</button>
+            <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg> Share Certificate</button>
+            <button class="primary" id="quickPublishBtn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Publish</button>
           </div>
-          <div class="cta-feature">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            Instant access
+        </article>
+
+        <div class="feed-headline-row fade-in-section" role="region" aria-labelledby="main-feed-title">
+          <h2 id="main-feed-title">Main Social Feed</h2>
+          <div class="feed-filters">
+            <button class="active">For You</button>
+            <button>Projects</button>
+            <button>Challenges</button>
+            <button>Certificates</button>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <div class="navbar-brand">
-            <div class="brand-icon">â¬¡</div>
-            Diversity.is
+        <div class="feed-list" id="feedList" aria-live="polite">
+          <article class="feed-card glass-card fade-in-section">
+            <div class="feed-user-row">
+              <img src="https://api.dicebear.com/7.x/initials/svg?seed=Sarah+Kim" alt="Sarah Kim">
+              <div>
+                <h4>Sarah Kim <span class="rep-pill">REP 91</span></h4>
+                <p>Community Manager • 22 min ago</p>
+              </div>
+            </div>
+            <p class="feed-content">Just completed sprint retrospective for <strong>Project Atlas</strong>. We reduced delivery delays by <strong>31%</strong> and opened 2 new collaboration spots.</p>
+            <div class="feed-cover" style="height:240px; background:linear-gradient(135deg, #a5b4fc, #818cf8); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; letter-spacing:1px;">Sprint Analytics Visualization</div>
+            <div class="feed-meta"><span>124 likes</span><span>18 comments</span><span>9 shares</span></div>
+            <div class="feed-actions">
+              <button class="react-btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514" /></svg> Like</button>
+              <button class="comment-btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> Comment</button>
+              <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg> Share</button>
+              <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg> Save</button>
+              <button class="skill-boost"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg> Skill Boost</button>
+            </div>
+            <div class="comment-preview">Leo Santos: “Great execution. Interested to collaborate for next phase.”</div>
+          </article>
+
+          <article class="feed-card glass-card fade-in-section">
+            <div class="feed-user-row">
+              <img src="https://api.dicebear.com/7.x/initials/svg?seed=Marc+D" alt="Marc D">
+              <div>
+                <h4>Marc D. <span class="rep-pill">REP 76</span></h4>
+                <p>Operations Lead • 1 hour ago</p>
+              </div>
+            </div>
+            <p class="feed-content">Daily challenge result: our team reached <strong>#2</strong> on sustainability leaderboard. Looking for a front-end collaborator for the next challenge build.</p>
+            <div class="post-tags"><span>#challenge</span><span>#frontend</span><span>#leadership</span></div>
+            <div class="feed-meta"><span>89 likes</span><span>12 comments</span><span>5 shares</span></div>
+            <div class="feed-actions">
+              <button class="react-btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514" /></svg> Like</button>
+              <button class="comment-btn"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> Comment</button>
+              <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg> Share</button>
+              <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg> Save</button>
+              <button class="skill-boost"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg> Skill Boost</button>
+            </div>
+            <div class="comment-preview">Amina Bennett: “Count me in for collaboration.”</div>
+          </article>
+
+          <article class="activity-highlight glass-card fade-in-section">
+            <h3>Recent Network Activity</h3>
+            <ul>
+              <li><strong>Sarah</strong> completed Project Atlas and earned <span>+120 REP</span></li>
+              <li><strong>Leo</strong> shared a certificate in Product Strategy <span>+60 XP</span></li>
+              <li><strong>Maya</strong> joined today’s challenge leaderboard <span>+35 XP</span></li>
+            </ul>
+            <a href="../BackOffice/dashboard.php">See all in Dashboard</a>
+          </article>
+        </div>
+      </section>
+
+      <aside class="home-right" aria-label="Right widgets">
+        <article class="widget-card glass-card fade-in-section">
+          <h3>People You May Know</h3>
+          <div class="people-list">
+            <div class="people-item"><img src="https://api.dicebear.com/7.x/initials/svg?seed=Lina+O" alt="Lina"><div><strong>Lina O.</strong><p>Product Lead • 4 mutual skills</p></div><button>Connect</button></div>
+            <div class="people-item"><img src="https://api.dicebear.com/7.x/initials/svg?seed=Noah+Kim" alt="Noah"><div><strong>Noah Kim</strong><p>DevOps • 2 mutual connections</p></div><button>Connect</button></div>
+            <div class="people-item"><img src="https://api.dicebear.com/7.x/initials/svg?seed=Rania+K" alt="Rania"><div><strong>Rania K.</strong><p>Community Builder • Skill match 87%</p></div><button>Connect</button></div>
           </div>
-          <p class="text-small">Professional collaboration reimagined.</p>
-        </div>
-        <div class="footer-links">
-          <a href="auth.php">Sign In</a>
-          <a href="social.php">Feed</a>
-          <a href="skills.php">Skills</a>
-          <a href="projects.php">Projects</a>
-          <a href="reviews.php">Reviews</a>
-          <a href="challenges.php">Challenges</a>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <p class="text-small footer-copy">&copy; 2026 Diversity.is. All rights reserved.</p>
-    </div>
-  </footer>
+        </article>
 
-  <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/mouse-tracking.js"></script>
-  <script src="../assets/js/home.js"></script>
+        <article class="widget-card glass-card fade-in-section">
+          <h3>Trending Collaborations</h3>
+          <div class="project-mini-card">
+            <img src="../../assets/images/projects/project-thumb.svg" alt="GreenOps project thumbnail" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
+            <div><strong>GreenOps Hub</strong><p>Looking for collaborators • Skill match: UI/UX, JS</p><button>Join as Collaborator</button></div>
+          </div>
+          <div class="project-mini-card">
+            <img src="../../assets/images/challenges/challenge-card.svg" alt="TalentBridge challenge thumbnail" style="width:40px;height:40px;border-radius:10px;object-fit:cover;">
+            <div><strong>TalentBridge</strong><p>Open role: Front-end Engineer</p><button>Apply Role</button></div>
+          </div>
+        </article>
+
+        <article class="widget-card glass-card fade-in-section">
+          <h3>Challenges & Leaderboard</h3>
+          <div class="challenge-progress">
+            <div class="small-ring" style="--progress:72;"><span>72%</span></div>
+            <div><strong>Eco Impact Sprint</strong><p>3 days left • Rank #6 in network</p></div>
+          </div>
+          <ol class="mini-leaderboard">
+            <li><span>1</span> Sarah Kim <strong>1490 XP</strong></li>
+            <li><span>2</span> Marc D. <strong>1380 XP</strong></li>
+            <li><span>3</span> Amina Bennett <strong>1315 XP</strong></li>
+          </ol>
+          <a href="challenges.php" class="btn btn-secondary btn-sm widget-btn">Start Daily Quiz</a>
+        </article>
+
+        <article class="widget-card glass-card fade-in-section">
+          <h3>Skill Spotlight</h3>
+          <div class="skills-pill-list">
+            <span>Prompt Engineering</span>
+            <span>Team Leadership</span>
+            <span>Frontend Architecture</span>
+            <span>Data Storytelling</span>
+          </div>
+          <button class="btn btn-primary btn-sm widget-btn">Add Suggested Certificate (+40 XP)</button>
+        </article>
+      </aside>
+    </div>
+  </main>
+
+  <button class="home-fab" id="homeFab" type="button" aria-label="Open quick actions" aria-controls="fabMenu" aria-expanded="false"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16m8-8H4" /></svg></button>
+  <div class="fab-menu" id="fabMenu" aria-label="Quick actions menu">
+    <a href="#"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg> Create Post</a>
+    <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg> Create Project</a>
+    <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> Create Challenge</a>
+  </div>
+
+  <nav class="mobile-tabbar" aria-label="Mobile navigation">
+    <a class="active" href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span>Home</span></a>
+    <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg><span>Network</span></a>
+    <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg><span>Projects</span></a>
+    <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Challenges</span></a>
+    <a href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg><span>Me</span></a>
+  </nav>
+
+  <div class="home-toast-stack" id="homeToastStack" aria-live="polite"></div>
+
+  <script src="../../assets/js/main.js"></script>
+  <script src="../../assets/js/mouse-tracking.js"></script>
+  <script src="../../assets/js/home.js"></script>
 </body>
 </html>
-
-
-

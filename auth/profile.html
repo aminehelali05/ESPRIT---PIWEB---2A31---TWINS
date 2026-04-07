@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings - Voices of Peace</title>
+    <link rel="icon" href="../vue/assets/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+    </style>
+    <style>
+        :root {
+            --primary-glow: conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            /* Zinc 950 */
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(120, 119, 198, 0.1) 0%, transparent 60%),
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .input-field {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e4e4e7;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #AEE1F9;
+            box-shadow: 0 0 0 1px rgba(174, 225, 249, 0.2);
+        }
+
+        /* Custom Toggle Switch */
+        .toggle-checkbox {
+            appearance: none;
+            display: none;
+        }
+
+        .toggle-label {
+            position: relative;
+            display: block;
+            width: 36px;
+            height: 20px;
+            background-color: #27272a;
+            /* Zinc 800 */
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 14px;
+            height: 14px;
+            background-color: #71717a;
+            /* Zinc 500 */
+            border-radius: 50%;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: rgba(174, 225, 249, 0.15);
+            /* Sky tint */
+            border-color: rgba(174, 225, 249, 0.3);
+        }
+
+        .toggle-checkbox:checked+.toggle-label::after {
+            transform: translateX(16px);
+            background-color: #AEE1F9;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+    </style>
+</head>
+
+<body class="text-zinc-300 min-h-screen selection:bg-[#AEE1F9] selection:text-zinc-900">
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#09090b]/80 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-2 group cursor-default">
+                <div
+                    class="w-6 h-6 rounded bg-gradient-to-tr from-[#AEE1F9] to-[#C3E6CB] flex items-center justify-center text-zinc-900 shadow-lg shadow-cyan-500/20">
+                    <span class="font-bold text-xs tracking-tighter">VoP</span>
+                </div>
+                <span
+                    class="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-white transition-colors">Voices
+                    of <span class="text-zinc-500">Peace</span></span>
+            </div>
+            <a href="../vue/home.html"
+                class="text-xs font-medium text-zinc-500 hover:text-zinc-200 transition-colors flex items-center gap-1.5">
+                <i data-lucide="arrow-left" class="w-3 h-3"></i>
+                <span>Back to Hub</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-20 px-6">
+        <div class="max-w-6xl mx-auto space-y-6">
+
+            <!-- Profile Header -->
+            <div class="glass-panel rounded-2xl p-1 relative overflow-hidden">
+                <div
+                    class="absolute top-0 right-0 w-96 h-96 bg-[#AEE1F9] opacity-[0.03] blur-[80px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2">
+                </div>
+
+                <div class="bg-zinc-900/40 rounded-xl p-6 md:p-8 relative z-10">
+                    <div class="flex flex-col md:flex-row gap-8 items-start md:items-center">
+
+                        <!-- Avatar Section -->
+                        <div class="relative group shrink-0 mx-auto md:mx-0">
+                            <div
+                                class="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl relative bg-zinc-800">
+                                <img id="profileAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=User"
+                                    alt="Profile"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            </div>
+                            <div class="absolute -bottom-2 -right-2 bg-zinc-950 border border-zinc-800 p-1.5 rounded-lg shadow-sm"
+                                title="Biometric ID Verified">
+                                <div class="text-[#C3E6CB]">
+                                    <i data-lucide="scan-face" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+
+                            <!-- Upload Button Overlay -->
+                            <button id="uploadAvatarBtn"
+                                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl cursor-pointer backdrop-blur-[2px]">
+                                <i data-lucide="camera" class="w-5 h-5 text-white"></i>
+                            </button>
+
+                            <!-- Hidden File Input -->
+                            <input type="file" id="avatarInput" accept="image/*" class="hidden">
+
+                            <!-- Random Avatar Button -->
+                            <button id="randomAvatarBtn"
+                                class="absolute -top-2 -right-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 p-1.5 rounded-full shadow-lg transition-colors"
+                                title="Generate Random Avatar">
+                                <i data-lucide="dices" class="w-3.5 h-3.5 text-zinc-300"></i>
+                            </button>
+                        </div>
+
+                        <!-- Info Section -->
+                        <div class="flex-1 text-center md:text-left space-y-3">
+                            <div>
+                                <div class="flex items-center justify-center md:justify-start gap-3">
+                                    <h1 id="profileName"
+                                        class="text-2xl md:text-3xl font-semibold tracking-tight text-white">Loading...
+                                    </h1>
+                                    <span id="aiBadge"
+                                        class="hidden px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-200 border border-amber-500/20 uppercase tracking-wider items-center gap-1">
+                                        Legend
+                                    </span>
+                                </div>
+                                <div
+                                    class="flex items-center justify-center md:justify-start gap-4 mt-1 text-xs text-zinc-400 font-medium">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="mail" class="w-3 h-3"></i>
+                                        <span id="displayEmail">user@example.com</span>
+                                    </span>
+                                    <span class="w-1 h-1 rounded-full bg-zinc-700"></span>
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                                        Joined Sept 2023
+                                    </span>
+                                </div>
+                                <span id="profileLocation" class="hidden"></span>
+                            </div>
+
+                            <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                <span
+                                    class="px-2.5 py-1 rounded-md bg-white/5 border border-white/5 text-[11px] font-medium text-zinc-300">Community
+                                    Builder</span>
+                                <span
+                                    class="px-2.5 py-1 rounded-md bg-[#AEE1F9]/10 border border-[#AEE1F9]/20 text-[11px] font-medium text-[#AEE1F9]">Peace
+                                    Maker</span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2 w-full md:w-auto justify-center">
+                            <button id="editToggleBtn"
+                                class="h-9 px-4 rounded-lg bg-white text-zinc-950 text-xs font-semibold hover:bg-zinc-200 transition-colors shadow-lg shadow-white/5 flex items-center gap-2">
+                                <i data-lucide="pencil" class="w-3 h-3"></i> Edit Details
+                            </button>
+                            <button id="exportDataBtn"
+                                class="h-9 w-9 flex items-center justify-center rounded-lg border border-white/10 text-zinc-400 hover:bg-white/5 transition-colors"
+                                title="Export Data">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="logoutAndGoToHome()"
+                                class="h-9 w-9 flex items-center justify-center rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors"
+                                title="Sign Out">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Left Column (4/12) -->
+                <div class="lg:col-span-4 space-y-6">
+
+                    <!-- Stats Card -->
+                    <div class="glass-panel p-5 rounded-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Engagement</h3>
+                            <button class="text-[10px] text-[#AEE1F9] hover:underline">View All</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div
+                                class="p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/[0.07] transition-colors cursor-pointer group">
+                                <div class="text-zinc-500 mb-1 group-hover:text-[#AEE1F9] transition-colors"><i
+                                        data-lucide="heart-handshake" class="w-4 h-4"></i></div>
+                                <div class="text-xl font-semibold text-white tracking-tight">12</div>
+                                <div class="text-[10px] text-zinc-400">Actions Joined</div>
+                            </div>
+                            <div
+                                class="p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/[0.07] transition-colors cursor-pointer group">
+                                <div class="text-zinc-500 mb-1 group-hover:text-[#C3E6CB] transition-colors"><i
+                                        data-lucide="package" class="w-4 h-4"></i></div>
+                                <div class="text-xl font-semibold text-white tracking-tight">8</div>
+                                <div class="text-[10px] text-zinc-400">Resources Shared</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills & Expertise -->
+                    <div class="glass-panel p-5 rounded-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xs font-medium text-zinc-500 uppercase tracking-wider">Skills</h3>
+                            <button class="text-zinc-500 hover:text-white"><i data-lucide="plus"
+                                    class="w-3.5 h-3.5"></i></button>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-2 py-1 rounded text-[11px] bg-zinc-800 text-zinc-300 border border-zinc-700 flex items-center gap-1">
+                                Conflict Resolution <button class="hover:text-red-400"><i data-lucide="x"
+                                        class="w-2 h-2"></i></button>
+                            </span>
+                            <span
+                                class="px-2 py-1 rounded text-[11px] bg-zinc-800 text-zinc-300 border border-zinc-700 flex items-center gap-1">
+                                Translation <button class="hover:text-red-400"><i data-lucide="x"
+                                        class="w-2 h-2"></i></button>
+                            </span>
+                            <span
+                                class="px-2 py-1 rounded text-[11px] bg-zinc-800 text-zinc-300 border border-zinc-700 flex items-center gap-1">
+                                Logistics <button class="hover:text-red-400"><i data-lucide="x"
+                                        class="w-2 h-2"></i></button>
+                            </span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-white/5">
+                            <input type="text" placeholder="Add a skill..."
+                                class="w-full bg-transparent text-[11px] text-zinc-300 focus:outline-none placeholder:text-zinc-600">
+                        </div>
+                    </div>
+
+                    <!-- Connected Accounts -->
+                    <div class="glass-panel p-5 rounded-xl">
+                        <h3 class="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">Connections</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div
+                                        class="w-7 h-7 rounded bg-[#5865F2]/10 flex items-center justify-center text-[#5865F2]">
+                                        <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-medium text-zinc-200">Discord</span>
+                                        <span class="text-[10px] text-zinc-500">Connected</span>
+                                    </div>
+                                </div>
+                                <div class="w-2 h-2 rounded-full bg-green-500/50 shadow-[0_0_8px_rgba(34,197,94,0.4)]">
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div
+                                        class="w-7 h-7 rounded bg-white/5 flex items-center justify-center text-zinc-400">
+                                        <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-medium text-zinc-200">Wallet</span>
+                                        <span class="text-[10px] text-zinc-500">Not connected</span>
+                                    </div>
+                                </div>
+                                <button
+                                    class="text-[10px] px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-zinc-400 transition-colors">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column (8/12) -->
+                <div class="lg:col-span-8 space-y-6">
+
+                    <!-- AI Insight Card -->
+                    <div class="glass-panel p-6 rounded-xl relative overflow-hidden group">
+                        <div
+                            class="absolute right-0 top-0 w-32 h-32 bg-gradient-to-br from-[#AEE1F9] to-[#C3E6CB] opacity-10 blur-[40px] group-hover:opacity-20 transition-opacity duration-700">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2 text-[#AEE1F9]">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                    <span class="text-xs font-semibold tracking-wide">AI IMPACT ANALYSIS</span>
+                                </div>
+                                <span class="text-[10px] text-zinc-500">Updated 2h ago</span>
+                            </div>
+                            <h3 class="text-lg font-medium text-white mb-2 tracking-tight">Community Catalyst</h3>
+                            <p class="text-sm text-zinc-400 leading-relaxed max-w-lg mb-6">
+                                Your collaboration score is trending up. You've impacted <strong class="text-zinc-200">3
+                                    local communities</strong> recently.
+                            </p>
+                            <div class="space-y-2">
+                                <div
+                                    class="flex justify-between text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                                    <span>Impact Score</span>
+                                    <span>Top 15%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                                    <div
+                                        class="h-full bg-gradient-to-r from-[#AEE1F9] via-[#C3E6CB] to-[#AEE1F9] w-[85%] rounded-full animate-pulse">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Tabs -->
+                    <div class="border-b border-white/5">
+                        <div class="flex gap-6">
+                            <button
+                                class="pb-3 text-sm font-medium text-white border-b-2 border-[#AEE1F9]">Settings</button>
+                            <button
+                                class="pb-3 text-sm font-medium text-zinc-500 hover:text-zinc-300 transition-colors">History</button>
+                            <button
+                                class="pb-3 text-sm font-medium text-zinc-500 hover:text-zinc-300 transition-colors">Security</button>
+                        </div>
+                    </div>
+
+                    <!-- Settings Controls -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- Notifications -->
+                        <div class="glass-panel p-5 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                                    <i data-lucide="bell" class="w-4 h-4 text-zinc-500"></i> Notifications
+                                </h4>
+                                <p class="text-[11px] text-zinc-500 mb-4">Manage how you receive updates.</p>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-zinc-300">Weekly Digest</span>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="toggle1" class="toggle-checkbox" checked>
+                                            <label for="toggle1" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-zinc-300">Project Alerts</span>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="toggle2" class="toggle-checkbox" checked>
+                                            <label for="toggle2" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-zinc-300">Marketing Emails</span>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="toggle3" class="toggle-checkbox">
+                                            <label for="toggle3" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Privacy -->
+                        <div class="glass-panel p-5 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-sm font-semibold text-white mb-1 flex items-center gap-2">
+                                    <i data-lucide="shield" class="w-4 h-4 text-zinc-500"></i> Privacy
+                                </h4>
+                                <p class="text-[11px] text-zinc-500 mb-4">Control your data visibility.</p>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-zinc-300">Public Profile</span>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="toggle4" class="toggle-checkbox" checked>
+                                            <label for="toggle4" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-zinc-300">Share Activity Status</span>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="toggle5" class="toggle-checkbox">
+                                            <label for="toggle5" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-zinc-300">Allow AI Analysis</span>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="toggle6" class="toggle-checkbox" checked>
+                                            <label for="toggle6" class="toggle-label"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Log -->
+                    <div class="glass-panel p-6 rounded-xl">
+                        <h4 class="text-sm font-semibold text-white mb-4">Recent Activity</h4>
+                        <div
+                            class="space-y-4 relative before:absolute before:inset-0 before:ml-2.5 before:w-px before:bg-white/5 before:h-full before:z-0">
+
+                            <!-- Item 1 -->
+                            <div class="relative flex gap-4 z-10">
+                                <div
+                                    class="w-5 h-5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-[#AEE1F9]"></div>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <p class="text-xs text-zinc-200">Updated profile settings</p>
+                                    <span class="text-[10px] text-zinc-500">Just now • Web</span>
+                                </div>
+                            </div>
+
+                            <!-- Item 2 -->
+                            <div class="relative flex gap-4 z-10">
+                                <div
+                                    class="w-5 h-5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-[#C3E6CB]"></div>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <p class="text-xs text-zinc-200">Donated to <span
+                                            class="text-white font-medium">Water for All</span></p>
+                                    <span class="text-[10px] text-zinc-500">2 hours ago • Transaction ID: #8821</span>
+                                </div>
+                            </div>
+
+                            <!-- Item 3 -->
+                            <div class="relative flex gap-4 z-10">
+                                <div
+                                    class="w-5 h-5 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center shrink-0">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <p class="text-xs text-zinc-200">Logged in from new device (iPhone 14)</p>
+                                    <span class="text-[10px] text-zinc-500">Yesterday, 14:00 • London, UK</span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <button
+                            class="mt-4 w-full py-2 rounded border border-white/5 text-[10px] font-medium text-zinc-400 hover:bg-white/5 transition-colors">
+                            View Full History
+                        </button>
+                    </div>
+
+                    <!-- Edit Form (Overlay) -->
+                    <div id="editFormSection"
+                        class="glass-panel p-6 rounded-xl hidden border border-yellow-500/10 bg-zinc-900/95 fixed inset-0 z-[60] m-auto max-w-lg h-fit shadow-2xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-sm font-semibold text-white">Edit Profile Details</h3>
+                            <button id="closeEditBtn" class="text-zinc-500 hover:text-white">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <form id="profileForm" class="space-y-5">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-1.5">
+                                    <label class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Full
+                                        Name</label>
+                                    <input type="text" id="editName"
+                                        class="input-field w-full px-3 py-2 rounded-lg text-sm" placeholder="Your name">
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label
+                                        class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Title/Role</label>
+                                    <input type="text" class="input-field w-full px-3 py-2 rounded-lg text-sm"
+                                        placeholder="e.g. Humanitarian">
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label
+                                    class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Location</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="text" id="editCountry"
+                                        class="input-field w-full px-3 py-2 rounded-lg text-sm" placeholder="City, Country">
+                                    <button type="button" id="openAuthGlobe3DBtn"
+                                        class="px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-600/70 hover:bg-indigo-500 text-white border border-indigo-400/50 transition-colors">3D</button>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center">
+                                    <label
+                                        class="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Bio</label>
+                                    <button type="button" id="aiEnhanceBioBtn"
+                                        class="text-[10px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
+                                        <i data-lucide="sparkles" class="w-3 h-3"></i> Enhance with AI
+                                    </button>
+                                </div>
+                                <textarea id="editBio"
+                                    class="input-field w-full px-3 py-2 rounded-lg text-sm h-20 resize-none"
+                                    placeholder="Tell us about yourself..."></textarea>
+                            </div>
+
+                            <div class="pt-2 flex justify-end gap-2">
+                                <button type="button" id="cancelEditBtn"
+                                    class="px-4 py-2 border border-white/10 text-zinc-300 text-xs font-semibold rounded-lg hover:bg-white/5 transition-colors">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-white text-zinc-950 text-xs font-semibold rounded-lg hover:bg-zinc-200 transition-colors">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Required Scripts -->
+    <script src="js/auth-utils.js"></script>
+    <script src="../assets/js/globe-3d-picker.js"></script>
+    <script src="../vue/assets/js/ai_features.js"></script>
+    <script src="../vue/assets/js/ai-ui.js"></script>
+    <script src="js/profile.js"></script>
+    <script>
+        // Initialize Icons
+        lucide.createIcons({
+            attrs: {
+                'stroke-width': 1.5,
+                'class': "lucide"
+            }
+        });
+
+        // UI Logic for Edit Modal - HANDLED IN profile.js
+        // const editToggleBtn = document.getElementById('editToggleBtn');
+        // ... (removed to prevent double-toggling)
+        const closeEditBtn = document.getElementById('closeEditBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const editFormSection = document.getElementById('editFormSection');
+
+        function toggleModal() {
+            editFormSection.classList.toggle('hidden');
+        }
+
+        // Close buttons still need listeners here if not in profile.js (Checking profile.js... it doesn't seem to handle close buttons exclusively or fully matches)
+        // profile.js handles editToggleBtn.
+
+        if (closeEditBtn) closeEditBtn.addEventListener('click', toggleModal);
+        if (cancelEditBtn) cancelEditBtn.addEventListener('click', toggleModal);
+
+        // Window click handled here
+        window.addEventListener('click', (e) => {
+            if (e.target === editFormSection) {
+                toggleModal();
+            }
+        });
+
+        // Click outside to close
+        window.addEventListener('click', (e) => {
+            if (e.target === editFormSection) {
+                toggleModal();
+            }
+        });
+
+        // Function to logout and redirect to home.html
+        async function logoutAndGoToHome() {
+            try {
+                await fetch('../api/users/logout.php', {
+                    method: 'POST',
+                    credentials: 'include' // Include cookies for session
+                });
+            } catch (e) {
+                console.error('Logout error:', e);
+                // Continue even if logout fails
+            } finally {
+                // Clear any local storage or session storage
+                localStorage.clear();
+                sessionStorage.clear();
+                // Redirect to login page (unlogged in)
+                window.location.href = '../auth/login.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

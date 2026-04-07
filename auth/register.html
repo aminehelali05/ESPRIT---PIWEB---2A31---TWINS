@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Voices of Peace</title>
+    <link rel="icon" href="../vue/assets/favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- COMMENT 1 FIX: Face-api.js for face enrollment -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center relative py-10">
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="glass-card w-full max-w-lg p-8 m-4 relative z-10 animate-fade-in ring-1 ring-white/10">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-emerald-500">
+                Join the Community</h1>
+            <p class="text-gray-400 mt-2">Start your journey of making an impact today</p>
+        </div>
+
+        <form id="registerForm" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-300 ml-1">First Name</label>
+                    <input type="text" id="firstName" required
+                        class="auth-input w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/50"
+                        placeholder="John">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-300 ml-1">Last Name</label>
+                    <input type="text" id="lastName" required
+                        class="auth-input w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/50"
+                        placeholder="Doe">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-300 ml-1">Email</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                    <input type="email" id="email" required
+                        class="auth-input w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/50"
+                        placeholder="john@example.com">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-300 ml-1">Country</label>
+                <div class="relative flex gap-2">
+                    <div class="relative flex-1">
+                        <i data-lucide="map-pin"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                        <input type="text" id="country" required readonly
+                            class="auth-input w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+                            placeholder="Click to select country" onclick="openMapPicker()">
+                    </div>
+                    <button type="button" onclick="openMapPicker()"
+                        class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl border border-zinc-700 transition-colors">
+                        <i data-lucide="map" class="w-5 h-5"></i>
+                    </button>
+                    <button type="button" onclick="openGlobe3DPicker()"
+                        class="px-4 py-2 bg-indigo-700/70 hover:bg-indigo-600 text-white rounded-xl border border-indigo-500/60 transition-colors">
+                        <i data-lucide="orbit" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="latitude">
+                <input type="hidden" id="longitude">
+                <input type="hidden" id="city">
+                <input type="hidden" id="fullAddress">
+            </div>
+
+            <div class="space-y-2">
+                <!-- Password Input -->
+                <div class="space-y-2">
+                    <label for="password" class="text-block text-sm font-medium text-zinc-400 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="lock" class="h-5 w-5 text-zinc-500"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required
+                            class="block w-full pl-10 pr-3 py-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl leading-5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all sm:text-sm"
+                            placeholder="Create a strong password">
+                    </div>
+                </div>
+
+                <!-- Password Strength Meter -->
+                <div class="space-y-2" id="passwordStrengthContainer" style="display: none;">
+                    <div class="flex gap-1 h-1">
+                        <div class="h-full w-1/4 rounded-full bg-zinc-700 transition-colors duration-300"
+                            id="strengthBar1"></div>
+                        <div class="h-full w-1/4 rounded-full bg-zinc-700 transition-colors duration-300"
+                            id="strengthBar2"></div>
+                        <div class="h-full w-1/4 rounded-full bg-zinc-700 transition-colors duration-300"
+                            id="strengthBar3"></div>
+                        <div class="h-full w-1/4 rounded-full bg-zinc-700 transition-colors duration-300"
+                            id="strengthBar4"></div>
+                    </div>
+                    <p class="text-xs text-zinc-500 text-right" id="strengthText">Enter password</p>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-300 ml-1">Confirm Password</label>
+                    <div class="relative">
+                        <i data-lucide="check-circle-2"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                        <input type="password" id="confirmPassword" required minlength="6"
+                            class="auth-input w-full pl-10 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500/50"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <!-- Face Enrollment Section -->
+                <div class="space-y-2">
+                    <button type="button" id="enrollFaceBtn"
+                        class="w-full px-4 py-3 rounded-xl border-2 border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 text-gray-300 hover:text-white transition-all duration-300 flex items-center justify-center gap-3 group">
+                        <i data-lucide="scan-face"
+                            class="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform"></i>
+                        <span class="font-medium">Enroll Face ID (Optional)</span>
+                    </button>
+                    <div id="enrollmentStatus" class="text-sm text-center text-gray-400 hidden"></div>
+                </div>
+
+                <button type="submit" id="registerBtn"
+                    class="btn-primary w-full py-3.5 rounded-xl text-lg shadow-lg bg-gradient-to-r from-emerald-400 to-green-600 hover:from-emerald-500 hover:to-green-700 text-white">
+                    Create Account
+                </button>
+        </form>
+
+        <div class="mt-8 text-center text-sm text-gray-400">
+            Already have an account?
+            <a href="login.html" class="text-emerald-400 font-semibold hover:text-emerald-300 hover:underline">Sign
+                In</a>
+        </div>
+    </div>
+
+    <!-- Location Picker Modal -->
+    <div id="locationPickerModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="glass-card w-full max-w-4xl p-0 m-4 relative overflow-hidden flex flex-col h-[80vh]">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-zinc-900/50">
+                <h3 class="text-xl font-bold text-white">Select Location</h3>
+                <button type="button" class="text-gray-400 hover:text-white" onclick="closeMapPicker()">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="relative flex-1">
+                <div id="map" class="absolute inset-0 w-full h-full"></div>
+            </div>
+            <div class="p-4 bg-zinc-900/80 border-t border-white/10 text-white">
+                <p class="mb-2 text-sm text-gray-300">Selected: <span id="selectedLocationDisplay"
+                        class="font-semibold text-emerald-400">None</span></p>
+                <button type="button" id="confirmLocationBtn" disabled onclick="confirmLocation()"
+                    class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-medium">
+                    Confirm Location
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMENT 1 FIX: Face Enrollment Modal -->
+    <div id="face-capture-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50"
+        style="display: none;">
+        <div class="glass-card w-full max-w-2xl p-8 m-4 relative">
+            <button id="cancel-face-capture" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+
+            <h2 class="text-2xl font-bold text-white mb-4">Enroll Face Recognition (Optional)</h2>
+            <p class="text-gray-300 mb-6">Add face recognition for faster, more secure login</p>
+
+            <div class="relative">
+                <video id="face-video" class="w-full rounded-lg" autoplay muted playsinline></video>
+                <canvas id="face-canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+            </div>
+
+            <div id="face-instructions" class="mt-4 p-4 bg-blue-500/20 border border-blue-500/50 rounded-lg">
+                <p class="text-blue-200 text-sm"></p>
+            </div>
+
+            <div id="capture-progress" class="mt-4 hidden">
+                <div class="flex justify-between text-sm text-gray-300 mb-2">
+                    <span>Capture Progress</span>
+                    <span id="capture-count">0/5</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div id="capture-progress-bar" class="bg-emerald-500 h-2 rounded-full transition-all"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-6">
+                <button id="init-face-capture"
+                    class="flex-1 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all">
+                    Start Face Enrollment
+                </button>
+                <button id="capture-face-btn"
+                    class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all hidden">
+                    Capture Photo
+                </button>
+                <button id="skip-face-enrollment"
+                    class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-all">
+                    Skip for Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="user-id" value="">
+
+    <script src="js/auth-utils.js"></script>
+    <script src="js/register.js"></script>
+    <script src="js/password-strength.js"></script>
+    <script src="../assets/js/globe-3d-picker.js"></script>
+    <script src="js/map-picker.js"></script>
+    <!-- COMMENT 1 FIX: Face enrollment scripts -->
+    <script src="js/face-utils.js"></script>
+    <script src="js/face-capture.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

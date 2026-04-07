@@ -29,4 +29,4 @@ CREATE TABLE users (
 INSERT INTO users (first_name, last_name, email, password, phone, role, status, badge, country, bio, title, skills, xp)
 VALUES
 ('Admin', 'Root', 'admin@example.com', '$2y$10$T6fU4i1Rm5s6cJF0vE9w9u4Aakm0Qnhv5T9vLfH0V5ChR.MQ9vY0i', '+216 00 000 000', 'admin', 1, 'Admin', 'Tunisia', 'Platform administrator with full access.', 'System Administrator', 'PHP,MySQL,JavaScript', 500),
-('Sarah', 'Kim', 'sarah.kim@example.com', '$2y$10$T6fU4i1Rm5s6cJF0vE9w9u4Aakm0Qnhv5T9vLfH0V5ChR.MQ9vY0i', '+216 11 111 111', 'manager', 1, 'Peace Maker', 'Tunisia', 'Community builder and project manager.', 'Community Manager', 'Leadership,Translation,Logistics', 320);
+('Amine', 'LARPER', 'amine.larper@example.com', '$2y$10$T6fU4i1Rm5s6cJF0vE9w9u4Aakm0Qnhv5T9vLfH0V5ChR.MQ9vY0i', '+216 22 222 222', 'manager', 1, 'Peace Maker', 'Tunisia', 'Community builder and project manager.', 'Community Manager', 'Leadership,Translation,Logistics', 320);

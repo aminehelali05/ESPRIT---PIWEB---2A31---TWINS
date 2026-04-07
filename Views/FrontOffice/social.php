@@ -1,12 +1,12 @@
-﻿<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Diversity.is Social Feed â€” Share updates, discuss ideas, and engage with the community.">
-  <title>Social Feed â€” Diversity.is</title>
-  <link rel="stylesheet" href="../assets/css/global.css">
-  <link rel="stylesheet" href="../assets/css/social.css">
+  <meta name="description" content="Diversity.is Social Feed — Share updates, discuss ideas, and engage with the community.">
+  <title>Social Feed — Diversity.is</title>
+  <link rel="stylesheet" href="../../assets/css/global.css">
+  <link rel="stylesheet" href="../../assets/css/social.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="grid-dot-bg">
@@ -14,9 +14,10 @@
 
   <nav class="navbar" id="navbar">
     <div class="container">
-      <a href="home.php" class="navbar-brand"><div class="brand-icon">â¬¡</div>Diversity.is</a>
+      <a href="home.php" class="navbar-brand"><div class="brand-icon">⬡</div>Diversity.is</a>
       <div class="navbar-nav" id="navbar-nav">
         <a href="home.php">Home</a>
+        <a href="auth.php">Sign In</a>
         <a href="social.php" class="active">Feed</a>
         <a href="skills.php">Skills</a>
         <a href="projects.php">Projects</a>
@@ -24,7 +25,6 @@
         <a href="challenges.php">Challenges</a>
       </div>
       <div class="navbar-actions">
-        <a href="auth.php" class="btn btn-primary btn-sm">Sign In</a>
         <!-- Theme Toggle -->
         <button class="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -42,7 +42,7 @@
               <span>admin@diversity.is</span>
             </div>
             <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/user_list.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="../BackOffice/dashboard.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
@@ -86,7 +86,7 @@
               <div class="avatar" style="background:linear-gradient(135deg,#A855F7,#6366F1)"><span>SK</span></div>
               <div>
                 <p class="post-author">Sarah Kim</p>
-                <p class="text-small">UX Designer â€¢ 2 hours ago</p>
+                <p class="text-small">UX Designer • 2 hours ago</p>
               </div>
             </div>
             <div class="post-body">
@@ -123,7 +123,7 @@
                 <div class="comment-body">
                   <p class="comment-author">Mike Rodriguez</p>
                   <p class="comment-text">This looks incredible! The blur effects are so smooth. Would love to see the interaction states.</p>
-                  <p class="text-small">1 hour ago â€¢ <i data-lucide="heart" class="w-2.5 h-2.5"></i> 5</p>
+                  <p class="text-small">1 hour ago • <i data-lucide="heart" class="w-2.5 h-2.5"></i> 5</p>
                 </div>
               </div>
               <div class="comment-item">
@@ -131,7 +131,7 @@
                 <div class="comment-body">
                   <p class="comment-author">Anna Johnson</p>
                   <p class="comment-text">Beautiful work! The glass cards really stand out against that dark background</p>
-                  <p class="text-small">45 min ago â€¢ <i data-lucide="heart" class="w-2.5 h-2.5"></i> 3</p>
+                  <p class="text-small">45 min ago • <i data-lucide="heart" class="w-2.5 h-2.5"></i> 3</p>
                 </div>
               </div>
               <div class="comment-input-row">
@@ -146,7 +146,7 @@
               <div class="avatar" style="background:linear-gradient(135deg,#22C55E,#22D3EE)"><span>MR</span></div>
               <div>
                 <p class="post-author">Mike Rodriguez</p>
-                <p class="text-small">Backend Developer â€¢ 5 hours ago</p>
+                <p class="text-small">Backend Developer • 5 hours ago</p>
               </div>
             </div>
             <div class="post-body">
@@ -177,7 +177,7 @@
                 <div class="comment-body">
                   <p class="comment-author">Sarah Kim</p>
                   <p class="comment-text">40% improvement is insane! Would love to see the architecture diagram.</p>
-                  <p class="text-small">3 hours ago â€¢ <i data-lucide="heart" class="w-2.5 h-2.5"></i> 8</p>
+                  <p class="text-small">3 hours ago • <i data-lucide="heart" class="w-2.5 h-2.5"></i> 8</p>
                 </div>
               </div>
               <div class="comment-input-row">
@@ -192,7 +192,7 @@
               <div class="avatar" style="background:linear-gradient(135deg,#F59E0B,#F43F5E)"><span>AJ</span></div>
               <div>
                 <p class="post-author">Anna Johnson</p>
-                <p class="text-small">Data Scientist â€¢ 8 hours ago</p>
+                <p class="text-small">Data Scientist • 8 hours ago</p>
               </div>
             </div>
             <div class="post-body">
@@ -262,11 +262,8 @@
     </div>
   </section>
 
-  <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/mouse-tracking.js"></script>
-  <script src="../assets/js/social.js"></script>
+  <script src="../../assets/js/main.js"></script>
+  <script src="../../assets/js/mouse-tracking.js"></script>
+  <script src="../../assets/js/social.js"></script>
 </body>
 </html>
-
-
-
