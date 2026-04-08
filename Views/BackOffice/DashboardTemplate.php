@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
@@ -23,6 +23,7 @@
       <nav class="sidebar-nav">
         <a href="#overview" class="sidebar-link active" data-page="overview"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></a>
         <a href="#users" class="sidebar-link" data-page="users"><i data-lucide="users" class="w-4 h-4"></i><span>User Management</span></a>
+        <a href="#social" class="sidebar-link" data-page="social"><i data-lucide="share-2" class="w-4 h-4"></i><span>Social Feed</span></a>
         <a href="#clients" class="sidebar-link" data-page="clients"><i data-lucide="briefcase" class="w-4 h-4"></i><span>Clients</span></a>
         <a href="#employees" class="sidebar-link" data-page="employees"><i data-lucide="contact" class="w-4 h-4"></i><span>Employees</span></a>
         <a href="#products" class="sidebar-link" data-page="products"><i data-lucide="package" class="w-4 h-4"></i><span>Products</span></a>
