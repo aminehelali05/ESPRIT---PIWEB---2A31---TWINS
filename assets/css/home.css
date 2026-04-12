@@ -8,8 +8,16 @@
    ============================================================ */
 .home-page-body { min-height: 100vh; }
 
+.home-page-body {
+  --shared-sidebar-left: max(20px, calc((100vw - var(--shared-layout-max)) / 2 + var(--shared-container-pad)));
+}
+
+.home-hub .container {
+  max-width: 1360px;
+}
+
 .home-hub {
-  padding-top: 90px;
+  padding-top: 100px;
   padding-bottom: 6rem;
 }
 
@@ -27,11 +35,28 @@
   top: 88px;
 }
 
+@media (min-width: 1025px) {
+  .home-grid {
+    grid-template-columns: 240px minmax(0, 1fr) 310px;
+    padding-left: 0;
+  }
+}
+
 /* ============================================================
    LEFT SIDEBAR
    ============================================================ */
 .home-left {
   padding: var(--sp-6);
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.home-left::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 .home-left:hover { transform: none; }
@@ -998,7 +1023,10 @@
    RESPONSIVE
    ============================================================ */
 @media (max-width: 1250px) {
-  .home-grid { grid-template-columns: 210px 1fr; }
+  .home-grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: calc(var(--shared-sidebar-width) + var(--shared-sidebar-gap) + 14px);
+  }
   .home-right {
     grid-column: 1 / -1;
     grid-template-columns: repeat(2, 1fr);

@@ -2,6 +2,10 @@
 
 class User
 {
+    private $table;
+    private $lastError;
+    private $colCache = [];
+
     private $id;
     private $first_name;
     private $last_name;
@@ -30,6 +34,8 @@ class User
         $first_name = null, $last_name = null, $email = null, $password = null,
         $phone = null, $role = 'user', $status = 1, $created_at = null
     ) {
+        $this->table = null;
+        $this->lastError = null;
         $this->first_name = $first_name;
         $this->last_name = $last_name;
         $this->email = $email;
@@ -65,6 +71,11 @@ class User
     public function getFaceEnrolledAt() { return $this->face_enrolled_at; }
     public function getCreatedAt() { return $this->created_at; }
     public function getUpdatedAt() { return $this->updated_at; }
+    public function getTableName(): string { return (string) $this->table; }
+    public function getLastError() { return $this->lastError; }
+    public function getColumnCache(): array { return (array) $this->colCache; }
+    public function hasColumnInCache(string $column): bool { return array_key_exists($column, $this->colCache); }
+    public function getColumnFromCache(string $column): bool { return (bool) ($this->colCache[$column] ?? false); }
 
     // --- SETTERS ---
     public function setId($id) { $this->id = $id; }
@@ -90,6 +101,10 @@ class User
     public function setFaceEnrolledAt($v) { $this->face_enrolled_at = $v; }
     public function setCreatedAt($v) { $this->created_at = $v; }
     public function setUpdatedAt($v) { $this->updated_at = $v; }
+    public function setTableName(string $v) { $this->table = $v; }
+    public function setLastError($v) { $this->lastError = $v; }
+    public function setColumnInCache(string $column, bool $exists) { $this->colCache[$column] = $exists; }
+    public function clearColumnCache() { $this->colCache = []; }
 
     public function getFullName() {
         return trim($this->first_name . ' ' . $this->last_name);

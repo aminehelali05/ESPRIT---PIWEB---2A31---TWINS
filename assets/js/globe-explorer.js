@@ -71,6 +71,26 @@ window.GlobeExplorer = (function () {
         }
     }
 
+    function setView(center, zoom = 5) {
+        if (!map || !Array.isArray(center) || center.length < 2) {
+            return;
+        }
+
+        const lat = Number(center[0]);
+        const lng = Number(center[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            return;
+        }
+
+        map.setView([lat, lng], zoom, { animate: true });
+
+        if (!marker) {
+            marker = L.marker([lat, lng]).addTo(map);
+        } else {
+            marker.setLatLng([lat, lng]);
+        }
+    }
+
     function onMapClick(callbacks = {}) {
         if (!map) return;
 
@@ -84,6 +104,7 @@ window.GlobeExplorer = (function () {
         init,
         onMapClick,
         getPicked,
-        invalidateSize
+        invalidateSize,
+        setView
     };
 })();

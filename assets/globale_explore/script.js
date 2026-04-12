@@ -15,6 +15,10 @@ let globeGroup, globeColorMesh, globeStrokesMesh, globeSelectionOuterMesh;
 const svgViewBox = [2000, 1000];
 const offsetY = -.1;
 
+const urlParams = new URLSearchParams(window.location.search);
+const IS_PICKER_MODE = urlParams.get('picker') === '1';
+const IS_EMBED_MODE = urlParams.get('embed') === '1' || IS_PICKER_MODE;
+
 const params = {
     strokeColor: "#111111",
     defaultColor: "#9a9591",
@@ -39,9 +43,29 @@ let staticMapUri;
 const bBoxes = [];
 const dataUris = [];
 
+const countryCapitalCoordinates = {
+    'brazil': { lat: -15.793889, lng: -47.882778 },
+    'uruguay': { lat: -34.901112, lng: -56.164532 },
+    'argentina': { lat: -34.603722, lng: -58.381592 },
+    'tunisia': { lat: 36.806389, lng: 10.181667 },
+    'france': { lat: 48.856613, lng: 2.352222 },
+    'germany': { lat: 52.52, lng: 13.405 },
+    'united states': { lat: 38.9072, lng: -77.0369 },
+    'united states of america': { lat: 38.9072, lng: -77.0369 },
+    'united kingdom': { lat: 51.507222, lng: -0.1275 },
+    'italy': { lat: 41.902782, lng: 12.496366 },
+    'spain': { lat: 40.416775, lng: -3.70379 }
+};
+
 
 initScene();
-createControls();
+if (!IS_EMBED_MODE) {
+    createControls();
+}
+
+if (IS_EMBED_MODE) {
+    document.body.classList.add('embed-mode');
+}
 
 window.addEventListener("resize", updateSize);
 
@@ -196,10 +220,47 @@ function normalizeCountryName(name) {
     });
 }
 
-function emitCountrySelection(countryName) {
+function getHoveredCountryApproxCoordinates() {
+    if (hoveredCountryIdx < 0 || hoveredCountryIdx >= svgCountries.length) {
+        return null;
+    }
+
+    const path = svgCountries[hoveredCountryIdx];
+    const bbox = bBoxes[hoveredCountryIdx] || (path ? path.getBBox() : null);
+    if (!bbox) {
+        return null;
+    }
+
+    const centerX = bbox.x + (bbox.width / 2);
+    const centerY = bbox.y + (bbox.height / 2);
+
+    const u = centerX / svgViewBox[0];
+    const v = 1 + offsetY - (centerY / svgViewBox[1]);
+
+    const lat = Math.max(-85, Math.min(85, (v - 0.5) * 180));
+    const lng = (u - 0.5) * 360;
+
+    return {
+        lat: Number(lat.toFixed(6)),
+        lng: Number(lng.toFixed(6))
+    };
+}
+
+function getCountryCapitalCoordinates(countryName) {
+    const key = String(countryName || '').trim().toLowerCase();
+    if (!key) {
+        return null;
+    }
+
+    return countryCapitalCoordinates[key] || null;
+}
+
+function emitCountrySelection(countryName, coordinates = null) {
     const payload = {
         country: countryName,
         fullAddress: countryName,
+        lat: coordinates?.lat,
+        lng: coordinates?.lng,
         source: '3d-globe'
     };
 
@@ -223,6 +284,7 @@ containerEl.addEventListener("mousemove", (e) => {
 });
 containerEl.addEventListener("click", (e) => {
     updateMousePosition(e.clientX, e.clientY);
+    updateHoveredCountryFromPointer();
     handleCountryClick();
 });
 
@@ -233,13 +295,26 @@ function updateMousePosition(x, y) {
     pointer.y = -((y - rect.top) / rect.height) * 2 + 1;
 }
 
+function updateHoveredCountryFromPointer() {
+    if (!rayCaster || !globeStrokesMesh || !camera) {
+        return false;
+    }
+
+    rayCaster.setFromCamera(pointer, camera);
+    const intersects = rayCaster.intersectObject(globeStrokesMesh);
+    if (!intersects.length) {
+        return false;
+    }
+
+    updateMap(intersects[0].uv, true);
+    return true;
+}
+
 
 
 // Handle country click to show panel with actions/resources
 function handleCountryClick() {
-    // This function is safe to run after the existing functionality
-    if (typeof isHoverable !== 'undefined' && typeof hoveredCountryIdx !== 'undefined' &&
-        isHoverable && hoveredCountryIdx !== -1) {
+    if (typeof hoveredCountryIdx !== 'undefined' && hoveredCountryIdx !== -1) {
         let countryName = svgCountries[hoveredCountryIdx].getAttribute("data-name");
         if (countryName) {
             // Clean up country name to handle potential formatting differences
@@ -248,7 +323,8 @@ function handleCountryClick() {
             // Normalize the country name using comprehensive mappings
             countryName = normalizeCountryName(countryName);
 
-            emitCountrySelection(countryName);
+            const coordinates = getCountryCapitalCoordinates(countryName) || getHoveredCountryApproxCoordinates();
+            emitCountrySelection(countryName, coordinates);
 
             // Temporarily disable auto-rotation when clicking a country
 
@@ -257,6 +333,11 @@ function handleCountryClick() {
                 controls.autoRotate = false;
             }
             console.log('Normalized country name:', countryName);
+
+            if (IS_PICKER_MODE) {
+                return;
+            }
+
             loadCountryData(countryName);
         }
     }
@@ -311,6 +392,10 @@ async function loadCountryData(country) {
 
 // Show the right-side panel
 function showCountryPanel() {
+    if (IS_PICKER_MODE) {
+        return;
+    }
+
     // Check if our panel already exists
     let panel = document.getElementById('countryPanel');
     if (panel) {
@@ -743,7 +828,7 @@ function closeCountryPanel() {
 
     // Re-enable auto-rotation when panel is closed (only if it should be enabled)
     if (controls && autoRotation) {
-        controls.autoRotate = flase;
+        controls.autoRotate = false;
     }
 }
 
@@ -814,7 +899,9 @@ async function initCountryActivityHighlights() {
 }
 
 // Initialize with a small delay to ensure everything is loaded
-setTimeout(initCountryActivityHighlights, 1000);
+if (!IS_PICKER_MODE) {
+    setTimeout(initCountryActivityHighlights, 1000);
+}
 
 
 
@@ -976,7 +1063,7 @@ function prepareLowResTextures() {
 
 }
 
-function updateMap(uv = { x: 0, y: 0 }) {
+function updateMap(uv = { x: 0, y: 0 }, force = false) {
     const pointObj = svgMapDomEl.createSVGPoint();
     pointObj.x = uv.x * svgViewBox[0];
     pointObj.y = (1 + offsetY - uv.y) * svgViewBox[1];
@@ -989,7 +1076,7 @@ function updateMap(uv = { x: 0, y: 0 }) {
         ) {
             const isHovering = svgCountries[i].isPointInFill(pointObj);
             if (isHovering) {
-                if (i !== hoveredCountryIdx) {
+                if (force || i !== hoveredCountryIdx) {
                     hoveredCountryIdx = i;
                     setMapTexture(globeSelectionOuterMesh.material, dataUris[hoveredCountryIdx]);
                     countryNameEl.innerHTML = svgCountries[hoveredCountryIdx].getAttribute("data-name");

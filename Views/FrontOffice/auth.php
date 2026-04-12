@@ -3,10 +3,14 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-include_once(__DIR__ . '/../../Controllers/AuthController.php');
+include_once(__DIR__ . '/../../Controllers/UserController.php');
 
-if (AuthController::isAuthenticated()) {
-  header('Location: ../BackOffice/dashboard.php');
+if (UserController::isAuthenticated()) {
+    if (UserController::isAdmin()) {
+        header('Location: ../BackOffice/dashboard.php');
+    } else {
+        header('Location: home.php');
+    }
   exit;
 }
 
@@ -140,11 +144,11 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-zinc-600 dark:text-zinc-300 ml-1">First Name</label>
-                    <input type="text" id="firstName" name="first_name" required class="auth-input !pl-4" placeholder="John">
+                    <input type="text" id="firstName" name="first_name" required class="auth-input !pl-4" placeholder="Amine">
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-zinc-600 dark:text-zinc-300 ml-1">Last Name</label>
-                    <input type="text" id="lastName" name="last_name" required class="auth-input !pl-4" placeholder="Doe">
+                    <input type="text" id="lastName" name="last_name" required class="auth-input !pl-4" placeholder="HELALI">
                 </div>
             </div>
 
@@ -152,7 +156,21 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
                 <label class="text-sm font-medium text-zinc-600 dark:text-zinc-300 ml-1">Email</label>
                 <div class="relative">
                     <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                    <input type="email" id="email" name="email" required class="auth-input" placeholder="john@example.com">
+                    <input type="email" id="email" name="email" required class="auth-input" placeholder="helali@example.com">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-zinc-600 dark:text-zinc-300 ml-1">Account Type</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="auth-type-option">
+                        <input type="radio" name="account_type" value="freelancer" checked>
+                        <span>Freelancer</span>
+                    </label>
+                    <label class="auth-type-option">
+                        <input type="radio" name="account_type" value="client">
+                        <span>Client</span>
+                    </label>
                 </div>
             </div>
 
@@ -162,7 +180,7 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
                 <div class="relative flex gap-2">
                     <div class="relative flex-1">
                         <i data-lucide="map-pin" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-                        <input type="text" id="country" name="country" required readonly class="auth-input cursor-pointer" placeholder="Select location" onclick="openMapPicker()">
+                        <input type="text" id="country" name="country" readonly class="auth-input cursor-pointer" value="Unknown" placeholder="Unknown" onclick="openMapPicker()">
                     </div>
                     <button type="button" onclick="openMapPicker()" class="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-xl border border-zinc-200 dark:border-zinc-700 transition-colors shadow-sm">
                         <i data-lucide="map" class="w-5 h-5"></i>
@@ -205,7 +223,7 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
             <div class="space-y-2">
                 <button type="button" id="enrollFaceBtn" class="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-gray-300 hover:text-blue-600 transition-all duration-300 flex items-center justify-center gap-3 group">
                     <i data-lucide="scan-face" class="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-medium">Enroll Face ID (Optional)</span>
+                    <span class="font-medium">Enroll Face ID</span>
                 </button>
                 <div id="enrollmentStatus" class="text-sm text-center text-zinc-500 dark:text-gray-400 hidden"></div>
             </div>
@@ -330,18 +348,7 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
 
     <!-- Scripts Injection -->
     <script src="../../assets/js/main.js"></script>
-    <script src="../../auth/js/face-config.js"></script>
-    <script src="../../auth/js/auth-utils.js"></script>
-    <script src="../../auth/js/face-utils.js"></script>
-    <?php if ($mode === 'login'): ?>
-        <script src="../../auth/js/face-login.js"></script>
-    <?php else: ?>
-        <script src="../../auth/js/password-strength.js"></script>
-        <script src="../../auth/js/map-picker.js"></script>
-        <script src="../../auth/js/face-capture.js"></script>
-        <!-- Need a stub so friend's register.js logic isn't strictly requested. Instead, we are posting the form native via PHP inside Auth.php -->
-    <?php endif; ?>
-    <script src="../../auth/js/gamified-captcha.js"></script>
+    <script src="../../assets/js/user.js"></script>
 
     <script>
         if(typeof lucide !== 'undefined') lucide.createIcons();

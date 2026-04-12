@@ -319,6 +319,28 @@
 
 .modal .form-input::placeholder { color: var(--color-text-muted); }
 
+/* Premium profile editor light tuning */
+[data-theme="light"] #editModal .db-modal-card {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(191,219,254,0.42), transparent 36%),
+    linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+  border-color: rgba(147, 197, 253, 0.46);
+}
+
+[data-theme="light"] #editModal .db-section-card {
+  background: linear-gradient(165deg, rgba(255,255,255,0.99), rgba(240,248,255,0.95));
+  border-color: rgba(191, 219, 254, 0.66);
+}
+
+[data-theme="light"] #editModal .db-field:not(.db-map-tools):not(.db-globe-wrap):not(.db-avatar-uploader-card) {
+  background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(246,250,255,0.96));
+  border-color: rgba(148, 163, 184, 0.36);
+}
+
+[data-theme="light"] #editModal .db-btn-primary {
+  box-shadow: 0 14px 30px rgba(59, 130, 246, 0.36);
+}
+
 [data-theme="dark"] .modal .form-input {
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.16);

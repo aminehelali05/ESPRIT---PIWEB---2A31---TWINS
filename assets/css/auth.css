@@ -176,3 +176,39 @@ body {
 .feedback-badge-fair { background-color: rgba(234, 179, 8, 0.2); color: rgb(253, 224, 71); }
 .feedback-badge-good { background-color: rgba(59, 130, 246, 0.2); color: rgb(147, 197, 253); }
 .feedback-badge-excellent { background-color: rgba(16, 185, 129, 0.2); color: rgb(110, 231, 183); }
+
+.auth-type-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    min-height: 44px;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+[data-theme="dark"] .auth-type-option {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.auth-type-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.auth-type-option span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.auth-type-option:has(input:checked) {
+    border-color: rgba(79, 82, 217, 0.42);
+    background: linear-gradient(135deg, rgba(79,82,217,0.13), rgba(14,165,233,0.1));
+    box-shadow: 0 8px 22px rgba(79,82,217,0.16);
+}

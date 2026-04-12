@@ -1,3 +1,16 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+include_once(__DIR__ . '/../../Controllers/UserController.php');
+$sidebarUser = UserController::currentUser() ?? [];
+$sidebarFirstName = trim((string) ($sidebarUser['first_name'] ?? 'Guest'));
+$sidebarLastName = trim((string) ($sidebarUser['last_name'] ?? 'User'));
+$sidebarDisplayName = trim($sidebarFirstName . ' ' . $sidebarLastName);
+$sidebarDisplayName = $sidebarDisplayName !== '' ? $sidebarDisplayName : 'Guest User';
+$sidebarInitials = strtoupper(substr($sidebarFirstName ?: 'G', 0, 1) . substr($sidebarLastName ?: 'U', 0, 1));
+$isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === 'admin@diversity.is';
+?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -9,8 +22,32 @@
   <link rel="stylesheet" href="../../assets/css/challenges.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="grid-dot-bg">
+<body class="grid-dot-bg with-global-left-sidebar">
   <canvas id="gradient-canvas"></canvas>
+
+  <aside class="global-left-sidebar glass-card" aria-label="Global modules navigation">
+    <div class="left-profile">
+      <div class="left-avatar"><?= htmlspecialchars($sidebarInitials) ?></div>
+      <div>
+        <h4><?= htmlspecialchars($sidebarDisplayName) ?></h4>
+        <p>Level 12</p>
+      </div>
+    </div>
+    <nav class="left-nav">
+      <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span>Home Feed</span></a>
+      <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg><span>Social</span></a>
+      <a href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg><span>Profile</span></a>
+      <a href="skills.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Skills & Certificates</span></a>
+      <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg><span>Projects & Collaborators</span></a>
+      <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z" /></svg><span>Reviews & Ratings</span></a>
+      <a class="active" href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Challenges & Daily Quiz</span></a>
+      <?php if ($isAdminSidebar): ?><a href="../BackOffice/dashboard.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M14 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V6z"/><path d="M4 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z"/></svg><span>User Management</span></a><?php endif; ?>
+    </nav>
+    <div class="left-gamification">
+      <div class="mini-score"><span>Reputation</span><strong>84</strong></div>
+      <div class="mini-score"><span>Daily Streak</span><strong>7 days</strong></div>
+    </div>
+  </aside>
 
   <nav class="navbar" id="navbar">
     <div class="container">

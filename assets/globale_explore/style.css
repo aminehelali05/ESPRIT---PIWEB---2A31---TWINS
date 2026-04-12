@@ -2,7 +2,7 @@ body {
     padding: 0;
     margin: 0;
     overflow: hidden;
-    font-family: sans-serif;
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
 }
 
 .page {
@@ -27,6 +27,49 @@ body {
     padding: 15px;
     width: 90vw;
     height: 70vh;
+}
+
+body.embed-mode {
+    background:
+      radial-gradient(circle at 12% -8%, rgba(99, 102, 241, 0.3), transparent 36%),
+      radial-gradient(circle at 100% 10%, rgba(59, 130, 246, 0.26), transparent 40%),
+      linear-gradient(180deg, #0f172a 0%, #111827 100%);
+}
+
+body.embed-mode .page {
+    padding-top: 10px;
+}
+
+body.embed-mode .globe-wrapper {
+    margin-top: 0;
+    width: 100%;
+    height: 100%;
+        background:
+            radial-gradient(circle at 50% -14%, rgba(96, 165, 250, 0.26), transparent 42%),
+            radial-gradient(circle at 110% 88%, rgba(129, 140, 248, 0.2), transparent 44%),
+            rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(147, 197, 253, 0.34);
+        border-radius: 16px;
+        padding: 6px;
+        box-shadow: inset 0 0 80px rgba(56, 189, 248, 0.18), 0 20px 40px rgba(2, 6, 23, 0.36);
+}
+
+body.embed-mode .country-panel,
+body.embed-mode .panel-controls,
+body.embed-mode .panel-stats,
+body.embed-mode .panel-content,
+body.embed-mode .panel-header,
+body.embed-mode .lil-gui {
+    display: none !important;
+}
+
+body.embed-mode .info span {
+    color: #e2e8f0;
+    text-shadow: 0 0 14px rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(147, 197, 253, 0.3);
+    background: rgba(15, 23, 42, 0.42);
+    border-radius: 10px;
+    font-size: 1.9em;
 }
 
 .info {
