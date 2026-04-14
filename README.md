@@ -1,7 +1,7 @@
-# LARPLARP — Professional Networking Platform
+# Diversity — Professional Networking Platform
 
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&size=30&duration=3000&pause=700&color=4ABAF7&center=true&vCenter=true&width=850&lines=LARPLARP+%7C+Professional+Networking+Platform;Build%2C+Connect%2C+Collaborate%2C+Grow" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&size=30&duration=3000&pause=700&color=4ABAF7&center=true&vCenter=true&width=850&lines=Diversity+%7C+Professional+Networking+Platform;Build%2C+Connect%2C+Collaborate%2C+Grow" />
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
 
 ## Overview
 
-LARPLARP is a PHP/MySQL web platform designed for professionals, freelancers, and clients to connect, publish opportunities, manage projects, and collaborate through a clean front office and back office experience.
+Diversity is a PHP/MySQL web platform designed for professionals, freelancers, and clients to connect, publish opportunities, manage projects, and collaborate through a clean front office and back office experience.
 
 It includes:
 - secure authentication and registration
@@ -91,7 +91,7 @@ It includes:
 ## Project Structure
 
 ```text
-LARPLARP/
+Diversity/
 ├─ index.php
 ├─ config.php
 ├─ User.sql
