@@ -172,11 +172,7 @@ The app also uses custom JavaScript behavior from `assets/js/` for dashboards, p
 
 ---
 
-<p align="center">
-  <a href="https://github.com/aminehelali05/ESPRIT---PIWEB---2A31---TWINS">
-    <img src="https://visitcount.itsvg.in/api?id=aminehelali05&icon=0&color=0" alt="visit count" />
-  </a>
-</p>
+
 
 <!-- SOCIALS ANIMATED LINE -->
 <p align="center">
