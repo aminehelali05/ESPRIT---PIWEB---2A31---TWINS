@@ -2,6 +2,8 @@
 
 class User
 {
+    public const BIO_MAX_LENGTH = 1000;
+
     private $table;
     private $lastError;
     private $colCache = [];

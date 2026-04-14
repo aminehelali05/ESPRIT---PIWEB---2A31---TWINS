@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const apiBase = 'dashboard.php';
+    const apiBase = 'dashboardUser.php';
     const tableBody = document.getElementById('usersTableBody');
     const addUserBtn = document.getElementById('addUserBtn');
     const modal = document.getElementById('userModal');
@@ -29,10 +29,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const randomAvatarBtn = document.getElementById('randomAvatarBtn');
     const avatarCameraVideo = document.getElementById('avatarCameraVideo');
     const avatarCaptureCanvas = document.getElementById('avatarCaptureCanvas');
+    const selectedUserHint = document.getElementById('selectedUserHint');
+    const selectedUserOverview = document.getElementById('selectedUserOverview');
+    const selectedUserMetaList = document.getElementById('selectedUserMetaList');
+    const selectedUserDeleteRequests = document.getElementById('selectedUserDeleteRequests');
+    const selectedUserSigninHistory = document.getElementById('selectedUserSigninHistory');
+    const selectedUserHeroAvatar = document.getElementById('selectedUserHeroAvatar');
+    const selectedUserHeroAvatarImg = document.getElementById('selectedUserHeroAvatarImg');
+    const selectedUserHeroAvatarText = document.getElementById('selectedUserHeroAvatarText');
+    const selectedUserHeroName = document.getElementById('selectedUserHeroName');
+    const selectedUserHeroRole = document.getElementById('selectedUserHeroRole');
+    const selectedUserHeroMeta = document.getElementById('selectedUserHeroMeta');
+    const selectedUserCalendarMonthLabel = document.getElementById('selectedUserCalendarMonthLabel');
+    const selectedUserCalendarGrid = document.getElementById('selectedUserCalendarGrid');
 
     let users = [];
     let deleteRequests = [];
     let editMode = false;
+    let selectedUserId = 0;
     let pickedLocation = null;
     let initialFormSnapshot = '';
     let avatarCameraStream = null;
@@ -86,6 +100,112 @@ document.addEventListener('DOMContentLoaded', () => {
             return role;
         }
         return 'client';
+    };
+
+    const escapeHtml = (value) => String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const prettyDateTime = (value) => {
+        const raw = String(value || '').trim();
+        if (!raw) return '—';
+        const date = new Date(raw.replace(' ', 'T'));
+        if (Number.isNaN(date.getTime())) return raw;
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const getDateKey = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
+
+    const buildCalendarModel = (signInHistory = []) => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const start = new Date(firstDay);
+        start.setDate(firstDay.getDate() - firstDay.getDay());
+
+        const countsByDay = {};
+        signInHistory.forEach((entry) => {
+            const raw = String(entry?.signed_in_at || '').trim();
+            if (!raw) return;
+            const date = new Date(raw.replace(' ', 'T'));
+            if (Number.isNaN(date.getTime())) return;
+            const key = getDateKey(date);
+            countsByDay[key] = (Number(countsByDay[key] || 0) + 1);
+        });
+
+        const days = [];
+        for (let i = 0; i < 42; i += 1) {
+            const current = new Date(start);
+            current.setDate(start.getDate() + i);
+            const key = getDateKey(current);
+            const sessions = Number(countsByDay[key] || 0);
+            days.push({
+                key,
+                day: current.getDate(),
+                month: current.getMonth(),
+                year: current.getFullYear(),
+                sessions,
+                isCurrentMonth: current.getMonth() === month,
+                isToday: key === getDateKey(now)
+            });
+        }
+
+        return {
+            monthLabel: now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+            days
+        };
+    };
+
+    const levelForSessions = (count) => {
+        if (count >= 4) return 4;
+        if (count >= 3) return 3;
+        if (count >= 2) return 2;
+        if (count >= 1) return 1;
+        return 0;
+    };
+
+    const renderSignInCalendar = (signInHistory = []) => {
+        if (!selectedUserCalendarGrid || !selectedUserCalendarMonthLabel) return;
+
+        const model = buildCalendarModel(signInHistory);
+        selectedUserCalendarMonthLabel.textContent = model.monthLabel;
+
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const weekdaysHtml = `<div class="selected-user-calendar-weekdays">${weekdays.map((day) => `<span>${day}</span>`).join('')}</div>`;
+
+        const daysHtml = model.days.map((day) => {
+            const level = levelForSessions(day.sessions);
+            const classNames = [
+                'selected-user-calendar-day',
+                day.isCurrentMonth ? '' : 'is-out',
+                day.isToday ? 'is-today' : '',
+                level > 0 ? `level-${level}` : ''
+            ].filter(Boolean).join(' ');
+
+            return `
+                <div class="${classNames}" title="${day.key} · ${day.sessions} sign-in${day.sessions !== 1 ? 's' : ''}">
+                    <span class="day">${day.day}</span>
+                    <span class="count">${day.sessions > 0 ? `${day.sessions} login${day.sessions !== 1 ? 's' : ''}` : ''}</span>
+                </div>
+            `;
+        }).join('');
+
+        selectedUserCalendarGrid.innerHTML = `${weekdaysHtml}<div class="selected-user-calendar-days">${daysHtml}</div>`;
     };
 
     const avatarFallbackSvg = (seed = 'U') => {
@@ -244,10 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadAvatarData = async (imageData, fileName = 'avatar.png') => {
         const response = await fetch(`${apiBase}?action=upload_avatar`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ image_data: imageData, file_name: fileName })
         });
-        const result = await response.json();
+        const contentType = String(response.headers.get('content-type') || '');
+        const result = contentType.includes('application/json') ? await response.json() : { success: false, message: await response.text() };
         if (!response.ok || !result.success) {
             throw new Error(result.message || 'Could not upload avatar.');
         }
@@ -352,6 +473,154 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const renderSelectedUserProfile = (payload) => {
+        if (!selectedUserOverview || !selectedUserMetaList || !selectedUserDeleteRequests || !selectedUserSigninHistory) {
+            return;
+        }
+
+        const user = payload?.user || {};
+        const deleteRequestsHistory = Array.isArray(payload?.delete_requests) ? payload.delete_requests : [];
+        const signInHistory = Array.isArray(payload?.signin_history) ? payload.signin_history : [];
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || `User #${user.id || 'Unknown'}`;
+        const initials = `${String(user.first_name || 'U').charAt(0)}${String(user.last_name || 'S').charAt(0)}`.toUpperCase();
+        const avatarUrl = String(user.avatar_url || '').trim();
+        const activeDays = new Set(signInHistory
+            .map((row) => String(row?.signed_in_at || '').trim())
+            .filter(Boolean)
+            .map((raw) => {
+                const date = new Date(raw.replace(' ', 'T'));
+                return Number.isNaN(date.getTime()) ? '' : getDateKey(date);
+            })
+            .filter(Boolean)).size;
+
+        if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.textContent = initials || '--';
+        if (selectedUserHeroAvatarImg) {
+            if (avatarUrl !== '') {
+                selectedUserHeroAvatarImg.src = avatarUrl;
+                selectedUserHeroAvatarImg.style.display = 'block';
+                if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.style.display = 'none';
+            } else {
+                selectedUserHeroAvatarImg.src = '';
+                selectedUserHeroAvatarImg.style.display = 'none';
+                if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.style.display = 'block';
+            }
+            selectedUserHeroAvatarImg.onerror = () => {
+                selectedUserHeroAvatarImg.src = '';
+                selectedUserHeroAvatarImg.style.display = 'none';
+                if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.style.display = 'block';
+            };
+        }
+        if (selectedUserHeroName) selectedUserHeroName.textContent = fullName;
+        if (selectedUserHeroRole) selectedUserHeroRole.textContent = `Role: ${String(user.role || 'user')} · XP: ${Number(user.xp || 0)}`;
+        if (selectedUserHeroMeta) {
+            selectedUserHeroMeta.textContent = `${signInHistory.length} sign-in record${signInHistory.length !== 1 ? 's' : ''} · ${activeDays} active day${activeDays !== 1 ? 's' : ''} this month`;
+        }
+
+        selectedUserOverview.innerHTML = `
+            <strong>${escapeHtml(fullName)}</strong> · ${escapeHtml(String(user.email || 'No email'))}
+            <br>
+            Role: ${escapeHtml(String(user.role || 'user'))} · Status: ${Number(user.status) === 1 ? 'Active' : 'Offline'} · Blocked: ${Number(user.is_blocked) === 1 ? 'Yes' : 'No'}
+        `;
+
+        const metaItems = [
+            ['User ID', user.id || '—'],
+            ['Phone', user.phone || '—'],
+            ['Country', user.country || '—'],
+            ['Title', user.title || '—'],
+            ['XP', user.xp ?? 0],
+            ['Face Enrolled', Number(user.face_enrolled) === 1 ? 'Yes' : 'No'],
+            ['Last Seen', prettyDateTime(user.last_seen)],
+            ['Created At', prettyDateTime(user.created_at)],
+            ['Bio', user.bio || '—'],
+            ['Skills', user.skills || '—']
+        ];
+
+        selectedUserMetaList.innerHTML = metaItems.map(([label, value]) => `
+            <div class="selected-user-meta-item">
+                <strong>${escapeHtml(label)}</strong>
+                <span>${escapeHtml(String(value ?? '—'))}</span>
+            </div>
+        `).join('');
+
+        if (!deleteRequestsHistory.length) {
+            selectedUserDeleteRequests.innerHTML = '<div class="empty-state">No delete requests history for this user.</div>';
+        } else {
+            selectedUserDeleteRequests.innerHTML = deleteRequestsHistory.map((row) => `
+                <div class="selected-user-list-item">
+                    <div class="title">Request #${Number(row.id || 0)} · ${escapeHtml(String(row.status || 'pending').toUpperCase())}</div>
+                    <div class="meta">Requested: ${prettyDateTime(row.created_at)} · Reviewed: ${prettyDateTime(row.reviewed_at)}</div>
+                    <div class="meta">Reason: ${escapeHtml(String(row.reason || 'No reason provided.'))}</div>
+                    <div class="meta">Admin note: ${escapeHtml(String(row.admin_note || '—'))}</div>
+                </div>
+            `).join('');
+        }
+
+        if (!signInHistory.length) {
+            selectedUserSigninHistory.innerHTML = '<div class="empty-state">No sign-in history available for this user.</div>';
+        } else {
+            selectedUserSigninHistory.innerHTML = signInHistory.map((row) => `
+                <div class="selected-user-list-item">
+                    <div class="title">${prettyDateTime(row.signed_in_at)}</div>
+                    <div class="meta">IP: ${escapeHtml(String(row.ip_address || 'Unknown'))}</div>
+                    <div class="meta">Device: ${escapeHtml(String(row.device_type || 'Unknown'))} · OS: ${escapeHtml(String(row.os || 'Unknown'))} · Browser: ${escapeHtml(String(row.browser || 'Unknown'))}</div>
+                    <div class="meta">User-Agent: ${escapeHtml(String(row.user_agent || 'Unknown'))}</div>
+                </div>
+            `).join('');
+        }
+
+        renderSignInCalendar(signInHistory);
+
+        if (selectedUserHint) {
+            selectedUserHint.textContent = `Loaded profile for ${fullName}.`;
+        }
+    };
+
+    const setSelectedUserLoadingState = (userId) => {
+        if (!selectedUserOverview || !selectedUserMetaList || !selectedUserDeleteRequests || !selectedUserSigninHistory) {
+            return;
+        }
+
+        const label = userId > 0 ? `Loading profile for user #${userId}...` : 'Loading selected user profile...';
+        selectedUserOverview.innerHTML = `<div class="empty-state">${escapeHtml(label)}</div>`;
+        selectedUserMetaList.innerHTML = '<div class="empty-state">Loading user information…</div>';
+        selectedUserDeleteRequests.innerHTML = '<div class="empty-state">Loading delete requests history…</div>';
+        selectedUserSigninHistory.innerHTML = '<div class="empty-state">Loading sign-in history…</div>';
+        if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.textContent = '--';
+        if (selectedUserHeroAvatarImg) {
+            selectedUserHeroAvatarImg.src = '';
+            selectedUserHeroAvatarImg.style.display = 'none';
+            if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.style.display = 'block';
+        }
+        if (selectedUserHeroName) selectedUserHeroName.textContent = 'Loading profile...';
+        if (selectedUserHeroRole) selectedUserHeroRole.textContent = 'Role: —';
+        if (selectedUserHeroMeta) selectedUserHeroMeta.textContent = 'Please wait while we fetch user insights.';
+        if (selectedUserCalendarMonthLabel) selectedUserCalendarMonthLabel.textContent = '—';
+        if (selectedUserCalendarGrid) selectedUserCalendarGrid.innerHTML = '<div class="empty-state">Loading calendar…</div>';
+    };
+
+    const loadUserProfile = async (userId) => {
+        if (!Number.isFinite(Number(userId)) || Number(userId) <= 0) {
+            return;
+        }
+
+        selectedUserId = Number(userId);
+        renderUsers();
+        setSelectedUserLoadingState(selectedUserId);
+
+        try {
+            const response = await fetch(`${apiBase}?action=profile&user_id=${selectedUserId}`);
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Could not load selected user profile.');
+            }
+            renderSelectedUserProfile(data);
+        } catch (error) {
+            if (selectedUserOverview) {
+                selectedUserOverview.innerHTML = `<div class="empty-state">${escapeHtml(error.message || 'Could not load selected user profile.')}</div>`;
+            }
+        }
+    };
+
     const toInitials = (u) => `${(u.first_name || 'U').charAt(0)}${(u.last_name || 'S').charAt(0)}`.toUpperCase();
 
     const roleClass = (role) => {
@@ -382,8 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok || !data.success) return;
 
             animateCounter(document.getElementById('kpiTotalUsers'), Number(data.stats.total || 0));
-            animateCounter(document.getElementById('kpiAdmins'), Number(data.stats.admins || 0));
-            animateCounter(document.getElementById('kpiNewThisMonth'), Number(data.stats.newThisMonth || 0));
+            animateCounter(document.getElementById('kpiJobOffers'), Number(data.stats.jobOffers || 0));
+            animateCounter(document.getElementById('kpiContracts'), Number(data.stats.contracts || 0));
         } catch (error) {
             console.error(error);
         }
@@ -397,6 +666,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.message || 'Could not load users.');
             }
             users = data.users || [];
+            if (selectedUserId > 0 && !users.some((u) => Number(u.id) === selectedUserId)) {
+                selectedUserId = 0;
+                if (selectedUserHint) {
+                    selectedUserHint.textContent = 'Click a user row to load full profile details.';
+                }
+                if (selectedUserOverview) {
+                    selectedUserOverview.innerHTML = 'Selected user is no longer available. Pick another user to display profile details.';
+                }
+                if (selectedUserMetaList) selectedUserMetaList.innerHTML = '<div class="empty-state">No user selected yet.</div>';
+                if (selectedUserDeleteRequests) selectedUserDeleteRequests.innerHTML = '<div class="empty-state">No data yet.</div>';
+                if (selectedUserSigninHistory) selectedUserSigninHistory.innerHTML = '<div class="empty-state">No data yet.</div>';
+                if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.textContent = '--';
+                if (selectedUserHeroAvatarImg) {
+                    selectedUserHeroAvatarImg.src = '';
+                    selectedUserHeroAvatarImg.style.display = 'none';
+                    if (selectedUserHeroAvatarText) selectedUserHeroAvatarText.style.display = 'block';
+                }
+                if (selectedUserHeroName) selectedUserHeroName.textContent = 'No user selected';
+                if (selectedUserHeroRole) selectedUserHeroRole.textContent = 'Role: —';
+                if (selectedUserHeroMeta) selectedUserHeroMeta.textContent = 'Choose a user to open profile insights.';
+                if (selectedUserCalendarMonthLabel) selectedUserCalendarMonthLabel.textContent = '—';
+                if (selectedUserCalendarGrid) selectedUserCalendarGrid.innerHTML = '<div class="empty-state">No calendar data yet.</div>';
+            }
             renderUsers();
             updateStats();
         } catch (error) {
@@ -479,6 +771,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusClass = Number(u.status) === 1 ? 'active' : 'offline';
             const statusText = Number(u.status) === 1 ? 'Active' : 'Offline';
             const isCurrent = Number(u.id) === currentUserId;
+            const isSelected = Number(u.id) === selectedUserId;
             const editButton = isCurrent
                 ? `<button class="t-btn icon-btn" data-action="edit" data-id="${u.id}" title="Edit my profile">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"></path></svg>
@@ -487,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                    </button>`;
             return `
-                <tr>
+                <tr class="user-row-clickable ${isSelected ? 'user-row-selected' : ''}" data-row-user-id="${u.id}">
                     <td>#${u.id}</td>
                     <td>
                         <div class="u-cell">
@@ -748,7 +1041,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tableBody) {
         tableBody.addEventListener('click', async (event) => {
             const button = event.target.closest('[data-action]');
-            if (!button) return;
+            if (!button) {
+                const row = event.target.closest('tr[data-row-user-id]');
+                if (!row) return;
+                const selectedId = Number(row.dataset.rowUserId || 0);
+                if (!selectedId) return;
+                await loadUserProfile(selectedId);
+                return;
+            }
 
             const action = button.dataset.action;
             const id = Number(button.dataset.id || 0);
@@ -778,6 +1078,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const result = await response.json();
                     if (!response.ok || !result.success) throw new Error(result.message || 'Toggle failed.');
                     await loadUsers();
+                    if (selectedUserId === id) {
+                        await loadUserProfile(id);
+                    }
                     showSuccess('User status updated.');
                 } catch (error) {
                     showError(error.message);

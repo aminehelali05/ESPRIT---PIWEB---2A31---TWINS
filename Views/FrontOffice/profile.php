@@ -122,9 +122,11 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   $lastName  = $clean($jsonInput['last_name'] ?? '');
   $email     = $clean($jsonInput['email'] ?? '');
   $phone     = $normalizePhone($jsonInput['phone'] ?? '');
+  $bio       = $clean($jsonInput['bio'] ?? '');
   if ($firstName === '' || $lastName === '' || $email === '') { $respond(['success' => false, 'message' => 'First name, last name, and email are required.'], 400); }
   if ($phone === '' || !preg_match('/^\+\d{8,15}$/', $phone)) { $respond(['success' => false, 'message' => 'Phone must start with +country code and contain 8 to 15 digits.'], 400); }
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $respond(['success' => false, 'message' => 'Invalid email format.'], 400); }
+  if (strlen($bio) > User::BIO_MAX_LENGTH) { $respond(['success' => false, 'message' => 'Bio must not exceed ' . User::BIO_MAX_LENGTH . ' characters.'], 400); }
   if ($userController->emailExists($email, $currentUserId)) { $respond(['success' => false, 'message' => 'Email already exists.'], 400); }
   $existingForUpdate = $userController->getUserById($currentUserId);
   $normalizeRole = static function ($value): string {
@@ -146,7 +148,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     'phone'   => $phone,
     'role'    => $normalizeRole($jsonInput['role'] ?? ($existingForUpdate ? $existingForUpdate->getRole() : 'client')),
     'country' => $countryValue,
-    'bio'     => $clean($jsonInput['bio'] ?? ''),
+    'bio'     => $bio,
     'skills'  => array_key_exists('skills', $jsonInput) ? $clean($jsonInput['skills'] ?? '') : (string) ($existingForUpdate ? ($existingForUpdate->getSkills() ?? '') : ''),
     'avatar_url' => $avatarUrl,
   ]);
@@ -1174,7 +1176,7 @@ $displayAvatarResolved = $displayAvatarUrl;
               <span><?= htmlspecialchars($displayEmail) ?></span>
             </div>
             <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/dashboard.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="../BackOffice/dashboardUser.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
             <a href="../../index.php?action=logout" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
@@ -1201,11 +1203,14 @@ $displayAvatarResolved = $displayAvatarUrl;
           <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> Home Feed</a>
           <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> Social</a>
           <a class="active" href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> Profile</a>
-          <a href="skills.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Skills & Certificates</a>
+          <a href="JobOffer.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Job Offers</a>
           <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg> Projects & Collaborators</a>
-          <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z"/></svg> Reviews & Ratings</a>
+          <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z"/></svg> Contracts</a>
           <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Challenges & Daily Quiz</a>
-          <?php if ($isAdminSidebar): ?><a href="../BackOffice/dashboard.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M14 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V6z"/><path d="M4 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z"/></svg> User Management</a><?php endif; ?>
+          <?php if ($isAdminSidebar): ?>
+            <div style="margin: 12px 0 6px 12px; font-size: 0.7rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em;">BackOffice</div>
+            <a href="../BackOffice/dashboardUser.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Dashboard</a>
+          <?php endif; ?>
         </nav>
         <div class="left-gamification">
           <div class="mini-score"><span>Reputation</span><strong><?= (int) $reputationScore ?></strong></div>
@@ -1511,7 +1516,7 @@ $displayAvatarResolved = $displayAvatarUrl;
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                     Skills
                   </div>
-                  <button class="skills-v2-add-btn" type="button" onclick="window.location.href='skills.php'">
+                  <button class="skills-v2-add-btn" type="button" onclick="window.location.href='JobOffer.php'">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                     Manage
                   </button>
@@ -1934,7 +1939,7 @@ $displayAvatarResolved = $displayAvatarUrl;
                   </div>
                   <div class="uf-group uf-span-2 is-textarea <?= $displayBio !== '' ? 'has-value' : '' ?>">
                     <label class="uf-label" for="formBio">Bio</label>
-                    <textarea class="uf-input uf-textarea" id="formBio" name="bio" rows="3" placeholder=" "><?= htmlspecialchars($displayBio) ?></textarea>
+                    <textarea class="uf-input uf-textarea" id="formBio" name="bio" rows="3" maxlength="<?= User::BIO_MAX_LENGTH ?>" placeholder=" "><?= htmlspecialchars($displayBio) ?></textarea>
                   </div>
 
                   <!-- Hidden -->
@@ -1995,3 +2000,4 @@ $displayAvatarResolved = $displayAvatarUrl;
   <script src="../../assets/js/profile.js"></script>
 </body>
 </html>
+

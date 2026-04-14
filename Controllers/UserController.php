@@ -10,8 +10,6 @@ class UserController
     {
         $this->modelState = new User();
         $this->modelState->setTableName($this->resolveTableName());
-        $this->modelState->setLastError(null);
-        $this->modelState->clearColumnCache();
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -26,31 +24,6 @@ class UserController
             if ($stmt && $stmt->fetch()) return 'users';
         } catch (Exception $e) {}
         return 'user';
-    }
-
-    public function getTableName(): string  { return $this->modelState->getTableName(); }
-    public function getLastError()          { return $this->modelState->getLastError(); }
-
-    public function __get($name)
-    {
-        if ($name === 'table') {
-            return $this->modelState->getTableName();
-        }
-        if ($name === 'lastError') {
-            return $this->modelState->getLastError();
-        }
-        return null;
-    }
-
-    public function __set($name, $value): void
-    {
-        if ($name === 'table') {
-            $this->modelState->setTableName((string) $value);
-            return;
-        }
-        if ($name === 'lastError') {
-            $this->modelState->setLastError($value);
-        }
     }
 
     // ── Column presence helper (cached per column name) ────────────────────
@@ -69,6 +42,13 @@ class UserController
             $this->modelState->setColumnInCache($column, false);
         }
         return $this->modelState->getColumnFromCache($column);
+    }
+
+    private function bioIsTooLong(string $bio): bool
+    {
+        return function_exists('mb_strlen')
+            ? mb_strlen($bio) > User::BIO_MAX_LENGTH
+            : strlen($bio) > User::BIO_MAX_LENGTH;
     }
 
     // ── Real client IP ─────────────────────────────────────────────────────
@@ -263,16 +243,16 @@ class UserController
     private function hydrateUser(array $row): User
     {
         $user = new User(
-            $row['first_name'],
-            $row['last_name'],
-            $row['email'],
-            $row['password'],
+            $row['first_name'] ?? '',
+            $row['last_name'] ?? '',
+            $row['email'] ?? '',
+            $row['password'] ?? '',
             $row['phone']      ?? '',
             $row['role']       ?? 'user',
             $row['status']     ?? 1,
             $row['created_at'] ?? null
         );
-        $user->setId($row['id']);
+        $user->setId($row['id'] ?? null);
         $user->setAvatarUrl($row['avatar_url']         ?? null);
         $user->setBadge($row['badge']                  ?? null);
         $user->setCountry($row['country']              ?? null);
@@ -308,8 +288,9 @@ class UserController
 
     public function addUser(User $user)
     {
-        $this->lastError = null;
-        $sql = "INSERT INTO {$this->table}
+        $this->modelState->setLastError(null);
+        $table = $this->modelState->getTableName();
+        $sql = "INSERT INTO {$table}
                     (first_name, last_name, email, password, phone, role, status,
                      avatar_url, badge, country, bio, title, skills,
                      xp, is_blocked, last_seen, created_at)
@@ -341,7 +322,7 @@ class UserController
             ]);
             return $db->lastInsertId();
         } catch (Exception $e) {
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::addUser — ' . $e->getMessage());
             return false;
         }
@@ -349,8 +330,9 @@ class UserController
 
     public function updateUser(User $user, $id): bool
     {
-        $this->lastError = null;
-        $sql = "UPDATE {$this->table} SET
+        $this->modelState->setLastError(null);
+        $table = $this->modelState->getTableName();
+        $sql = "UPDATE {$table} SET
                     first_name        = :first_name,
                     last_name         = :last_name,
                     email             = :email,
@@ -400,7 +382,7 @@ class UserController
             ]);
             return true;
         } catch (Exception $e) {
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::updateUser — ' . $e->getMessage());
             return false;
         }
@@ -408,13 +390,14 @@ class UserController
 
     public function deleteUser($id): bool
     {
-        $this->lastError = null;
+        $this->modelState->setLastError(null);
+        $table = $this->modelState->getTableName();
         $db = config::getConnexion();
         try {
-            $q = $db->prepare("DELETE FROM {$this->table} WHERE id = :id");
+            $q = $db->prepare("DELETE FROM {$table} WHERE id = :id");
             return $q->execute(['id' => $id]);
         } catch (Exception $e) {
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::deleteUser — ' . $e->getMessage());
             return false;
         }
@@ -426,8 +409,9 @@ class UserController
 
     public function listUsers(string $search = ''): array
     {
-        $this->lastError = null;
-        $sql    = "SELECT * FROM {$this->table}";
+        $this->modelState->setLastError(null);
+        $table  = $this->modelState->getTableName();
+        $sql    = "SELECT * FROM {$table}";
         $params = [];
         if ($search !== '') {
             $sql            .= " WHERE first_name LIKE :kw OR last_name LIKE :kw OR email LIKE :kw";
@@ -440,7 +424,7 @@ class UserController
             $q->execute($params);
             return array_map([$this, 'hydrateUser'], $q->fetchAll());
         } catch (Exception $e) {
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::listUsers — ' . $e->getMessage());
             return [];
         }
@@ -454,8 +438,9 @@ class UserController
     public function getUserById($id): ?User
     {
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
-            $q = $db->prepare("SELECT * FROM {$this->table} WHERE id = :id");
+            $q = $db->prepare("SELECT * FROM {$table} WHERE id = :id");
             $q->execute(['id' => $id]);
             $row = $q->fetch();
             return $row ? $this->hydrateUser($row) : null;
@@ -467,8 +452,9 @@ class UserController
     public function getUserByEmail(string $email): ?User
     {
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
-            $q = $db->prepare("SELECT * FROM {$this->table} WHERE email = :email LIMIT 1");
+            $q = $db->prepare("SELECT * FROM {$table} WHERE email = :email LIMIT 1");
             $q->execute(['email' => $email]);
             $row = $q->fetch();
             return $row ? $this->hydrateUser($row) : null;
@@ -479,7 +465,8 @@ class UserController
 
     public function emailExists(string $email, $excludeId = null): bool
     {
-        $sql    = "SELECT id FROM {$this->table} WHERE email = :email";
+        $table  = $this->modelState->getTableName();
+        $sql    = "SELECT id FROM {$table} WHERE email = :email";
         $params = ['email' => $email];
         if ($excludeId !== null) {
             $sql             .= ' AND id != :exclude_id';
@@ -506,8 +493,9 @@ class UserController
         if (!password_verify($password, $user->getPassword()))  return null;
 
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
-            $q = $db->prepare("UPDATE {$this->table} SET last_seen = NOW() WHERE id = :id");
+            $q = $db->prepare("UPDATE {$table} SET last_seen = NOW() WHERE id = :id");
             $q->execute(['id' => $user->getId()]);
         } catch (Exception $e) {}
 
@@ -600,6 +588,9 @@ class UserController
         if ($this->emailExists($email)) {
             return ['success' => false, 'message' => 'This email already exists.'];
         }
+        if ($this->bioIsTooLong($bio)) {
+            return ['success' => false, 'message' => 'Bio must not exceed ' . User::BIO_MAX_LENGTH . ' characters.'];
+        }
 
         $user = new User(
             $firstName,
@@ -607,7 +598,7 @@ class UserController
             $email,
             password_hash($password, PASSWORD_DEFAULT),
             $phone,
-            'user',
+            $accountType,
             1,
             date('Y-m-d H:i:s')
         );
@@ -631,7 +622,7 @@ class UserController
 
         $newId = $this->addUser($user);
         if (!$newId) {
-            $details = (string)$this->getLastError();
+            $details = (string)$this->modelState->getLastError();
             return [
                 'success' => false,
                 'message' => $details !== ''
@@ -647,7 +638,7 @@ class UserController
             'first_name' => $firstName,
             'last_name'  => $lastName,
             'email'      => $email,
-            'role'       => 'user',
+            'role'       => $accountType,
             'avatar_url' => $finalAvatarUrl,
         ];
 
@@ -794,7 +785,8 @@ class UserController
 
     public function countUsers(string $search = ''): int
     {
-        $sql    = "SELECT COUNT(*) AS cnt FROM {$this->table}";
+        $table  = $this->modelState->getTableName();
+        $sql    = "SELECT COUNT(*) AS cnt FROM {$table}";
         $params = [];
         if ($search !== '') {
             $sql            .= " WHERE first_name LIKE :kw OR last_name LIKE :kw OR email LIKE :kw";
@@ -819,14 +811,15 @@ class UserController
         }
 
         $db    = config::getConnexion();
-        $totalQ = $db->prepare("SELECT COUNT(*) AS cnt FROM {$this->table}{$where}");
+        $table = $this->modelState->getTableName();
+        $totalQ = $db->prepare("SELECT COUNT(*) AS cnt FROM {$table}{$where}");
         $totalQ->execute($params);
         $total = (int)(($totalQ->fetch())['cnt'] ?? 0);
         $pages = max(1, (int)ceil($total / $perPage));
         if ($page > $pages) { $page = $pages; }
         $offset = ($page - 1) * $perPage;
 
-        $q = $db->prepare("SELECT * FROM {$this->table}{$where} ORDER BY id DESC LIMIT {$offset}, {$perPage}");
+        $q = $db->prepare("SELECT * FROM {$table}{$where} ORDER BY id DESC LIMIT {$offset}, {$perPage}");
         $q->execute($params);
         $users = array_map([$this, 'hydrateUser'], $q->fetchAll());
 
@@ -836,7 +829,8 @@ class UserController
     public function countByRole(string $role): int
     {
         $db = config::getConnexion();
-        $q  = $db->prepare("SELECT COUNT(*) AS cnt FROM {$this->table} WHERE role = :role");
+        $table = $this->modelState->getTableName();
+        $q  = $db->prepare("SELECT COUNT(*) AS cnt FROM {$table} WHERE role = :role");
         $q->execute(['role' => $role]);
         return (int)(($q->fetch())['cnt'] ?? 0);
     }
@@ -844,7 +838,8 @@ class UserController
     public function countActiveUsers(): int
     {
         $db = config::getConnexion();
-        $q  = $db->prepare("SELECT COUNT(*) AS cnt FROM {$this->table} WHERE status = 1");
+        $table = $this->modelState->getTableName();
+        $q  = $db->prepare("SELECT COUNT(*) AS cnt FROM {$table} WHERE status = 1");
         $q->execute();
         return (int)(($q->fetch())['cnt'] ?? 0);
     }
@@ -869,7 +864,13 @@ class UserController
     {
         if ($id <= 0) return false;
 
-        $sql = "UPDATE {$this->table} SET
+        $bio = trim((string)($data['bio'] ?? ''));
+        if ($this->bioIsTooLong($bio)) {
+            return false;
+        }
+
+        $table = $this->modelState->getTableName();
+        $sql = "UPDATE {$table} SET
                     first_name  = :first_name,
                     last_name   = :last_name,
                     email       = :email,
@@ -892,7 +893,7 @@ class UserController
                 'phone'      => trim((string)($data['phone']       ?? '')),
                 'role'       => trim((string)($data['role']        ?? 'client')),
                 'country'    => trim((string)($data['country']     ?? '')),
-                'bio'        => trim((string)($data['bio']         ?? '')),
+                'bio'        => $bio,
                 'title'      => trim((string)($data['title']       ?? '')),
                 'skills'     => trim((string)($data['skills']      ?? '')),
                 'avatar_url' => trim((string)($data['avatar_url']  ?? '')) ?: null,
@@ -907,9 +908,10 @@ class UserController
     {
         if ($id <= 0 || strlen($newPassword) < 6) return false;
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
             $q = $db->prepare(
-                "UPDATE {$this->table} SET password = :password, updated_at = NOW() WHERE id = :id"
+                "UPDATE {$table} SET password = :password, updated_at = NOW() WHERE id = :id"
             );
             return $q->execute([
                 'password' => password_hash($newPassword, PASSWORD_DEFAULT),
@@ -959,11 +961,12 @@ class UserController
 
     public function createDeleteRequest(int $userId, int $requestedBy, string $reason = '')
     {
-        $this->lastError = null;
+        $this->modelState->setLastError(null);
         if ($userId <= 0 || $requestedBy <= 0) return false;
         if ($this->hasPendingDeleteRequest($userId)) return 'pending_exists';
 
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
             $db->beginTransaction();
 
@@ -978,7 +981,7 @@ class UserController
             ]);
 
             $dis = $db->prepare(
-                "UPDATE {$this->table} SET status = 0, is_blocked = 1, updated_at = NOW() WHERE id = :id"
+                "UPDATE {$table} SET status = 0, is_blocked = 1, updated_at = NOW() WHERE id = :id"
             );
             $dis->execute(['id' => $userId]);
 
@@ -987,7 +990,7 @@ class UserController
             return $requestId;
         } catch (Exception $e) {
             if ($db->inTransaction()) $db->rollBack();
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::createDeleteRequest — ' . $e->getMessage());
             return false;
         }
@@ -995,10 +998,11 @@ class UserController
 
     public function cancelDeleteRequest(int $userId): bool
     {
-        $this->lastError = null;
+        $this->modelState->setLastError(null);
         if ($userId <= 0) return false;
 
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
             $db->beginTransaction();
 
@@ -1014,7 +1018,7 @@ class UserController
             }
 
             $db->prepare(
-                "UPDATE {$this->table} SET status = 1, is_blocked = 0, updated_at = NOW() WHERE id = :id"
+                "UPDATE {$table} SET status = 1, is_blocked = 0, updated_at = NOW() WHERE id = :id"
             )->execute(['id' => $userId]);
 
             $db->prepare(
@@ -1025,7 +1029,7 @@ class UserController
             return true;
         } catch (Exception $e) {
             if ($db->inTransaction()) $db->rollBack();
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::cancelDeleteRequest — ' . $e->getMessage());
             return false;
         }
@@ -1033,10 +1037,11 @@ class UserController
 
     public function getDeleteRequests(string $status = 'pending'): array
     {
+        $table  = $this->modelState->getTableName();
         $db     = config::getConnexion();
         $sql    = "SELECT r.*, u.first_name, u.last_name, u.email
                    FROM user_delete_requests r
-                   LEFT JOIN {$this->table} u ON u.id = r.user_id";
+                   LEFT JOIN {$table} u ON u.id = r.user_id";
         $params = [];
 
         $normalizedStatus = trim($status);
@@ -1051,7 +1056,7 @@ class UserController
             $q->execute($params);
             return $q->fetchAll() ?: [];
         } catch (Exception $e) {
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::getDeleteRequests — ' . $e->getMessage());
             return [];
         }
@@ -1059,10 +1064,11 @@ class UserController
 
     public function approveDeleteRequest(int $requestId, int $adminId): bool
     {
-        $this->lastError = null;
+        $this->modelState->setLastError(null);
         if ($requestId <= 0 || $adminId <= 0) return false;
 
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
             $db->beginTransaction();
 
@@ -1077,7 +1083,7 @@ class UserController
             $userId = (int)($request['user_id'] ?? 0);
             if ($userId <= 0) { $db->rollBack(); return false; }
 
-            $db->prepare("DELETE FROM {$this->table} WHERE id = :id")->execute(['id' => $userId]);
+            $db->prepare("DELETE FROM {$table} WHERE id = :id")->execute(['id' => $userId]);
 
             $db->prepare(
                 "UPDATE user_delete_requests
@@ -1089,7 +1095,7 @@ class UserController
             return true;
         } catch (Exception $e) {
             if ($db->inTransaction()) $db->rollBack();
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::approveDeleteRequest — ' . $e->getMessage());
             return false;
         }
@@ -1097,10 +1103,11 @@ class UserController
 
     public function rejectDeleteRequest(int $requestId, int $adminId, string $note = ''): bool
     {
-        $this->lastError = null;
+        $this->modelState->setLastError(null);
         if ($requestId <= 0 || $adminId <= 0) return false;
 
         $db = config::getConnexion();
+        $table = $this->modelState->getTableName();
         try {
             $db->beginTransaction();
 
@@ -1116,7 +1123,7 @@ class UserController
             if ($userId <= 0) { $db->rollBack(); return false; }
 
             $db->prepare(
-                "UPDATE {$this->table} SET status = 1, is_blocked = 0, updated_at = NOW() WHERE id = :id"
+                "UPDATE {$table} SET status = 1, is_blocked = 0, updated_at = NOW() WHERE id = :id"
             )->execute(['id' => $userId]);
 
             $db->prepare(
@@ -1134,7 +1141,7 @@ class UserController
             return true;
         } catch (Exception $e) {
             if ($db->inTransaction()) $db->rollBack();
-            $this->lastError = $e->getMessage();
+            $this->modelState->setLastError($e->getMessage());
             error_log('UserController::rejectDeleteRequest — ' . $e->getMessage());
             return false;
         }

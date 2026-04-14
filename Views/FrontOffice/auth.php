@@ -7,7 +7,7 @@ include_once(__DIR__ . '/../../Controllers/UserController.php');
 
 if (UserController::isAuthenticated()) {
     if (UserController::isAdmin()) {
-        header('Location: ../BackOffice/dashboard.php');
+        header('Location: ../BackOffice/dashboardUser.php');
     } else {
         header('Location: home.php');
     }
@@ -433,3 +433,4 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
     </script>
 </body>
 </html>
+

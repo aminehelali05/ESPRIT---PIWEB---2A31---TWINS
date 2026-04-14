@@ -15,7 +15,7 @@ if ($action === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result['success']) {
         if (UserController::isAdmin()) {
-            header('Location: Views/BackOffice/dashboard.php');
+            header('Location: Views/BackOffice/dashboardUser.php');
         } else {
             header('Location: Views/FrontOffice/home.php');
         }
@@ -61,7 +61,7 @@ if ($action === 'logout') {
 }
 
 if ($page === 'dashboard') {
-    header('Location: Views/BackOffice/dashboard.php');
+    header('Location: Views/BackOffice/dashboardUser.php');
     exit;
 }
 
@@ -77,3 +77,4 @@ if ($page === 'profile') {
 
 header('Location: Views/FrontOffice/home.php');
 exit;
+

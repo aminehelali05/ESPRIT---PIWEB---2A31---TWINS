@@ -476,10 +476,68 @@ if (isset($_GET['action'])) {
         $respond(['success' => true, 'users' => $payload]);
     }
 
+    if ($action === 'profile') {
+        if (!$isAdminSession) {
+            $respond(['success' => false, 'message' => 'Only admins can view full user profiles.'], 403);
+        }
+
+        $userId = (int) ($_GET['user_id'] ?? $jsonInput['user_id'] ?? 0);
+        if ($userId <= 0) {
+            $respond(['success' => false, 'message' => 'Invalid user id.'], 400);
+        }
+
+        $selectedUser = $userController->getUserById($userId);
+        if (!($selectedUser instanceof User)) {
+            $respond(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        $allDeleteRequests = $userController->getDeleteRequests('all');
+        $deleteRequests = array_values(array_filter($allDeleteRequests, static function ($row) use ($userId) {
+            return (int) ($row['user_id'] ?? 0) === $userId;
+        }));
+
+        $deletePayload = array_map(static function ($row) {
+            return [
+                'id' => (int) ($row['id'] ?? 0),
+                'user_id' => (int) ($row['user_id'] ?? 0),
+                'requested_by' => (int) ($row['requested_by'] ?? 0),
+                'reason' => (string) ($row['reason'] ?? ''),
+                'status' => (string) ($row['status'] ?? 'pending'),
+                'admin_note' => (string) ($row['admin_note'] ?? ''),
+                'reviewed_by' => (int) ($row['reviewed_by'] ?? 0),
+                'reviewed_at' => (string) ($row['reviewed_at'] ?? ''),
+                'created_at' => (string) ($row['created_at'] ?? ''),
+                'updated_at' => (string) ($row['updated_at'] ?? ''),
+            ];
+        }, $deleteRequests);
+
+        $signInHistoryRows = $userController->getSignInHistory($userId, 60);
+        $signInHistory = array_map(static function ($row) {
+            return [
+                'signed_in_at' => (string) ($row['signed_in_at'] ?? ''),
+                'ip_address' => (string) ($row['ip_address'] ?? ''),
+                'user_agent' => (string) ($row['user_agent'] ?? ''),
+                'device_type' => (string) ($row['device_type'] ?? ''),
+                'os' => (string) ($row['os'] ?? ''),
+                'browser' => (string) ($row['browser'] ?? ''),
+            ];
+        }, $signInHistoryRows);
+
+        $respond([
+            'success' => true,
+            'user' => $userToArray($selectedUser),
+            'delete_requests' => $deletePayload,
+            'pending_delete_request' => $userController->getPendingDeleteRequest($userId),
+            'signin_history' => $signInHistory,
+        ]);
+    }
+
     if ($action === 'stats') {
         $users = $userController->listUsers();
         $thisMonth = date('Y-m');
         $newThisMonth = 0;
+        $jobOffersCount = 0;
+        $contractsCount = 0;
         foreach ($users as $u) {
             if (!($u instanceof User)) {
                 continue;
@@ -489,12 +547,27 @@ if (isset($_GET['action'])) {
                 $newThisMonth++;
             }
         }
+
+        try {
+            $jobOffersCount = (int) $pdo->query('SELECT COUNT(*) AS c FROM job_offers')->fetch()['c'];
+        } catch (Throwable $e) {
+            $jobOffersCount = 0;
+        }
+
+        try {
+            $contractsCount = (int) $pdo->query('SELECT COUNT(*) AS c FROM contracts')->fetch()['c'];
+        } catch (Throwable $e) {
+            $contractsCount = 0;
+        }
+
         $respond([
             'success' => true,
             'stats' => [
                 'total' => $userController->countUsers(),
                 'admins' => $userController->countByRole('admin'),
                 'newThisMonth' => $newThisMonth,
+                'jobOffers' => $jobOffersCount,
+                'contracts' => $contractsCount,
             ],
         ]);
     }
@@ -505,6 +578,7 @@ if (isset($_GET['action'])) {
         $email = $clean($jsonInput['email'] ?? '');
         $password = (string) ($jsonInput['password'] ?? '');
         $phone = $normalizePhone($jsonInput['phone'] ?? '');
+        $bio = $clean($jsonInput['bio'] ?? '');
 
         if ($firstName === '' || $lastName === '' || $email === '' || $password === '' || $phone === '') {
             $respond(['success' => false, 'message' => 'First name, last name, email, password, and phone are required.'], 400);
@@ -520,6 +594,10 @@ if (isset($_GET['action'])) {
 
         if (!preg_match('/^\+\d{8,15}$/', $phone)) {
             $respond(['success' => false, 'message' => 'Phone must start with +country code and contain 8 to 15 digits.'], 400);
+        }
+
+        if (strlen($bio) > User::BIO_MAX_LENGTH) {
+            $respond(['success' => false, 'message' => 'Bio must not exceed ' . User::BIO_MAX_LENGTH . ' characters.'], 400);
         }
 
         $newUser = new User(
@@ -539,7 +617,7 @@ if (isset($_GET['action'])) {
         $incomingCountry = $clean($jsonInput['country'] ?? '');
         $newUser->setCountry($incomingCountry !== '' ? $incomingCountry : 'Unknown');
         $newUser->setSkills(null);
-        $newUser->setBio($clean($jsonInput['bio'] ?? '') ?: null);
+        $newUser->setBio($bio !== '' ? $bio : null);
         $newUser->setFaceEnrolled((int) ($jsonInput['face_enrolled'] ?? 0));
         $newUser->setFaceImagesPath($clean($jsonInput['face_images_path'] ?? '') ?: null);
         $newUser->setFaceDescriptor($clean($jsonInput['face_descriptor'] ?? '') ?: null);
@@ -596,6 +674,11 @@ if (isset($_GET['action'])) {
             $respond(['success' => false, 'message' => 'Phone must start with +country code and contain 8 to 15 digits.'], 400);
         }
 
+        $bio = $clean($jsonInput['bio'] ?? $existing->getBio());
+        if (strlen($bio) > User::BIO_MAX_LENGTH) {
+            $respond(['success' => false, 'message' => 'Bio must not exceed ' . User::BIO_MAX_LENGTH . ' characters.'], 400);
+        }
+
         $existing->setFirstName($clean($jsonInput['first_name'] ?? $existing->getFirstName()));
         $existing->setLastName($clean($jsonInput['last_name'] ?? $existing->getLastName()));
         $existing->setEmail($email);
@@ -608,7 +691,7 @@ if (isset($_GET['action'])) {
         $incomingCountry = $clean($jsonInput['country'] ?? $existing->getCountry());
         $existing->setCountry($incomingCountry !== '' ? $incomingCountry : 'Unknown');
         $existing->setSkills($existing->getSkills());
-        $existing->setBio($clean($jsonInput['bio'] ?? $existing->getBio()) ?: null);
+        $existing->setBio($bio !== '' ? $bio : null);
         $existing->setFaceEnrolled((int) ($jsonInput['face_enrolled'] ?? $existing->getFaceEnrolled()));
         $existing->setFaceImagesPath($clean($jsonInput['face_images_path'] ?? $existing->getFaceImagesPath()) ?: null);
         $existing->setFaceDescriptor($clean($jsonInput['face_descriptor'] ?? $existing->getFaceDescriptor()) ?: null);
@@ -733,27 +816,27 @@ $initials = strtoupper(substr((string) ($user['first_name'] ?? 'M'), 0, 1) . sub
 $moduleShortcuts = [
     [
         'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-        'label' => 'Users', 'kpi' => '132 Total', 'desc' => 'Manage accounts, roles, & access levels.'
+        'label' => 'Users', 'kpi' => '132 Total', 'desc' => 'Manage accounts, roles, & access levels.', 'href' => '#users'
     ],
     [
         'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>', 
-        'label' => 'Social feed', 'kpi' => '24 New', 'desc' => 'Moderate discussions and comments.'
+        'label' => 'Social feed', 'kpi' => '24 New', 'desc' => 'Moderate discussions and comments.', 'href' => '../FrontOffice/social.php'
     ],
     [
-        'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>', 
-        'label' => 'Skills & Certs', 'kpi' => '12 Pending', 'desc' => 'Review and validate user skill sets.'
+        'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.7-8 10-4.5-1.3-8-5-8-10V6l8-4z"></path></svg>', 
+        'label' => 'Job Offers', 'kpi' => 'Hiring Flow', 'desc' => 'Track offers, candidates, and approvals.', 'href' => 'JobOffer.php'
     ],
     [
         'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>', 
-        'label' => 'Projects', 'kpi' => '7 Active', 'desc' => 'Monitor platform-wide collaborations.'
+        'label' => 'Projects', 'kpi' => '7 Active', 'desc' => 'Monitor platform-wide collaborations.', 'href' => 'Projects.php'
     ],
     [
-        'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>', 
-        'label' => 'Reviews', 'kpi' => '4.9 Avg', 'desc' => 'Analyze reputation metrics & feedback.'
+        'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10M7 17h6"></path></svg>', 
+        'label' => 'Contracts', 'kpi' => 'Lifecycle', 'desc' => 'Monitor draft, active, and completed contracts.', 'href' => 'Contracts.php'
     ],
     [
         'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>', 
-        'label' => 'Challenges', 'kpi' => 'Daily Live', 'desc' => 'Configure daily quizzes and sprints.'
+        'label' => 'Challenges', 'kpi' => 'Daily Live', 'desc' => 'Configure daily quizzes and sprints.', 'href' => '../FrontOffice/challenges.php'
     ],
 ];
 ?>
@@ -790,9 +873,17 @@ $moduleShortcuts = [
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     User
                 </a>
-                <a href="#modules" class="nav-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                    All Modules
+                <a href="JobOffer.php" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    Job Offers
+                </a>
+                <a href="Projects.php" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                    Projects
+                </a>
+                <a href="Contracts.php" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg>
+                    Contracts
                 </a>
                 <a href="#settings" class="nav-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -849,9 +940,9 @@ $moduleShortcuts = [
                 <!-- KPI 2 -->
                 <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.08s;">
                     <div>
-                        <div class="kpi-h">Platform Reputation</div>
-                        <div class="kpi-v" id="kpiAdmins" data-counter="0">0</div>
-                        <div class="kpi-badge" style="color: #6366f1; background: rgba(99,102,241,0.1);">Stable growth</div>
+                        <div class="kpi-h">Published Job Offers</div>
+                        <div class="kpi-v" id="kpiJobOffers" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #6366f1; background: rgba(99,102,241,0.1);">Client marketplace</div>
                     </div>
                     <div class="icon-box icon-indigo">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
@@ -861,9 +952,9 @@ $moduleShortcuts = [
                 <!-- KPI 3 -->
                 <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.11s;">
                     <div>
-                        <div class="kpi-h">Completed Projects</div>
-                        <div class="kpi-v" id="kpiNewThisMonth" data-counter="0">0</div>
-                        <div class="kpi-badge" style="color: #8b5cf6; background: rgba(139,92,246,0.1);">+4 this week</div>
+                        <div class="kpi-h">Contracts</div>
+                        <div class="kpi-v" id="kpiContracts" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #8b5cf6; background: rgba(139,92,246,0.1);">Auto + manual flow</div>
                     </div>
                     <div class="icon-box icon-purple">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -914,6 +1005,66 @@ $moduleShortcuts = [
                     </div>
                 </div>
 
+                <div class="card span-12 animate-enter" style="animation-delay: 0.17s;" id="userProfilePanel">
+                    <div class="section-head">
+                        <h2>Selected User Profile (Admin View)</h2>
+                        <span id="selectedUserHint" class="selected-user-hint">Click a user row to load full profile details.</span>
+                    </div>
+
+                    <div class="admin-profile-shell">
+                        <div id="selectedUserOverview" class="selected-user-overview empty-state">
+                            Select a user from the table to display complete information, delete requests history, and sign-in history.
+                        </div>
+
+                        <div class="admin-profile-hero">
+                            <div class="admin-profile-avatar" id="selectedUserHeroAvatar">
+                                <img id="selectedUserHeroAvatarImg" src="" alt="Selected user avatar" loading="lazy" decoding="async">
+                                <span id="selectedUserHeroAvatarText">--</span>
+                            </div>
+                            <div class="admin-profile-identity">
+                                <h3 id="selectedUserHeroName">No user selected</h3>
+                                <p id="selectedUserHeroRole">Role: —</p>
+                                <div id="selectedUserHeroMeta" class="admin-profile-meta">Choose a user to open profile insights.</div>
+                            </div>
+                        </div>
+
+                        <div class="selected-user-grid">
+                            <div class="selected-user-block">
+                                <h3>User Information</h3>
+                                <div id="selectedUserMetaList" class="selected-user-meta-list">
+                                    <div class="empty-state">No user selected yet.</div>
+                                </div>
+                            </div>
+
+                            <div class="selected-user-block">
+                                <h3>Delete Requests History</h3>
+                                <div id="selectedUserDeleteRequests" class="selected-user-list-block">
+                                    <div class="empty-state">No data yet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="selected-user-grid selected-user-grid-bottom">
+                            <div class="selected-user-block">
+                                <div class="selected-user-calendar-head">
+                                    <h3>Sign-In Calendar</h3>
+                                    <span id="selectedUserCalendarMonthLabel" class="selected-user-calendar-month">—</span>
+                                </div>
+                                <div id="selectedUserCalendarGrid" class="selected-user-calendar-grid">
+                                    <div class="empty-state">No calendar data yet.</div>
+                                </div>
+                            </div>
+
+                            <div class="selected-user-block selected-user-block-full">
+                                <h3>Sign-In History Timeline</h3>
+                                <div id="selectedUserSigninHistory" class="selected-user-list-block">
+                                    <div class="empty-state">No data yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Feed side column -->
                 <div class="card span-4 animate-enter" style="animation-delay: 0.18s;">
                     <div class="section-head">
@@ -951,7 +1102,7 @@ $moduleShortcuts = [
                     </div>
                     <div class="module-list" style="grid-template-columns: repeat(3, 1fr);">
                         <?php foreach ($moduleShortcuts as $mod): ?>
-                            <a href="#" class="dash-module">
+                            <a href="<?= htmlspecialchars((string) ($mod['href'] ?? '#')) ?>" class="dash-module">
                                 <div class="dm-head">
                                     <div class="dm-icon"><?= $mod['svg'] ?></div>
                                     <span class="dm-kpi"><?= $mod['kpi'] ?></span>
@@ -1134,7 +1285,7 @@ $moduleShortcuts = [
 
                         <div class="uf-group uf-span-2 is-textarea">
                             <label class="uf-label" for="formBio">Bio</label>
-                            <textarea class="uf-input uf-textarea" id="formBio" name="bio" rows="3" placeholder=" "></textarea>
+                            <textarea class="uf-input uf-textarea" id="formBio" name="bio" rows="3" maxlength="<?= User::BIO_MAX_LENGTH ?>" placeholder=" "></textarea>
                         </div>
 
                         <!-- Hidden fields -->
