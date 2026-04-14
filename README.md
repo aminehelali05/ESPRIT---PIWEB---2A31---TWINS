@@ -172,38 +172,6 @@ The app also uses custom JavaScript behavior from `assets/js/` for dashboards, p
 
 ---
 
-<!-- GITHUB STATS ANIMATED LINE -->
-<p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&size=28&duration=3000&pause=700&color=4ABAF7&center=true&vCenter=true&width=700&lines=GitHub%20Stats" />
-</p>
-
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=aminehelali05&theme=dark&hide_border=false&include_all_commits=true&count_private=true" />
-</p>
-
-<p align="center">
-  <img src="https://nirzak-streak-stats.vercel.app/?user=aminehelali05&theme=dark&hide_border=false" />
-</p>
-
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=aminehelali05&theme=dark&hide_border=false&include_all_commits=true&count_private=true&layout=compact" />
-</p>
-
-<p align="center">
-  <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=radical" />
-</p>
-
-<!-- TOP CONTRIBUTED REPO ANIMATED LINE -->
-<p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Poppins&size=28&duration=3000&pause=700&color=4ABAF7&center=true&vCenter=true&width=700&lines=Top%20Contributed%20Repo" />
-</p>
-
-<p align="center">
-  <img src="https://github-contributor-stats.vercel.app/api?username=aminehelali05&limit=5&theme=dark&combine_all_yearly_contributions=true" />
-</p>
-
----
-
 <p align="center">
   <a href="https://github.com/aminehelali05/ESPRIT---PIWEB---2A31---TWINS">
     <img src="https://visitcount.itsvg.in/api?id=aminehelali05&icon=0&color=0" alt="visit count" />
