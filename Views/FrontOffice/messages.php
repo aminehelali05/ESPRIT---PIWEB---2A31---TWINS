@@ -41,6 +41,11 @@ if (!$displayAvatarUrl) {
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
+    /* Small utility helpers used by migrated story scripts */
+    .hidden { display: none !important; }
+    .flex { display: flex !important; }
+    .modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); }
+    .modal .card { background: #fff; border-radius: 12px; padding: 18px; max-width: 96vw; max-height: 90vh; overflow: auto; }
     /* ─── Base ─────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; }
     body, body * { font-family: 'Poppins', sans-serif; }
@@ -159,6 +164,7 @@ if (!$displayAvatarUrl) {
       background: none;
     }
     .msg-thread-item:hover { background: var(--color-surface-alt, rgba(0,0,0,0.03)); }
+    .msg-thread-item:hover { box-shadow: 0 6px 18px rgba(15,23,42,0.06); }
     .msg-thread-item.is-active {
       background: rgba(99,102,241,0.08);
       border-color: rgba(99,102,241,0.15);
@@ -357,6 +363,8 @@ if (!$displayAvatarUrl) {
       font-size: 13px;
       line-height: 1.55;
     }
+    .msg-bubble { transition: transform .12s ease, box-shadow .12s ease; }
+    .msg-bubble:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(15,23,42,0.06); }
     .msg-bubble-row.is-incoming .msg-bubble {
       background: var(--color-surface, #fff);
       color: var(--color-text, #374151);
@@ -1552,10 +1560,52 @@ if (!$displayAvatarUrl) {
       if (tt && tid) setTimeout(() => openThread(tt, tid), 400);
 
       // Poll for new messages
-      setInterval(() => { if (S.activeType && S.activeId) loadMessages(); }, 8000);
-    });
-  </script>
-  <script src="../../assets/js/main.js"></script>
-  <script>window.addEventListener('DOMContentLoaded',()=>{ if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons(); });</script>
-</body>
-</html>
+        setInterval(() => { if (S.activeType && S.activeId) loadMessages(); }, 8000);
+      });
+    </script>
+
+    <!-- Story upload & viewer modals (needed by stories script) -->
+    <div id="storyUploadModal" class="modal hidden">
+      <div class="card">
+        <button onclick="closeStoryUploadModal()" style="position:absolute;right:12px;top:12px;border:none;background:transparent;color:#333;font-size:18px;">&times;</button>
+        <h3 style="margin:0 0 12px;font-size:18px;">Create Story</h3>
+        <div id="storyPreview" style="display:none;margin-bottom:12px;">
+          <img id="storyPreviewImage" style="max-width:100%;border-radius:8px;display:none;" />
+          <video id="storyPreviewVideo" style="max-width:100%;border-radius:8px;display:none;" controls></video>
+        </div>
+        <label style="display:block;cursor:pointer;border:1px dashed #d1d5db;padding:18px;border-radius:10px;text-align:center;">
+          <div style="margin-bottom:6px;color:#6b7280;">Upload file (image or video)</div>
+          <input id="storyFileInput" type="file" accept="image/*,video/*" style="display:none" onchange="previewStory(this)">
+        </label>
+        <button id="uploadStoryBtn" onclick="uploadStory()" disabled style="margin-top:12px;padding:10px 14px;border-radius:10px;background:#6366f1;color:#fff;border:none;"> <span id="uploadBtnText">Share Story</span></button>
+      </div>
+    </div>
+
+    <div id="storyViewerModal" class="modal hidden">
+      <div style="position:relative;max-width:100%;width:960px;">
+        <div id="storyProgressBars" style="position:absolute;left:12px;right:12px;top:12px;display:flex;gap:6px;z-index:12"></div>
+        <button onclick="closeStoryViewer()" style="position:absolute;right:12px;top:12px;border:none;background:rgba(0,0,0,0.5);color:#fff;padding:8px;border-radius:999px;z-index:13">×</button>
+        <div style="display:flex;align-items:center;gap:8px;position:absolute;left:12px;top:12px;z-index:13">
+          <img id="storyViewerAvatar" src="" alt="" style="width:40px;height:40px;border-radius:999px;border:2px solid #fff;object-fit:cover">
+          <span id="storyViewerName" style="color:#fff;font-weight:600"></span>
+        </div>
+        <div style="background:#000;display:flex;align-items:center;justify-content:center;max-height:80vh;border-radius:12px;overflow:hidden;">
+          <img id="storyViewerImage" style="max-width:100%;max-height:80vh;display:none;object-fit:contain">
+          <video id="storyViewerVideo" style="max-width:100%;max-height:80vh;display:none;object-fit:contain" autoplay muted></video>
+        </div>
+        <button onclick="previousStory()" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:13;padding:10px;border-radius:999px;background:rgba(0,0,0,0.5);color:#fff;border:none;">‹</button>
+        <button onclick="nextStory()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);z-index:13;padding:10px;border-radius:999px;background:rgba(0,0,0,0.5);color:#fff;border:none;">›</button>
+      </div>
+    </div>
+
+    <script>
+      // expose bootstrap user vars expected by migrated story scripts
+      window.currentUserName = (window.msgBootstrap && window.msgBootstrap.currentUserName) ? window.msgBootstrap.currentUserName : (window.msgBootstrap ? window.msgBootstrap.currentUserName : 'User');
+      window.currentUserId = Number((window.msgBootstrap && window.msgBootstrap.currentUserId) ? window.msgBootstrap.currentUserId : (window.msgBootstrap ? window.msgBootstrap.currentUserId : 0));
+    </script>
+    <script src="../../assets/js/stories_messages_p2a.js"></script>
+
+    <script src="../../assets/js/main.js"></script>
+    <script>window.addEventListener('DOMContentLoaded',()=>{ if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons(); });</script>
+  </body>
+  </html>
