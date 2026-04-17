@@ -1,2 +1,33 @@
-# Ignore Projet-2A folder  
-/Projet-2A/  
+```php
+# Dependencies
+vendor/
+
+# Build artifacts
+composer.lock
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs
+*.log
+
+# Cache
+.cache/
+*.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+.phpunit.result.cache
+coverage/
+```

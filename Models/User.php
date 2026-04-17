@@ -34,6 +34,9 @@ class User
     private $conversations = [];
     private $messages = [];
     private $stories = [];
+    private $certificates = [];
+    private $meetings = [];
+    private $rooms = [];
     public const BIO_MAX_LENGTH = 1000;
 
 
@@ -80,6 +83,9 @@ class User
     public function getPrivateConversations() { return is_array($this->private_conversations) ? $this->private_conversations : []; }
     public function getGroupChats() { return is_array($this->group_chats) ? $this->group_chats : []; }
     public function getStories() { return is_array($this->stories) ? $this->stories : []; }
+    public function getCertificates() { return is_array($this->certificates) ? $this->certificates : []; }
+    public function getMeetings() { return is_array($this->meetings) ? $this->meetings : []; }
+    public function getRooms() { return is_array($this->rooms) ? $this->rooms : []; }
     public function getTableName(): string { return (string) $this->table; }
     public function getLastError() { return $this->lastError; }
     public function getColumnCache(): array { return (array) $this->colCache; }
@@ -112,6 +118,9 @@ class User
     public function setPrivateConversations($v) { $this->private_conversations = is_array($v) ? $v : []; }
     public function setGroupChats($v) { $this->group_chats = is_array($v) ? $v : []; }
     public function setStories($v) { $this->stories = is_array($v) ? $v : []; }
+    public function setCertificates($v) { $this->certificates = is_array($v) ? $v : []; }
+    public function setMeetings($v) { $this->meetings = is_array($v) ? $v : []; }
+    public function setRooms($v) { $this->rooms = is_array($v) ? $v : []; }
     public function setTableName(string $v) { $this->table = $v; }
     public function setLastError($v) { $this->lastError = $v; }
     public function setColumnInCache(string $column, bool $exists) { $this->colCache[$column] = $exists; }
