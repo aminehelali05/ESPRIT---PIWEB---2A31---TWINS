@@ -1,0 +1,293 @@
+/* ============================================================
+   SKILLS.CSS — Skills & Certificates page
+   ============================================================ */
+
+.skills-section { padding: 0 0 var(--sp-24); }
+
+/* ============================================================
+   3D FLOATING SKILLS GRID
+   ============================================================ */
+.skills-3d-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-5);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.skill-float-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6) var(--sp-4);
+  background: var(--color-surface);
+  border: var(--glass-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--t-normal);
+  animation: float-skill 6s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+/* Depth variants */
+.skill-float-item[data-depth="2"] { animation-delay: -2s; }
+.skill-float-item[data-depth="3"] { animation-delay: -4s; }
+
+/* Top gradient highlight */
+.skill-float-item::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(var(--color-accent-rgb), 0.4), transparent);
+  opacity: 0;
+  transition: opacity var(--t-normal);
+}
+
+/* Radial glow on hover */
+.skill-float-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 0%, rgba(var(--color-accent-rgb), 0.07), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--t-normal);
+}
+
+.skill-float-item:hover {
+  border-color: rgba(var(--color-accent-rgb), 0.25);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-8px) !important;
+}
+
+.skill-float-item:hover::before { opacity: 1; }
+.skill-float-item:hover::after  { opacity: 1; }
+
+[data-theme="dark"] .skill-float-item {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* Skill icon wrap */
+.skill-icon-wrap {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  font-size: 1.5rem;
+  transition: all var(--t-normal);
+  position: relative;
+  z-index: 1;
+}
+
+.skill-float-item:hover .skill-icon-wrap {
+  background: rgba(var(--color-accent-rgb), 0.14);
+  box-shadow: 0 0 18px rgba(var(--color-accent-rgb), 0.2);
+  transform: scale(1.08);
+}
+
+.skill-float-item span {
+  font-size: 0.82rem;
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.skill-float-item:hover span { color: var(--color-text-primary); }
+
+/* ============================================================
+   CERTIFICATE CAROUSEL
+   ============================================================ */
+.certs-section { padding: var(--sp-20) 0; }
+
+.carousel-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.carousel-3d {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 370px;
+  perspective: 1200px;
+  position: relative;
+}
+
+.cert-card {
+  position: absolute;
+  width: 310px;
+  padding: var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  text-align: center;
+  transition: all 0.6s var(--ease-smooth);
+  cursor: pointer;
+  background: var(--color-surface);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.cert-card.active {
+  transform: translateZ(100px) scale(1.04);
+  z-index: 3;
+  box-shadow: var(--shadow-xl), var(--shadow-glow-strong);
+  border-color: rgba(var(--color-accent-rgb), 0.2);
+}
+
+.cert-card.prev {
+  transform: translateX(-240px) translateZ(-50px) rotateY(22deg) scale(0.87);
+  z-index: 2;
+  opacity: 0.55;
+  filter: blur(0.8px);
+}
+
+.cert-card.next {
+  transform: translateX(240px) translateZ(-50px) rotateY(-22deg) scale(0.87);
+  z-index: 2;
+  opacity: 0.55;
+  filter: blur(0.8px);
+}
+
+.cert-card.far-prev {
+  transform: translateX(-390px) translateZ(-150px) rotateY(32deg) scale(0.72);
+  z-index: 1;
+  opacity: 0.28;
+  filter: blur(1.5px);
+}
+
+.cert-card.far-next {
+  transform: translateX(390px) translateZ(-150px) rotateY(-32deg) scale(0.72);
+  z-index: 1;
+  opacity: 0.28;
+  filter: blur(1.5px);
+}
+
+.cert-card.hidden {
+  transform: translateZ(-300px) scale(0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-theme="dark"] .cert-card {
+  background: rgba(20, 28, 46, 0.85);
+  border-color: rgba(255,255,255,0.1);
+}
+
+/* Cert content */
+.cert-badge-wrap {
+  width: 60px; height: 60px;
+  border-radius: var(--radius-md);
+  background: rgba(var(--color-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  margin-bottom: var(--sp-2);
+}
+
+.cert-title {
+  font-size: 1.05rem;
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+}
+
+.cert-issuer {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  font-weight: var(--fw-medium);
+}
+
+.cert-date { color: var(--color-text-secondary); font-size: 0.8rem; }
+
+.cert-skills {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cert-id {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+/* ============================================================
+   CAROUSEL CONTROLS
+   ============================================================ */
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-6);
+  margin-top: var(--sp-6);
+}
+
+.carousel-btn {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.carousel-btn:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(var(--color-accent-rgb), 0.35);
+  transform: scale(1.08);
+}
+
+.carousel-dots { display: flex; gap: var(--sp-2); }
+
+.carousel-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.carousel-dot.active {
+  background: var(--color-accent);
+  box-shadow: 0 0 8px rgba(var(--color-accent-rgb), 0.4);
+  transform: scale(1.35);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .skills-3d-grid { grid-template-columns: repeat(3, 1fr); gap: var(--sp-4); }
+  .cert-card { width: 256px; padding: var(--sp-6); }
+  .cert-card.prev { transform: translateX(-170px) translateZ(-50px) rotateY(18deg) scale(0.82); }
+  .cert-card.next { transform: translateX(170px) translateZ(-50px) rotateY(-18deg) scale(0.82); }
+  .cert-card.far-prev, .cert-card.far-next { display: none; }
+}
+
+@media (max-width: 480px) {
+  .skills-3d-grid { grid-template-columns: repeat(2, 1fr); }
+}
