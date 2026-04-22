@@ -16,6 +16,12 @@ $currentUser = UserController::currentUser() ?? [];
 $userId      = (int)($currentUser['id'] ?? 0);
 $role        = strtolower(trim((string)($currentUser['role'] ?? 'user')));
 $resolvedRole = $role;
+$sessionTitle = strtolower(trim((string)($currentUser['title'] ?? '')));
+if (str_contains($sessionTitle, 'client')) {
+  $resolvedRole = 'client';
+} elseif (str_contains($sessionTitle, 'freelancer')) {
+  $resolvedRole = 'freelancer';
+}
 if (!in_array($resolvedRole, ['client', 'freelancer', 'admin'], true) && $userId > 0) {
   $hasUserTitleColumn = false;
   try {
@@ -41,10 +47,24 @@ if (!in_array($resolvedRole, ['client', 'freelancer', 'admin'], true) && $userId
     $resolvedRole = 'freelancer';
   }
 }
+$ownsClientOffers = false;
+if ($userId > 0 && !in_array($resolvedRole, ['client', 'admin'], true)) {
+  try {
+    $clientOfferStmt = $pdo->prepare('SELECT id FROM job_offers WHERE client_id = :client_id LIMIT 1');
+    $clientOfferStmt->execute(['client_id' => $userId]);
+    $ownsClientOffers = (bool) $clientOfferStmt->fetch(PDO::FETCH_ASSOC);
+  } catch (Throwable $e) {
+    $ownsClientOffers = false;
+  }
+  if ($ownsClientOffers) {
+    $resolvedRole = 'client';
+  }
+}
 $isAdmin     = UserController::isAdmin();
-$isClient    = $isAdmin || $resolvedRole === 'client';
+$moduleClientBypass = !$isAdmin && $resolvedRole !== 'freelancer';
+$isClient    = $isAdmin || $resolvedRole === 'client' || $moduleClientBypass;
 $isFreelancer = !$isClient;
-$canApplyToJobs = !$isAdmin;
+$canApplyToJobs = !$isAdmin && !$isClient;
 $firstName   = trim((string)($currentUser['first_name'] ?? 'Member'));
 $lastName    = trim((string)($currentUser['last_name'] ?? ''));
 $displayName = trim($firstName . ' ' . $lastName) ?: 'Member';
@@ -58,6 +78,7 @@ if (empty($_SESSION['csrf_token_front'])) {
 }
 $csrfToken = (string)$_SESSION['csrf_token_front'];
 $notice    = ['type' => '', 'message' => ''];
+$redirectAfterPost = '';
 $clean     = static fn($v): string => trim((string)($v ?? ''));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -135,11 +156,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $decision      = strtolower($clean($_POST['decision'] ?? 'rejected'));
                 if (in_array($decision, ['accepted', 'rejected'], true)) {
                     $controller->decideApplication($userId, $applicationId, $decision);
-                    $notice = ['type' => 'success', 'message' => 'Application ' . $decision . '.'];
+                    if ($decision === 'accepted') {
+                      $offerId = (int)($_POST['offer_id'] ?? 0);
+                      $freelancerId = (int)($_POST['freelancer_id'] ?? 0);
+                      $notice = ['type' => 'success', 'message' => 'Application accepted. Prepare the contract to continue.'];
+                      if ($offerId > 0 && $freelancerId > 0) {
+                        $redirectAfterPost = 'contracts.php?open_create=1&offer_id=' . $offerId . '&freelancer_id=' . $freelancerId;
+                      }
+                    } else {
+                      $notice = ['type' => 'success', 'message' => 'Application rejected.'];
+                    }
                 }
             }
         } catch (Throwable $e) { $notice = ['type' => 'error', 'message' => $e->getMessage()]; }
     }
+}
+
+if ($redirectAfterPost !== '') {
+  $_SESSION['contract_notice_front'] = $notice;
+  header('Location: ' . $redirectAfterPost);
+  exit;
 }
 
 $filters = [
@@ -151,6 +187,12 @@ $myApplications     = $canApplyToJobs ? $controller->freelancerApplicationsMap($
 $clientApplications = $isClient    ? $controller->clientApplicationsByOffer($userId) : [];
 $freelancerContracts = $isFreelancer ? $controller->contractsMapForFreelancer($userId) : [];
 $clientContractsByOffer = $isClient ? $controller->contractsMapForClient($userId) : [];
+$contractStateLabels = [
+  'waiting_client' => 'Draft',
+  'waiting_freelancer' => 'Waiting',
+  'completed' => 'Finalized',
+  'refused' => 'Refused',
+];
 $localDateTime = static function (?string $value): string {
   if (!$value) {
     return '';
@@ -442,7 +484,9 @@ $statusColors = [
                 <?php if ($myApp): ?>
                 <span class="jo-app-pill <?= htmlspecialchars((string)($myApp['status'] ?? 'pending')) ?>">Applied — <?= ucfirst((string)($myApp['status'] ?? 'pending')) ?></span>
                 <?php if ((string)($myApp['status'] ?? '') === 'accepted' && isset($freelancerContracts[$rowId])): ?>
-                <a class="jo-btn jo-btn-success" href="contracts.php#contract-<?= (int)$freelancerContracts[$rowId]['id'] ?>">Open Contract</a>
+                <a class="jo-btn jo-btn-success" href="contracts.php?contract=<?= (int)$freelancerContracts[$rowId]['id'] ?>#contract-<?= (int)$freelancerContracts[$rowId]['id'] ?>">
+                  <?= htmlspecialchars($contractStateLabels[(string)($freelancerContracts[$rowId]['workflow_state'] ?? 'waiting_freelancer')] ?? 'Review Contract') ?>
+                </a>
                 <?php endif; ?>
                 <?php else: ?>
                 <button class="jo-btn jo-btn-primary" onclick="openApplyModal(<?= $rowId ?>, '<?= htmlspecialchars(addslashes((string)($row['title'] ?? ''))) ?>')">
@@ -455,7 +499,9 @@ $statusColors = [
             <div style="border-top:1px solid var(--color-border);padding-top:10px;margin-top:4px;">
               <div style="font-size:.74rem;font-weight:600;color:var(--color-text-muted);margin-bottom:7px;"><?= count($apps) ?> Application<?= count($apps) > 1 ? 's' : '' ?></div>
               <?php if (isset($clientContractsByOffer[$rowId])): ?>
-              <a class="jo-btn jo-btn-success" href="contracts.php#contract-<?= (int)$clientContractsByOffer[$rowId]['id'] ?>" style="margin-bottom:9px;">Manage Contract</a>
+              <a class="jo-btn jo-btn-success" href="contracts.php?contract=<?= (int)$clientContractsByOffer[$rowId]['id'] ?>#contract-<?= (int)$clientContractsByOffer[$rowId]['id'] ?>" style="margin-bottom:9px;">
+                <?= htmlspecialchars($contractStateLabels[(string)($clientContractsByOffer[$rowId]['workflow_state'] ?? 'waiting_freelancer')] ?? 'Manage Contract') ?>
+              </a>
               <?php endif; ?>
               <div class="jo-apps-list">
                 <?php foreach ($apps as $app): ?>
@@ -467,6 +513,8 @@ $statusColors = [
                       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                       <input type="hidden" name="action" value="decide_application">
                       <input type="hidden" name="application_id" value="<?= (int)($app['id'] ?? 0) ?>">
+                      <input type="hidden" name="offer_id" value="<?= $rowId ?>">
+                      <input type="hidden" name="freelancer_id" value="<?= (int)($app['freelancer_id'] ?? 0) ?>">
                       <button name="decision" value="accepted" class="jo-btn jo-btn-success" style="padding:4px 9px;font-size:.73rem;">✓ Accept</button>
                       <button name="decision" value="rejected" class="jo-btn jo-btn-danger" style="padding:4px 9px;font-size:.73rem;">✗ Reject</button>
                     </form>
@@ -475,7 +523,7 @@ $statusColors = [
                       <?php if ((string)($app['status'] ?? '') === 'accepted' && !isset($clientContractsByOffer[$rowId])): ?>
                         <a class="jo-btn jo-btn-primary" style="padding:4px 9px;font-size:.73rem;" href="contracts.php?open_create=1&offer_id=<?= $rowId ?>&freelancer_id=<?= (int)($app['freelancer_id'] ?? 0) ?>">
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                          Create Contract
+                          Prepare Contract
                         </a>
                       <?php endif; ?>
                     <?php endif; ?>

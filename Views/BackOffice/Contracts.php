@@ -41,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'ends_at' => $controller->parseDateTimeLocal($clean($_POST['ends_at'] ?? '')),
                     'created_by_client_id' => (int) ($_POST['client_id'] ?? 0),
                     'status' => strtolower($clean($_POST['status'] ?? 'draft')),
+                    'client_signature' => $clean($_POST['client_signature'] ?? ''),
+                    'payment_details' => 'Payment amount: ' . max(0, (float) ($_POST['amount'] ?? 0)) . ' TND',
                 ];
                 if ($payload['client_id'] <= 0 || $payload['freelancer_id'] <= 0 || $payload['job_offer_id'] <= 0) {
                     throw new RuntimeException('Offer, client, and freelancer are required.');
@@ -292,6 +294,8 @@ $navItems = [
         .bo-modal .form-panel select:focus,
         .bo-modal .form-panel textarea:focus { border-color:#818cf8; box-shadow:0 0 0 3px rgba(99,102,241,.15); }
         .bo-modal .form-panel textarea { min-height:88px; resize:vertical; }
+        .bo-signature-wrap { border:1px dashed #d2dbef; border-radius:12px; padding:10px; background:#fff; }
+        .bo-signature-canvas { width:100%; height:150px; background:#fff; border:1px solid #d6def9; border-radius:10px; display:block; touch-action:none; cursor:crosshair; }
         .bo-modal-actions { display:flex; gap:8px; margin-top:18px; justify-content:flex-end; }
         .bo-modal-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:10px; font-size:.81rem; font-weight:700; border:1px solid transparent; cursor:pointer; }
         .bo-modal-btn.ghost { background:#eef2fa; border-color:#d4ddef; color:#607092; }
@@ -427,17 +431,26 @@ $navItems = [
                     </button>
                 </div>
                 <form id="createContractForm" method="post" class="form-panel" novalidate>
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="action" value="create_contract">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="action" value="create_contract"><input type="hidden" name="client_signature" id="back_client_signature">
                     <div class="field-grid">
                         <div><label>Status</label><select name="status"><option value="draft">Draft</option><option value="active">Active</option><option value="signed">Signed</option><option value="expired">Expired</option><option value="cancelled">Cancelled</option></select></div>
                         <div><label>Amount</label><input type="number" min="0" step="0.01" name="amount" value="0"></div>
-                        <div><label>Offer</label><select name="offer_id" required><option value="">Select offer</option><?php foreach ($offers as $offer): ?><option value="<?= (int) ($offer['id'] ?? 0) ?>\">#<?= (int) ($offer['id'] ?? 0) ?> · <?= htmlspecialchars((string) ($offer['title'] ?? 'Offer')) ?></option><?php endforeach; ?></select></div>
-                        <div><label>Client</label><select name="client_id" required><option value="">Select client</option><?php foreach ($users as $user): ?><option value="<?= (int) ($user['id'] ?? 0) ?>\"><?= htmlspecialchars($controller->userLabel($user)) ?></option><?php endforeach; ?></select></div>
-                        <div><label>Freelancer</label><select name="freelancer_id" required><option value="">Select freelancer</option><?php foreach ($users as $user): ?><option value="<?= (int) ($user['id'] ?? 0) ?>\"><?= htmlspecialchars($controller->userLabel($user)) ?></option><?php endforeach; ?></select></div>
+                        <div><label>Offer</label><select name="offer_id" required><option value="">Select offer</option><?php foreach ($offers as $offer): ?><option value="<?= (int) ($offer['id'] ?? 0) ?>">#<?= (int) ($offer['id'] ?? 0) ?> · <?= htmlspecialchars((string) ($offer['title'] ?? 'Offer')) ?></option><?php endforeach; ?></select></div>
+                        <div><label>Client</label><select name="client_id" required><option value="">Select client</option><?php foreach ($users as $user): ?><option value="<?= (int) ($user['id'] ?? 0) ?>"><?= htmlspecialchars($controller->userLabel($user)) ?></option><?php endforeach; ?></select></div>
+                        <div><label>Freelancer</label><select name="freelancer_id" required><option value="">Select freelancer</option><?php foreach ($users as $user): ?><option value="<?= (int) ($user['id'] ?? 0) ?>"><?= htmlspecialchars($controller->userLabel($user)) ?></option><?php endforeach; ?></select></div>
                         <div><label>Signed at</label><input type="datetime-local" name="signed_at"></div>
                         <div><label>Start at</label><input type="datetime-local" name="starts_at"></div>
                         <div><label>End at</label><input type="datetime-local" name="ends_at"></div>
                         <div class="full"><label>Terms</label><textarea name="terms"></textarea></div>
+                        <div class="full">
+                            <label>Client signature</label>
+                            <div class="bo-signature-wrap">
+                                <canvas id="backClientSignatureCanvas" class="bo-signature-canvas"></canvas>
+                                <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+                                    <button type="button" class="bo-modal-btn ghost" id="backClearSignature">Clear</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="bo-modal-actions">
                         <button type="button" class="bo-modal-btn ghost" onclick="closeCreateContractModal()">Cancel</button>
@@ -456,6 +469,99 @@ $navItems = [
     function closeCreateContractModal(){
         document.getElementById('createContractModal')?.classList.remove('open');
     }
+
+    function setupBackSignaturePad(canvas, hiddenInput, clearButton) {
+        if (!canvas || !hiddenInput) return;
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let hasStroke = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            const snapshot = hasStroke ? canvas.toDataURL('image/png') : '';
+            canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+            canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, rect.width, rect.height);
+            ctx.lineWidth = 2.2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#111827';
+            if (snapshot) {
+                const img = new Image();
+                img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                img.src = snapshot;
+            }
+        }
+
+        function pointFromEvent(event) {
+            const rect = canvas.getBoundingClientRect();
+            const source = event.touches ? event.touches[0] : event;
+            return { x: source.clientX - rect.left, y: source.clientY - rect.top };
+        }
+
+        function start(event) {
+            event.preventDefault();
+            const point = pointFromEvent(event);
+            drawing = true;
+            lastX = point.x;
+            lastY = point.y;
+        }
+
+        function move(event) {
+            if (!drawing) return;
+            event.preventDefault();
+            const point = pointFromEvent(event);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            lastX = point.x;
+            lastY = point.y;
+            hasStroke = true;
+            hiddenInput.value = canvas.toDataURL('image/png');
+        }
+
+        function stop() { drawing = false; }
+        function clear() {
+            hasStroke = false;
+            hiddenInput.value = '';
+            resizeCanvas();
+        }
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', stop);
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', move, { passive: false });
+        document.addEventListener('touchend', stop);
+        clearButton?.addEventListener('click', clear);
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    }
+
+    setupBackSignaturePad(
+        document.getElementById('backClientSignatureCanvas'),
+        document.getElementById('back_client_signature'),
+        document.getElementById('backClearSignature')
+    );
+
+    document.getElementById('createContractForm')?.addEventListener('submit', (event) => {
+        const signature = document.getElementById('back_client_signature');
+        if (signature && !signature.value) {
+            event.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Signature required',
+                text: 'Please add the client signature before creating the contract.',
+                confirmButtonColor: '#4f46e5'
+            });
+        }
+    });
     </script>
 
     <script src="../../assets/js/globe-explorer.js"></script>

@@ -10,7 +10,52 @@ $controller  = new ContractController($pdo);
 $currentUser = UserController::currentUser() ?? [];
 $userId      = (int)($currentUser['id'] ?? 0);
 $role        = strtolower((string)($currentUser['role'] ?? 'user'));
-$isClient    = UserController::isAdmin() || $role === 'client';
+$titleRole   = strtolower(trim((string)($currentUser['title'] ?? '')));
+$resolvedRole = $role;
+if (str_contains($titleRole, 'client')) {
+  $resolvedRole = 'client';
+} elseif (str_contains($titleRole, 'freelancer')) {
+  $resolvedRole = 'freelancer';
+}
+if (!in_array($resolvedRole, ['client', 'freelancer', 'admin'], true) && $userId > 0) {
+  $hasUserTitleColumn = false;
+  try {
+    $titleColumnStmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'title'");
+    $hasUserTitleColumn = (bool) ($titleColumnStmt && $titleColumnStmt->fetch(PDO::FETCH_ASSOC));
+  } catch (Throwable $e) {
+    $hasUserTitleColumn = false;
+  }
+
+  $roleQuery = $hasUserTitleColumn
+    ? 'SELECT role, title FROM users WHERE id = :id LIMIT 1'
+    : 'SELECT role FROM users WHERE id = :id LIMIT 1';
+  $roleStmt = $pdo->prepare($roleQuery);
+  $roleStmt->execute(['id' => $userId]);
+  $roleRow = $roleStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+  $dbRole = strtolower(trim((string)($roleRow['role'] ?? '')));
+  $dbTitle = strtolower(trim((string)($roleRow['title'] ?? '')));
+  if (in_array($dbRole, ['client', 'freelancer', 'admin'], true)) {
+    $resolvedRole = $dbRole;
+  } elseif (str_contains($dbTitle, 'client')) {
+    $resolvedRole = 'client';
+  } elseif (str_contains($dbTitle, 'freelancer')) {
+    $resolvedRole = 'freelancer';
+  }
+}
+$ownsClientOffers = false;
+if ($userId > 0 && !in_array($resolvedRole, ['client', 'admin'], true)) {
+  try {
+    $clientOfferStmt = $pdo->prepare('SELECT id FROM job_offers WHERE client_id = :client_id LIMIT 1');
+    $clientOfferStmt->execute(['client_id' => $userId]);
+    $ownsClientOffers = (bool) $clientOfferStmt->fetch(PDO::FETCH_ASSOC);
+  } catch (Throwable $e) {
+    $ownsClientOffers = false;
+  }
+  if ($ownsClientOffers) {
+    $resolvedRole = 'client';
+  }
+}
+$isClient    = UserController::isAdmin() || $resolvedRole === 'client';
 $isFreelancer = !$isClient;
 $firstName   = trim((string)($currentUser['first_name'] ?? 'Member'));
 $lastName    = trim((string)($currentUser['last_name'] ?? ''));
@@ -55,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'starts_at' => $controller->parseDateTimeLocal($clean($_POST['starts_at'] ?? '')),
                 'ends_at' => $controller->parseDateTimeLocal($clean($_POST['ends_at'] ?? '')),
                 'created_by_client_id' => $userId,
+                'client_signature' => $clean($_POST['client_signature'] ?? ''),
+                'payment_details' => $clean($_POST['payment_details'] ?? ''),
               ];
 
               if ($payload['terms'] === '') {
@@ -65,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               }
 
               $controller->create($payload);
-              $notice = ['type' => 'success', 'message' => 'Contract created successfully.'];
+              $notice = ['type' => 'success', 'message' => 'Contract created successfully. The freelancer can now sign it.'];
             }
 
             if ($action === 'update_contract' && $isClient) {
@@ -77,19 +124,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'ends_at'   => $controller->parseDateTimeLocal($clean($_POST['ends_at'] ?? '')),
                 ]);
               if (!$updated) {
-                throw new RuntimeException('You can only update your own contracts.');
+                throw new RuntimeException('You can only update your own contracts before the freelancer signs.');
               }
                 $notice = ['type' => 'success', 'message' => 'Contract updated.'];
             }
             if ($action === 'delete_contract' && $isClient) {
               $deleted = $controller->deleteByClient((int)($_POST['contract_id'] ?? 0), $userId);
               if (!$deleted) {
-                throw new RuntimeException('You can only delete your own contracts.');
+                throw new RuntimeException('You can only delete your own unsigned contracts.');
               }
                 $notice = ['type' => 'success', 'message' => 'Contract deleted.'];
             }
             if ($action === 'sign_contract' && $isFreelancer) {
-              $signed = $controller->signByFreelancer((int)($_POST['contract_id'] ?? 0), $userId);
+              $signed = $controller->signByFreelancer((int)($_POST['contract_id'] ?? 0), $userId, $clean($_POST['freelancer_signature'] ?? ''));
               if (!$signed) {
                 throw new RuntimeException('Unable to sign this contract.');
               }
@@ -102,7 +149,7 @@ $contracts = $controller->listUserContracts($userId);
 $acceptedPairs = $isClient ? $controller->listClientAcceptedApplicationsWithoutContract($userId) : [];
 $prefillOfferId = (int)($_GET['offer_id'] ?? 0);
 $prefillFreelancerId = (int)($_GET['freelancer_id'] ?? 0);
-$openCreateModal = $isClient && (int)($_GET['open_create'] ?? 0) === 1;
+$openCreateModal = $isClient && ((int)($_GET['open_create'] ?? 0) === 1 || ($prefillOfferId > 0 && $prefillFreelancerId > 0));
       $localDateTime = static function (?string $value): string {
         if (!$value) {
           return '';
@@ -110,18 +157,22 @@ $openCreateModal = $isClient && (int)($_GET['open_create'] ?? 0) === 1;
         $ts = strtotime($value);
         return $ts ? date('Y-m-d\\TH:i', $ts) : '';
       };
-$statTotals = ['total'=>0,'active'=>0,'signed'=>0,'pending'=>0];
+$statTotals = ['total'=>0,'waiting'=>0,'finalized'=>0,'pending'=>0];
+$freelancerPendingToSign = 0;
 foreach ($contracts as $c) {
     $statTotals['total']++;
     $s = (string)($c['status'] ?? 'draft');
-    if ($s === 'active') $statTotals['active']++;
-    if ($s === 'signed') $statTotals['signed']++;
+    if ($s === 'waiting') $statTotals['waiting']++;
+    if ($s === 'finalized') $statTotals['finalized']++;
     if ($s === 'draft')  $statTotals['pending']++;
+    if ($isFreelancer && (int)($c['freelancer_id'] ?? 0) === $userId && $s === 'waiting') {
+      $freelancerPendingToSign++;
+    }
 }
 $statusMeta = [
     'draft'     => ['bg'=>'rgba(107,114,128,.1)', 'text'=>'#6b7280','dot'=>'#9ca3af','label'=>'Draft'],
-    'active'    => ['bg'=>'rgba(99,102,241,.1)',  'text'=>'#6366f1','dot'=>'#6366f1','label'=>'Active'],
-    'signed'    => ['bg'=>'rgba(5,150,105,.1)',   'text'=>'#059669','dot'=>'#10b981','label'=>'Signed'],
+    'waiting'   => ['bg'=>'rgba(99,102,241,.1)',  'text'=>'#6366f1','dot'=>'#6366f1','label'=>'Waiting'],
+    'finalized' => ['bg'=>'rgba(5,150,105,.1)',   'text'=>'#059669','dot'=>'#10b981','label'=>'Finalized'],
     'expired'   => ['bg'=>'rgba(245,158,11,.1)',  'text'=>'#d97706','dot'=>'#f59e0b','label'=>'Expired'],
     'cancelled' => ['bg'=>'rgba(225,29,72,.08)',  'text'=>'#be123c','dot'=>'#f43f5e','label'=>'Cancelled'],
 ];
@@ -215,6 +266,10 @@ $statusMeta = [
     .ct-modal-fi, .ct-modal-sel, .ct-modal-ta { padding:8px 11px; background:var(--color-surface-2); border:1px solid var(--color-border-strong); border-radius:8px; font-size:.84rem; color:var(--color-text-primary); }
     .ct-modal-fi:focus, .ct-modal-sel:focus, .ct-modal-ta:focus { border-color:var(--color-accent); outline:none; }
     .ct-modal-ta { resize:vertical; min-height:88px; }
+    .ct-signature-wrap { border:1px dashed var(--color-border-strong); border-radius:12px; padding:10px; background:var(--color-surface); }
+    .ct-signature-canvas { width:100%; height:150px; display:block; background:#fff; border:1px solid var(--color-border); border-radius:8px; touch-action:none; cursor:crosshair; }
+    .ct-signature-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+    .ct-signature-help { font-size:.72rem; color:var(--color-text-muted); }
 
     /* Empty */
     .ct-empty { text-align:center; padding:44px 20px; }
@@ -311,11 +366,10 @@ $statusMeta = [
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
           <div class="ct-info-text">
             <h4>How contracts work</h4>
-            <p><?= $isClient ? 'Accept an application in Job Offers, then create the contract manually here.' : 'Sign contracts assigned to you.' ?></p>
+            <p><?= $isClient ? 'Accept an application in Job Offers, then create the contract manually here and sign first.' : 'Sign contracts assigned to you after the client signs them.' ?></p>
           </div>
         </div>
 
-        <!-- Stats -->
         <div class="ct-stats">
           <div class="ct-stat">
             <div class="ct-stat-icon" style="background:rgba(99,102,241,.1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></div>
@@ -323,15 +377,14 @@ $statusMeta = [
           </div>
           <div class="ct-stat">
             <div class="ct-stat-icon" style="background:rgba(5,150,105,.1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <div><div class="ct-stat-label">Signed</div><div class="ct-stat-value"><?= $statTotals['signed'] ?></div></div>
+            <div><div class="ct-stat-label">Finalized</div><div class="ct-stat-value"><?= $statTotals['finalized'] ?></div></div>
           </div>
           <div class="ct-stat">
             <div class="ct-stat-icon" style="background:rgba(245,158,11,.1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-            <div><div class="ct-stat-label">Pending</div><div class="ct-stat-value"><?= $statTotals['pending'] ?></div></div>
+            <div><div class="ct-stat-label">Waiting</div><div class="ct-stat-value"><?= $statTotals['waiting'] ?></div></div>
           </div>
         </div>
 
-        <!-- List -->
         <?php if (empty($contracts)): ?>
         <div class="ct-empty">
           <div class="ct-empty-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></div>
@@ -345,7 +398,7 @@ $statusMeta = [
             $cStatus     = (string)($row['status'] ?? 'draft');
             $sm          = $statusMeta[$cStatus] ?? $statusMeta['draft'];
             $isOwnerC    = $isClient && (int)($row['client_id'] ?? 0) === $userId;
-            $canSign     = $isFreelancer && (int)($row['freelancer_id'] ?? 0) === $userId && in_array($cStatus, ['draft','active'], true);
+            $canSign     = $isFreelancer && (int)($row['freelancer_id'] ?? 0) === $userId && in_array($cStatus, ['draft','waiting'], true);
             $clientName  = htmlspecialchars(trim((string)($row['client_first'] ?? '') . ' ' . (string)($row['client_last'] ?? '')));
             $fName       = htmlspecialchars(trim((string)($row['freelancer_first'] ?? '') . ' ' . (string)($row['freelancer_last'] ?? '')));
             $startsAt    = (string)($row['starts_at'] ?? '');
@@ -354,16 +407,16 @@ $statusMeta = [
           <div class="ct-card" id="contract-<?= $cId ?>">
             <div class="ct-card-header">
               <div class="ct-card-header-left">
-                <div class="ct-contract-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></div>
+                <span class="ct-status-badge" style="background:<?= $sm['bg'] ?>;color:<?= $sm['text'] ?>">
+                  <span class="ct-status-dot" style="background:<?= $sm['dot'] ?>"></span>
+                  <?= $sm['label'] ?>
+                </span>
                 <div>
                   <div class="ct-contract-title"><?= htmlspecialchars((string)($row['offer_title'] ?? 'Contract')) ?></div>
                   <div class="ct-contract-sub"><?= $clientName ?> → <?= $fName ?></div>
                 </div>
               </div>
-              <span class="ct-status-badge" style="background:<?= $sm['bg'] ?>;color:<?= $sm['text'] ?>">
-                <span class="ct-status-dot" style="background:<?= $sm['dot'] ?>"></span>
-                <?= $sm['label'] ?>
-              </span>
+              <div class="ct-contract-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg></div>
             </div>
             <div class="ct-card-body">
               <div><div class="ct-field-label">Amount</div><div class="ct-field-value amount"><?= number_format((float)($row['amount'] ?? 0), 2) ?> TND</div></div>
@@ -380,8 +433,8 @@ $statusMeta = [
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <input type="hidden" name="action" value="update_contract">
                 <input type="hidden" name="contract_id" value="<?= $cId ?>">
+                <input type="hidden" name="status" value="<?= htmlspecialchars($cStatus) ?>">
                 <div class="ct-edit-grid">
-                  <div><label class="ct-edit-label">Status</label><select name="status" class="ct-edit-select" required><?php foreach (['draft','active','signed','expired','cancelled'] as $s): ?><option value="<?= $s ?>" <?= $cStatus===$s?'selected':'' ?>><?= ucfirst($s) ?></option><?php endforeach; ?></select></div>
                   <div><label class="ct-edit-label">Amount (TND)</label><input type="number" name="amount" min="0" step="0.01" value="<?= (float)($row['amount'] ?? 0) ?>" class="ct-edit-input" required></div>
                   <div><label class="ct-edit-label">Start Date</label><input type="datetime-local" name="starts_at" value="<?= htmlspecialchars($localDateTime((string)($row['starts_at'] ?? ''))) ?>" class="ct-edit-input"></div>
                   <div><label class="ct-edit-label">End Date</label><input type="datetime-local" name="ends_at" value="<?= htmlspecialchars($localDateTime((string)($row['ends_at'] ?? ''))) ?>" class="ct-edit-input"></div>
@@ -409,11 +462,12 @@ $statusMeta = [
               </form>
               <?php endif; ?>
               <?php if ($canSign): ?>
-              <form method="post" style="display:inline">
+              <form method="post" style="display:inline" class="ct-sign-form">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <input type="hidden" name="action" value="sign_contract">
                 <input type="hidden" name="contract_id" value="<?= $cId ?>">
-                <button type="submit" class="ct-btn ct-btn-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Sign</button>
+                <input type="hidden" name="freelancer_signature" value="">
+                <button type="button" class="ct-btn ct-btn-success ct-sign-trigger"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Sign</button>
               </form>
               <?php endif; ?>
               <span style="margin-left:auto;font-size:.72rem;color:var(--color-text-muted);">Contract #<?= $cId ?></span>
@@ -445,6 +499,8 @@ $statusMeta = [
       <form method="post" id="createContractForm" novalidate>
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
         <input type="hidden" name="action" value="create_contract">
+        <input type="hidden" name="client_signature" id="client_signature" value="">
+        <input type="hidden" name="status" value="draft">
         <div class="ct-modal-grid">
           <div class="ct-modal-fg full">
             <label class="ct-modal-fl">Accepted Application *</label>
@@ -465,16 +521,6 @@ $statusMeta = [
           </div>
 
           <div class="ct-modal-fg">
-            <label class="ct-modal-fl">Status</label>
-            <select name="status" class="ct-modal-sel">
-              <option value="draft" selected>Draft</option>
-              <option value="active">Active</option>
-              <option value="signed">Signed</option>
-              <option value="expired">Expired</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-          <div class="ct-modal-fg">
             <label class="ct-modal-fl">Amount (TND)</label>
             <input type="number" min="0" step="0.01" name="amount" class="ct-modal-fi" value="0">
           </div>
@@ -490,6 +536,20 @@ $statusMeta = [
             <label class="ct-modal-fl">Terms *</label>
             <textarea name="terms" class="ct-modal-ta" placeholder="Describe scope, deliverables, milestones, and payment terms..." required></textarea>
           </div>
+          <div class="ct-modal-fg full">
+            <label class="ct-modal-fl">Payment Method *</label>
+            <input type="text" name="payment_details" class="ct-modal-fi" placeholder="Bank transfer, cash, card, milestone payment..." required>
+          </div>
+          <div class="ct-modal-fg full">
+            <label class="ct-modal-fl">Client Signature *</label>
+            <div class="ct-signature-wrap">
+              <canvas id="clientSignatureCanvas" class="ct-signature-canvas"></canvas>
+              <div class="ct-signature-row">
+                <span class="ct-signature-help">Draw with mouse or touch. The freelancer will be able to sign after this step.</span>
+                <button type="button" class="ct-btn ct-btn-ghost" id="clearClientSignature">Clear</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
           <button type="button" class="ct-btn ct-btn-ghost" onclick="closeCreateContractModal()">Cancel</button>
@@ -502,9 +562,18 @@ $statusMeta = [
   <?php endif; ?>
 
   <script>
+  let clientSignaturePad = null;
+
   function openCreateContractModal() {
     const modal = document.getElementById('createContractModal');
-    if (modal) modal.classList.add('open');
+    if (modal) {
+      modal.classList.add('open');
+      if (clientSignaturePad && typeof clientSignaturePad.resize === 'function') {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => clientSignaturePad.resize());
+        });
+      }
+    }
   }
   function closeCreateContractModal() {
     const modal = document.getElementById('createContractModal');
@@ -535,6 +604,7 @@ $statusMeta = [
 
   <script>
   const notice = <?= json_encode($notice, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+  const freelancerPendingToSign = <?= (int) $freelancerPendingToSign ?>;
   if (notice && notice.message && window.Swal) {
     Swal.fire({
       toast: true,
@@ -543,6 +613,16 @@ $statusMeta = [
       title: notice.message,
       showConfirmButton: false,
       timer: 3200,
+      timerProgressBar: true,
+    });
+  } else if (freelancerPendingToSign > 0 && window.Swal) {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'info',
+      title: 'Your application has been accepted. Please sign your contract.',
+      showConfirmButton: false,
+      timer: 3600,
       timerProgressBar: true,
     });
   }
@@ -558,6 +638,153 @@ $statusMeta = [
         confirmButtonText: 'Yes, continue',
         cancelButtonText: 'Cancel',
         confirmButtonColor: '#6366f1',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+
+  function setupSignaturePad(canvas, hiddenInput, clearButton) {
+    if (!canvas || !hiddenInput) return null;
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let hasStroke = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const snapshot = hasStroke ? canvas.toDataURL('image/png') : '';
+      canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+      canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#111827';
+      if (snapshot) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        img.src = snapshot;
+      }
+    }
+
+    function pointFromEvent(event) {
+      const rect = canvas.getBoundingClientRect();
+      const source = event.touches ? event.touches[0] : event;
+      return {
+        x: source.clientX - rect.left,
+        y: source.clientY - rect.top
+      };
+    }
+
+    function start(event) {
+      event.preventDefault();
+      const point = pointFromEvent(event);
+      drawing = true;
+      lastX = point.x;
+      lastY = point.y;
+    }
+
+    function move(event) {
+      if (!drawing) return;
+      event.preventDefault();
+      const point = pointFromEvent(event);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(point.x, point.y);
+      ctx.stroke();
+      lastX = point.x;
+      lastY = point.y;
+      hasStroke = true;
+      hiddenInput.value = canvas.toDataURL('image/png');
+    }
+
+    function stop() {
+      drawing = false;
+    }
+
+    function clear() {
+      hasStroke = false;
+      hiddenInput.value = '';
+      resizeCanvas();
+    }
+
+    canvas.addEventListener('pointerdown', start);
+    canvas.addEventListener('pointermove', move);
+    canvas.addEventListener('pointerup', stop);
+    canvas.addEventListener('pointerleave', stop);
+    canvas.addEventListener('pointercancel', stop);
+    clearButton?.addEventListener('click', clear);
+    window.addEventListener('resize', resizeCanvas);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resizeCanvas);
+    });
+
+    return { clear, resize: resizeCanvas };
+  }
+
+  clientSignaturePad = setupSignaturePad(
+    document.getElementById('clientSignatureCanvas'),
+    document.getElementById('client_signature'),
+    document.getElementById('clearClientSignature')
+  );
+
+  const createContractForm = document.getElementById('createContractForm');
+  createContractForm?.addEventListener('submit', (event) => {
+    const signatureField = document.getElementById('client_signature');
+    if (!signatureField || !signatureField.value) {
+      event.preventDefault();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Signature required',
+        text: 'Please sign the contract before creating it.',
+        confirmButtonColor: '#6366f1',
+      });
+    }
+  });
+
+  document.querySelectorAll('.ct-sign-trigger').forEach((button) => {
+    button.addEventListener('click', () => {
+      const form = button.closest('.ct-sign-form');
+      if (!form) return;
+
+      Swal.fire({
+        title: 'Sign Contract',
+        html: `
+          <div style="display:flex;flex-direction:column;gap:10px;text-align:left;">
+            <p style="margin:0;color:#64748b;font-size:.9rem;">Draw your signature below to finalize the contract.</p>
+            <canvas id="swalSignatureCanvas" style="width:100%;height:180px;background:#fff;border:1px solid #d1d5db;border-radius:10px;touch-action:none;cursor:crosshair;"></canvas>
+            <div style="display:flex;justify-content:flex-end;">
+              <button type="button" id="swalClearSignature" class="swal2-styled" style="background:#eef2ff;color:#4f46e5;box-shadow:none;">Clear</button>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Sign now',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#059669',
+        didOpen: () => {
+          setupSignaturePad(
+            document.getElementById('swalSignatureCanvas'),
+            form.querySelector('input[name="freelancer_signature"]'),
+            document.getElementById('swalClearSignature')
+          );
+        },
+        preConfirm: () => {
+          const signature = form.querySelector('input[name="freelancer_signature"]');
+          if (!signature || !signature.value) {
+            Swal.showValidationMessage('Please draw your signature first.');
+            return false;
+          }
+          return true;
+        }
       }).then((result) => {
         if (result.isConfirmed) {
           form.submit();

@@ -2519,6 +2519,47 @@ class UserController
         }
     }
 
+    private function decodeStoryJsonField($value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        $raw = trim((string) ($value ?? ''));
+        if ($raw === '') {
+            return [];
+        }
+
+        try {
+            $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+            return is_array($decoded) ? $decoded : [];
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+
+    private function normalizeStoryRow(array $row): array
+    {
+        $row['text_layers'] = $this->decodeStoryJsonField($row['text_layers'] ?? null);
+        $row['sticker_layers'] = $this->decodeStoryJsonField($row['sticker_layers'] ?? null);
+        $row['drawing_data'] = (string) ($row['drawing_data'] ?? '');
+        $row['media_url'] = (string) ($row['media_url'] ?? '');
+        $row['caption'] = (string) ($row['caption'] ?? '');
+        $row['music_url'] = (string) ($row['music_url'] ?? '');
+        $row['music_title'] = (string) ($row['music_title'] ?? '');
+        $row['filter_css'] = (string) ($row['filter_css'] ?? '');
+        $row['gradient_bg'] = (string) ($row['gradient_bg'] ?? '');
+        $row['location_label'] = (string) ($row['location_label'] ?? '');
+        $row['story_type'] = (string) ($row['story_type'] ?? 'image');
+        $row['duration'] = (int) ($row['duration'] ?? 5);
+        return $row;
+    }
+
+    private function normalizeStoryRows(array $rows): array
+    {
+        return array_map(fn(array $row): array => $this->normalizeStoryRow($row), $rows);
+    }
+
     public function getActiveStories(int $userId): array
     {
         $db = config::getConnexion();
@@ -2529,7 +2570,7 @@ class UserController
                  ORDER BY created_at DESC"
             );
             $q->execute(['user_id' => $userId]);
-            return $q->fetchAll() ?: [];
+            return $this->normalizeStoryRows($q->fetchAll() ?: []);
         } catch (Exception $e) {
             return [];
         }
@@ -2548,7 +2589,7 @@ class UserController
                  ORDER BY s.created_at DESC"
             );
             $q->execute();
-            return $q->fetchAll() ?: [];
+            return $this->normalizeStoryRows($q->fetchAll() ?: []);
         } catch (Exception $e) {
             return [];
         }

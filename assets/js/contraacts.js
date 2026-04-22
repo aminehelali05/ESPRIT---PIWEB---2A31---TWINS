@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastAlertKey = '';
     let lastAlertAt = 0;
 
-    const allowedStatus = new Set(['draft', 'active', 'signed', 'expired', 'cancelled']);
-
     const showError = (key, message) => {
         const now = Date.now();
         if (lastAlertKey === key && now - lastAlertAt < 2000) return;
@@ -64,12 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         };
 
-        const alwaysRequired = new Set(['status']);
-        const detailRequired = new Set(['amount', 'terms', 'starts_at', 'ends_at']);
-        const createOnlyRequired = new Set(['offer_id', 'client_id', 'freelancer_id', 'signed_at']);
+        const detailRequired = new Set(['amount', 'terms', 'payment_details']);
+        const createOnlyRequired = new Set([]);
 
-        const isRequired = alwaysRequired.has(name)
-            || (detailRequired.has(name) && !!form.querySelector(`[name="${name}"]`))
+        const isRequired = (detailRequired.has(name) && !!form.querySelector(`[name="${name}"]`))
             || (hasCreateAction && createOnlyRequired.has(name));
 
         if (isRequired && value === '') {
@@ -78,19 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (value === '') return true;
 
-        if (name === 'status' && !allowedStatus.has(value)) {
-            return fail('Invalid contract status.');
-        }
-
         if (name === 'amount') {
             const amount = Number(value);
             if (!Number.isFinite(amount) || amount <= 0) return fail('Amount must be greater than 0.');
             if (amount > 10000000) return fail('Amount is too high.');
-        }
-
-        if (name === 'offer_id' || name === 'client_id' || name === 'freelancer_id') {
-            const id = Number(value);
-            if (!Number.isInteger(id) || id <= 0) return fail(`${label} is invalid.`);
         }
 
         if (name === 'terms') {
@@ -98,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!/^[A-ZÀ-ÖØ-Þ]/.test(value)) return fail('Terms must start with an uppercase letter.');
         }
 
-        if (name === 'signed_at' || name === 'starts_at' || name === 'ends_at') {
+        if (name === 'starts_at' || name === 'ends_at') {
             if (!parseDate(value)) return fail(`${label} is invalid.`);
         }
 
@@ -106,28 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const validateFormRelations = (form) => {
-        const client = form.querySelector('[name="client_id"]')?.value?.trim() || '';
-        const freelancer = form.querySelector('[name="freelancer_id"]')?.value?.trim() || '';
-        if (client && freelancer && client === freelancer) {
-            showError(`${form.id}:same-users`, 'Client and freelancer must be different users.');
-            return false;
-        }
-
-        const signed = form.querySelector('[name="signed_at"]')?.value?.trim() || '';
         const starts = form.querySelector('[name="starts_at"]')?.value?.trim() || '';
         const ends = form.querySelector('[name="ends_at"]')?.value?.trim() || '';
 
-        const dSigned = signed ? parseDate(signed) : null;
         const dStart = starts ? parseDate(starts) : null;
         const dEnd = ends ? parseDate(ends) : null;
 
         if (dStart && dEnd && dEnd <= dStart) {
             showError(`${form.id}:end-before-start`, 'End date/time must be after start date/time.');
-            return false;
-        }
-
-        if (dSigned && dStart && dSigned > dStart) {
-            showError(`${form.id}:sign-after-start`, 'Signed date/time must be before or equal to start date/time.');
             return false;
         }
 

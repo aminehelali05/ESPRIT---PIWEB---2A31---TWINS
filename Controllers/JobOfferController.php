@@ -269,7 +269,9 @@ class JobOfferController
 
     public function contractsMapForFreelancer(int $freelancerId): array
     {
-        $stmt = $this->pdo->prepare('SELECT id, job_offer_id, status FROM contracts WHERE freelancer_id = :freelancer_id');
+        $stmt = $this->pdo->prepare('SELECT id, job_offer_id, client_signed, freelancer_signed, freelancer_refused_at
+            FROM contracts
+            WHERE freelancer_id = :freelancer_id');
         $stmt->execute(['freelancer_id' => $freelancerId]);
         $map = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -277,9 +279,14 @@ class JobOfferController
             if ($offerId <= 0) {
                 continue;
             }
+            $clientSigned = (int) ($row['client_signed'] ?? 0) === 1;
+            $freelancerSigned = (int) ($row['freelancer_signed'] ?? 0) === 1;
+            $refusedAt = trim((string) ($row['freelancer_refused_at'] ?? ''));
             $map[$offerId] = [
                 'id' => (int) ($row['id'] ?? 0),
-                'status' => (string) ($row['status'] ?? 'draft'),
+                'client_signed' => $clientSigned,
+                'freelancer_signed' => $freelancerSigned,
+                'workflow_state' => $freelancerSigned ? 'completed' : ($refusedAt !== '' ? 'refused' : ($clientSigned ? 'waiting_freelancer' : 'waiting_client')),
             ];
         }
         return $map;
@@ -287,7 +294,9 @@ class JobOfferController
 
     public function contractsMapForClient(int $clientId): array
     {
-        $stmt = $this->pdo->prepare('SELECT id, job_offer_id, status FROM contracts WHERE client_id = :client_id');
+        $stmt = $this->pdo->prepare('SELECT id, job_offer_id, client_signed, freelancer_signed, freelancer_refused_at
+            FROM contracts
+            WHERE client_id = :client_id');
         $stmt->execute(['client_id' => $clientId]);
         $map = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -295,9 +304,14 @@ class JobOfferController
             if ($offerId <= 0) {
                 continue;
             }
+            $clientSigned = (int) ($row['client_signed'] ?? 0) === 1;
+            $freelancerSigned = (int) ($row['freelancer_signed'] ?? 0) === 1;
+            $refusedAt = trim((string) ($row['freelancer_refused_at'] ?? ''));
             $map[$offerId] = [
                 'id' => (int) ($row['id'] ?? 0),
-                'status' => (string) ($row['status'] ?? 'draft'),
+                'client_signed' => $clientSigned,
+                'freelancer_signed' => $freelancerSigned,
+                'workflow_state' => $freelancerSigned ? 'completed' : ($refusedAt !== '' ? 'refused' : ($clientSigned ? 'waiting_freelancer' : 'waiting_client')),
             ];
         }
         return $map;
@@ -342,18 +356,6 @@ class JobOfferController
 
             $update = $this->pdo->prepare('UPDATE job_offer_applications SET status = :status, decided_at = NOW(), updated_at = NOW() WHERE id = :id');
             $update->execute(['status' => $decision, 'id' => $applicationId]);
-
-            if ($decision === 'accepted') {
-                $rejectOthers = $this->pdo->prepare('UPDATE job_offer_applications SET status = :status, decided_at = NOW(), updated_at = NOW() WHERE job_offer_id = :job_offer_id AND id <> :id AND status = :pending');
-                $rejectOthers->execute([
-                    'status' => 'rejected',
-                    'job_offer_id' => (int) ($application['job_offer_id'] ?? 0),
-                    'id' => $applicationId,
-                    'pending' => 'pending',
-                ]);
-
-                $this->updateStatus((int) ($application['offer_id'] ?? 0), 'in_progress');
-            }
 
             $this->pdo->commit();
         } catch (Throwable $exception) {
