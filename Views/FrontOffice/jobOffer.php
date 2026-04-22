@@ -17,7 +17,18 @@ $userId      = (int)($currentUser['id'] ?? 0);
 $role        = strtolower(trim((string)($currentUser['role'] ?? 'user')));
 $resolvedRole = $role;
 if (!in_array($resolvedRole, ['client', 'freelancer', 'admin'], true) && $userId > 0) {
-  $roleStmt = $pdo->prepare('SELECT role, title FROM users WHERE id = :id LIMIT 1');
+  $hasUserTitleColumn = false;
+  try {
+    $titleColumnStmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'title'");
+    $hasUserTitleColumn = (bool) ($titleColumnStmt && $titleColumnStmt->fetch(PDO::FETCH_ASSOC));
+  } catch (Throwable $e) {
+    $hasUserTitleColumn = false;
+  }
+
+  $roleQuery = $hasUserTitleColumn
+    ? 'SELECT role, title FROM users WHERE id = :id LIMIT 1'
+    : 'SELECT role FROM users WHERE id = :id LIMIT 1';
+  $roleStmt = $pdo->prepare($roleQuery);
   $roleStmt->execute(['id' => $userId]);
   $roleRow = $roleStmt->fetch(PDO::FETCH_ASSOC) ?: [];
   $dbRole = strtolower(trim((string)($roleRow['role'] ?? '')));

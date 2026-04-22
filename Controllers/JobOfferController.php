@@ -5,10 +5,58 @@ include_once(__DIR__ . '/../config.php');
 class JobOfferController
 {
     private PDO $pdo;
+    private array $columnCache = [];
 
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? config::getConnexion();
+        $this->ensureJobOffersSchema();
+    }
+
+    private function jobOfferHasColumn(string $column): bool
+    {
+        if (array_key_exists($column, $this->columnCache)) {
+            return $this->columnCache[$column];
+        }
+
+        try {
+            $stmt = $this->pdo->query("SHOW COLUMNS FROM job_offers LIKE " . $this->pdo->quote($column));
+            $this->columnCache[$column] = (bool) ($stmt && $stmt->fetch(PDO::FETCH_ASSOC));
+        } catch (Throwable $exception) {
+            $this->columnCache[$column] = false;
+        }
+
+        return $this->columnCache[$column];
+    }
+
+    private function ensureJobOffersSchema(): void
+    {
+        if ($this->jobOfferHasColumn('title')) {
+            return;
+        }
+
+        try {
+            $this->pdo->exec("ALTER TABLE job_offers ADD COLUMN title VARCHAR(180) NOT NULL DEFAULT '' AFTER id");
+            $this->columnCache['title'] = true;
+        } catch (Throwable $exception) {
+            error_log('JobOfferController::ensureJobOffersSchema - ' . $exception->getMessage());
+        }
+    }
+
+    private function normalizedTitle(array $payload): string
+    {
+        $title = trim((string) ($payload['title'] ?? ''));
+        if ($title !== '') {
+            return $title;
+        }
+
+        $description = trim((string) ($payload['description'] ?? ''));
+        if ($description === '') {
+            return 'Untitled Offer';
+        }
+
+        $snippet = preg_replace('/\s+/', ' ', $description);
+        return mb_substr((string) $snippet, 0, 120);
     }
 
     public function listUsers(): array
@@ -65,9 +113,10 @@ class JobOfferController
 
     public function createFromBackoffice(array $payload): int
     {
+        $this->ensureJobOffersSchema();
         $stmt = $this->pdo->prepare('INSERT INTO job_offers (title, description, budget, skills_required, location, experience_level, project_type, status, deadline_at, client_id, created_at, updated_at) VALUES (:title, :description, :budget, :skills_required, :location, :experience_level, :project_type, :status, :deadline_at, :client_id, NOW(), NOW())');
         $stmt->execute([
-            'title' => trim((string) ($payload['title'] ?? '')),
+            'title' => $this->normalizedTitle($payload),
             'description' => trim((string) ($payload['description'] ?? '')),
             'budget' => max(0, (float) ($payload['budget'] ?? 0)),
             'skills_required' => trim((string) ($payload['skills_required'] ?? '')) ?: null,
@@ -165,9 +214,10 @@ class JobOfferController
 
     public function updateOwnedByClient(int $offerId, int $clientId, array $payload): bool
     {
+        $this->ensureJobOffersSchema();
         $stmt = $this->pdo->prepare('UPDATE job_offers SET title = :title, description = :description, budget = :budget, skills_required = :skills_required, location = :location, experience_level = :experience_level, project_type = :project_type, status = :status, deadline_at = :deadline_at, updated_at = NOW() WHERE id = :id AND client_id = :client_id');
         return $stmt->execute([
-            'title' => trim((string) ($payload['title'] ?? '')),
+            'title' => $this->normalizedTitle($payload),
             'description' => trim((string) ($payload['description'] ?? '')),
             'budget' => max(0, (float) ($payload['budget'] ?? 0)),
             'skills_required' => trim((string) ($payload['skills_required'] ?? '')) ?: null,

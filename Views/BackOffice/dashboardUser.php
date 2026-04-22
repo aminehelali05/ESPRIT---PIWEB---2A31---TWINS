@@ -533,11 +533,17 @@ if (isset($_GET['action'])) {
     }
 
     if ($action === 'stats') {
+        $db = config::getConnexion();
         $users = $userController->listUsers();
         $thisMonth = date('Y-m');
         $newThisMonth = 0;
         $jobOffersCount = 0;
         $contractsCount = 0;
+        $messagesCount = 0;
+        $storiesCount = 0;
+        $liveSessionsCount = 0;
+        $activeUsersCount = $userController->countActiveUsers();
+        $registrationsByDay = [];
         foreach ($users as $u) {
             if (!($u instanceof User)) {
                 continue;
@@ -546,28 +552,74 @@ if (isset($_GET['action'])) {
             if ($created !== '' && strpos($created, $thisMonth) === 0) {
                 $newThisMonth++;
             }
+            if ($created !== '') {
+                $dayKey = substr($created, 0, 10);
+                if ($dayKey !== '') {
+                    $registrationsByDay[$dayKey] = (int) ($registrationsByDay[$dayKey] ?? 0) + 1;
+                }
+            }
         }
 
         try {
-            $jobOffersCount = (int) $pdo->query('SELECT COUNT(*) AS c FROM job_offers')->fetch()['c'];
+            $jobOffersCount = (int) $db->query('SELECT COUNT(*) AS c FROM job_offers')->fetch()['c'];
         } catch (Throwable $e) {
             $jobOffersCount = 0;
         }
 
         try {
-            $contractsCount = (int) $pdo->query('SELECT COUNT(*) AS c FROM contracts')->fetch()['c'];
+            $contractsCount = (int) $db->query('SELECT COUNT(*) AS c FROM contracts')->fetch()['c'];
         } catch (Throwable $e) {
             $contractsCount = 0;
+        }
+
+        try {
+            $messagesCount = (int) $db->query('SELECT COUNT(*) AS c FROM messages')->fetch()['c'];
+        } catch (Throwable $e) {
+            $messagesCount = 0;
+        }
+
+        try {
+            $storiesCount = (int) $db->query('SELECT COUNT(*) AS c FROM stories')->fetch()['c'];
+        } catch (Throwable $e) {
+            $storiesCount = 0;
+        }
+
+        try {
+            $liveSessionsCount = (int) $db->query('SELECT COUNT(*) AS c FROM live_streams WHERE status = "live"')->fetch()['c'];
+        } catch (Throwable $e) {
+            $liveSessionsCount = 0;
+        }
+
+        $lastSevenLabels = [];
+        $lastSevenValues = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $dayKey = date('Y-m-d', strtotime("-{$i} day"));
+            $lastSevenLabels[] = date('M d', strtotime($dayKey));
+            $lastSevenValues[] = (int) ($registrationsByDay[$dayKey] ?? 0);
         }
 
         $respond([
             'success' => true,
             'stats' => [
                 'total' => $userController->countUsers(),
+                'activeUsers' => $activeUsersCount,
                 'admins' => $userController->countByRole('admin'),
                 'newThisMonth' => $newThisMonth,
+                'messages' => $messagesCount,
+                'stories' => $storiesCount,
+                'liveSessions' => $liveSessionsCount,
                 'jobOffers' => $jobOffersCount,
                 'contracts' => $contractsCount,
+            ],
+            'charts' => [
+                'registrations' => [
+                    'labels' => $lastSevenLabels,
+                    'values' => $lastSevenValues,
+                ],
+                'engagement' => [
+                    'labels' => ['Messages', 'Stories', 'Live sessions', 'Job offers', 'Contracts'],
+                    'values' => [$messagesCount, $storiesCount, $liveSessionsCount, $jobOffersCount, $contractsCount],
+                ],
             ],
         ]);
     }
@@ -925,39 +977,86 @@ $moduleShortcuts = [
 
             <div class="bento-grid">
                 
-                <!-- KPI 1 -->
                 <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.05s;">
                     <div>
-                        <div class="kpi-h">Total Active Users</div>
+                        <div class="kpi-h">Total Users</div>
                         <div class="kpi-v" id="kpiTotalUsers" data-counter="0">0</div>
-                        <div class="kpi-badge">+12.5% this month</div>
+                        <div class="kpi-badge">All registered accounts</div>
                     </div>
                     <div class="icon-box icon-blue">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     </div>
                 </div>
 
-                <!-- KPI 2 -->
                 <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.08s;">
                     <div>
-                        <div class="kpi-h">Published Job Offers</div>
-                        <div class="kpi-v" id="kpiJobOffers" data-counter="0">0</div>
-                        <div class="kpi-badge" style="color: #6366f1; background: rgba(99,102,241,0.1);">Client marketplace</div>
+                        <div class="kpi-h">Active Users</div>
+                        <div class="kpi-v" id="kpiActiveUsers" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #16a34a; background: rgba(34,197,94,0.12);">Status = active</div>
                     </div>
                     <div class="icon-box icon-indigo">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12l2.5 2.5L16 9"></path></svg>
                     </div>
                 </div>
 
-                <!-- KPI 3 -->
                 <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.11s;">
                     <div>
-                        <div class="kpi-h">Contracts</div>
-                        <div class="kpi-v" id="kpiContracts" data-counter="0">0</div>
-                        <div class="kpi-badge" style="color: #8b5cf6; background: rgba(139,92,246,0.1);">Auto + manual flow</div>
+                        <div class="kpi-h">Messages</div>
+                        <div class="kpi-v" id="kpiMessages" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #8b5cf6; background: rgba(139,92,246,0.1);">Private + group chat</div>
                     </div>
                     <div class="icon-box icon-purple">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                </div>
+
+                <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.12s;">
+                    <div>
+                        <div class="kpi-h">Stories</div>
+                        <div class="kpi-v" id="kpiStories" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #f97316; background: rgba(249,115,22,0.12);">Published stories</div>
+                    </div>
+                    <div class="icon-box icon-blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+                    </div>
+                </div>
+
+                <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.13s;">
+                    <div>
+                        <div class="kpi-h">Live Sessions</div>
+                        <div class="kpi-v" id="kpiLiveSessions" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #06b6d4; background: rgba(6,182,212,0.12);">Currently live</div>
+                    </div>
+                    <div class="icon-box icon-indigo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    </div>
+                </div>
+
+                <div class="card span-4 kpi-card animate-enter" style="animation-delay: 0.14s;">
+                    <div>
+                        <div class="kpi-h">New This Month</div>
+                        <div class="kpi-v" id="kpiNewThisMonth" data-counter="0">0</div>
+                        <div class="kpi-badge" style="color: #2563eb; background: rgba(37,99,235,0.12);">Fresh registrations</div>
+                    </div>
+                    <div class="icon-box icon-purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="24" height="24" stroke-width="2"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                    </div>
+                </div>
+
+                <div class="card span-12 animate-enter" style="animation-delay: 0.145s;" id="adminAnalytics">
+                    <div class="section-head">
+                        <h2>Platform Analytics</h2>
+                        <span style="font-size:0.8rem; color:var(--b-text-muted);">Users, content, and live activity at a glance</span>
+                    </div>
+                    <div class="selected-user-grid">
+                        <div class="selected-user-block">
+                            <h3>Registrations · Last 7 Days</h3>
+                            <canvas id="adminGrowthChart" height="120"></canvas>
+                        </div>
+                        <div class="selected-user-block">
+                            <h3>Engagement Mix</h3>
+                            <canvas id="adminEngagementChart" height="120"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -1317,6 +1416,7 @@ $moduleShortcuts = [
     </div>
 
     <!-- Minimal JS execution -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="../../assets/js/globe-explorer.js"></script>
     <script src="../../assets/js/user.js"></script>
     <script src="../../assets/js/skilluser.js"></script>

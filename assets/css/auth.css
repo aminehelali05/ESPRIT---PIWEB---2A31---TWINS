@@ -73,9 +73,43 @@ body {
     box-shadow: 0 0 0 2px rgba(79, 82, 217, 0.2);
 }
 
+.auth-input.is-invalid,
+.space-y-2.has-error .auth-input {
+    border-color: rgba(225, 29, 72, 0.68);
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+}
+
+.space-y-2.has-error > label {
+    color: #be123c;
+}
+
+.field-error {
+    margin-top: 0.35rem;
+    padding-left: 0.1rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: #be123c;
+    font-weight: 500;
+}
+
+.field-error[hidden] {
+    display: none;
+}
+
 [data-theme="dark"] .auth-input:focus {
     background: rgba(0, 0, 0, 0.4);
     box-shadow: 0 0 0 2px rgba(174, 225, 249, 0.2);
+}
+
+[data-theme="dark"] .auth-input.is-invalid,
+[data-theme="dark"] .space-y-2.has-error .auth-input {
+    border-color: rgba(251, 113, 133, 0.78);
+    box-shadow: 0 0 0 2px rgba(251, 113, 133, 0.26);
+}
+
+[data-theme="dark"] .space-y-2.has-error > label,
+[data-theme="dark"] .field-error {
+    color: #fb7185;
 }
 
 /* Buttons */

@@ -488,6 +488,25 @@
   font-weight: var(--fw-semibold);
 }
 
+.feed-live-badge {
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(239, 68, 68, 0.42);
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  padding: 0.12rem 0.46rem;
+  font-size: 0.6rem;
+  font-weight: var(--fw-semibold);
+  vertical-align: middle;
+}
+
+[data-theme="dark"] .feed-live-badge {
+  color: #fecaca;
+}
+
 .feed-user-row p {
   margin: 0;
   color: var(--color-text-secondary);
@@ -656,6 +675,71 @@
   font-size: 0.9rem;
   font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-tight);
+}
+
+.live-now-list {
+  display: grid;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.live-now-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.72rem;
+  background: rgba(var(--color-accent-rgb), 0.05);
+  display: grid;
+  gap: 0.22rem;
+}
+
+.live-now-item strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  font-size: 0.8rem;
+}
+
+.live-now-item p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.72rem;
+}
+
+.live-now-item button {
+  margin-top: 0.32rem;
+  justify-self: start;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(239, 68, 68, 0.42);
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  padding: 0.22rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: var(--fw-semibold);
+  cursor: pointer;
+}
+
+.live-now-item button:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+[data-theme="dark"] .live-now-item button {
+  color: #fecaca;
+}
+
+.live-now-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #ef4444;
+}
+
+.live-now-empty {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.8rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
 }
 
 /* People list */

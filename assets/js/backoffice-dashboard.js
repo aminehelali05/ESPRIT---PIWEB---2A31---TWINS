@@ -51,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let initialFormSnapshot = '';
     let avatarCameraStream = null;
     let globeInitialized = false;
+    let growthChart = null;
+    let engagementChart = null;
     const countryCapitalCache = new Map();
 
     const normalizeDateTimeLocal = (value) => {
@@ -644,6 +646,66 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(tick);
     };
 
+    const renderAdminCharts = (charts = {}) => {
+        if (!window.Chart) return;
+
+        const growthCanvas = document.getElementById('adminGrowthChart');
+        const engagementCanvas = document.getElementById('adminEngagementChart');
+        const registrations = charts.registrations || {};
+        const engagement = charts.engagement || {};
+
+        if (growthCanvas) {
+            if (growthChart) growthChart.destroy();
+            growthChart = new window.Chart(growthCanvas, {
+                type: 'line',
+                data: {
+                    labels: Array.isArray(registrations.labels) ? registrations.labels : [],
+                    datasets: [{
+                        label: 'Registrations',
+                        data: Array.isArray(registrations.values) ? registrations.values : [],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.18)',
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    }
+                }
+            });
+        }
+
+        if (engagementCanvas) {
+            if (engagementChart) engagementChart.destroy();
+            engagementChart = new window.Chart(engagementCanvas, {
+                type: 'bar',
+                data: {
+                    labels: Array.isArray(engagement.labels) ? engagement.labels : [],
+                    datasets: [{
+                        label: 'Count',
+                        data: Array.isArray(engagement.values) ? engagement.values : [],
+                        backgroundColor: ['#8b5cf6', '#f97316', '#06b6d4', '#6366f1', '#10b981'],
+                        borderRadius: 10,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    }
+                }
+            });
+        }
+    };
+
     const updateStats = async () => {
         try {
             const response = await fetch(`${apiBase}?action=stats`);
@@ -651,8 +713,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok || !data.success) return;
 
             animateCounter(document.getElementById('kpiTotalUsers'), Number(data.stats.total || 0));
-            animateCounter(document.getElementById('kpiJobOffers'), Number(data.stats.jobOffers || 0));
-            animateCounter(document.getElementById('kpiContracts'), Number(data.stats.contracts || 0));
+            animateCounter(document.getElementById('kpiActiveUsers'), Number(data.stats.activeUsers || 0));
+            animateCounter(document.getElementById('kpiMessages'), Number(data.stats.messages || 0));
+            animateCounter(document.getElementById('kpiStories'), Number(data.stats.stories || 0));
+            animateCounter(document.getElementById('kpiLiveSessions'), Number(data.stats.liveSessions || 0));
+            animateCounter(document.getElementById('kpiNewThisMonth'), Number(data.stats.newThisMonth || 0));
+            renderAdminCharts(data.charts || {});
         } catch (error) {
             console.error(error);
         }

@@ -1,2 +1,5 @@
 # Ignore Projet-2A folder  
 /Projet-2A/  
+/vendor/
+/composer.lock
+/config.local.php

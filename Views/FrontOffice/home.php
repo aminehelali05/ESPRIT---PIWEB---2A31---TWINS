@@ -219,6 +219,14 @@ $dailyXp = 25;
       </section>
 
       <aside class="home-right" aria-label="Right widgets">
+        <article class="widget-card glass-card fade-in-section" id="liveNowWidget" aria-labelledby="liveNowWidgetTitle">
+          <h3 id="liveNowWidgetTitle">Live Now</h3>
+          <div class="live-now-list" id="liveNowWidgetList">
+            <div class="live-now-empty">Checking active broadcasts...</div>
+          </div>
+          <a href="live.php?mode=broadcast" class="btn btn-primary btn-sm widget-btn">Open Live Studio</a>
+        </article>
+
         <article class="widget-card glass-card fade-in-section">
           <h3>People You May Know</h3>
           <div class="people-list">

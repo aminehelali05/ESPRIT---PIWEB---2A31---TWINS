@@ -335,6 +335,30 @@
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
+
+.uf-group.is-invalid .uf-label {
+  color: #e11d48;
+}
+
+.uf-group.is-invalid .uf-input,
+.uf-input.is-invalid {
+  border-color: rgba(225, 29, 72, 0.68);
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.14);
+}
+
+.uf-group .field-error {
+  margin-top: 6px;
+  padding-left: 2px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #be123c;
+  font-weight: 500;
+}
+
+.uf-group .field-error[hidden] {
+  display: none;
+}
+
 .uf-readonly {
   background: linear-gradient(180deg, #f8fafc, #f1f5f9);
   color: #475569;

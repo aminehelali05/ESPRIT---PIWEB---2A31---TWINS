@@ -1,6 +1,5 @@
 (() => {
   const state = {
-    lastAlertKey: '',
     map: null,
     marker: null,
     selectedLocation: null,
@@ -9,6 +8,7 @@
 
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
   const isName = (value) => /^[A-Za-zÀ-ÖØ-öø-ÿ'\-\s]{2,40}$/.test(value);
+  const startsWithUppercaseLetter = (value) => /^[A-ZÀ-ÖØ-Þ]/.test(String(value || '').trim());
   const normalizePhone = (value) => String(value || '').replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
   const extractDialPrefix = (value) => {
     const normalized = normalizePhone(value);
@@ -882,24 +882,9 @@
     }
   };
 
-  const showPrefixMismatchWarning = (countryName, info, form) => {
+  const showPrefixMismatchWarning = (phoneInput, countryName, info) => {
     const message = `The phone prefix must match ${info.f} ${countryName} (${info.p}).`;
-    if (window.Swal) {
-      window.Swal.fire({
-        toast: true,
-        icon: 'warning',
-        title: message,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3600,
-        timerProgressBar: true,
-        background: '#0f172a',
-        color: '#f8fafc',
-        customClass: { container: 'uf-swal-front' }
-      });
-      return;
-    }
-    pushAlert(message, 'phone_mismatch');
+    setFieldError(phoneInput, message);
   };
 
   const buildPhoneWithCountryPrefix = (phoneRaw, info) => {
@@ -908,7 +893,7 @@
     return `${info.p}${localPart}`;
   };
 
-  const warnPrefixMismatchOnce = (phoneInput, info, form, currentPrefix = '') => {
+  const warnPrefixMismatchOnce = (phoneInput, info, currentPrefix = '') => {
     if (!phoneInput || !info || !currentPrefix || currentPrefix === info.p) {
       if (phoneInput) phoneInput.dataset.phoneMismatchKey = '';
       return;
@@ -918,7 +903,7 @@
     if (phoneInput.dataset.phoneMismatchKey === signature) return;
 
     phoneInput.dataset.phoneMismatchKey = signature;
-    showPrefixMismatchWarning(info.name, info, form);
+    showPrefixMismatchWarning(phoneInput, info.name, info);
   };
 
   const keepPhoneFieldActive = (phoneInput) => {
@@ -979,24 +964,90 @@
     return !idField || !String(idField.value || '').trim();
   };
 
-  const validateField = (field, context = 'generic', silent = false) => {
+  const getFieldContainer = (field) => {
+    if (!field) return null;
+    return field.closest('.uf-group')
+      || field.closest('.space-y-2')
+      || field.closest('.form-group')
+      || field.parentElement;
+  };
+
+  const getFieldErrorNode = (field, create = false) => {
+    const container = getFieldContainer(field);
+    if (!container) return null;
+
+    let node = container.querySelector('.field-error');
+    if (!node && create) {
+      node = document.createElement('div');
+      node.className = 'field-error';
+      node.hidden = true;
+      container.appendChild(node);
+    }
+
+    return node;
+  };
+
+  const setFieldError = (field, message) => {
+    if (!field) return;
+
+    const text = String(message || '').trim();
+    const hasError = text.length > 0;
+    const container = getFieldContainer(field);
+    const group = field.closest('.uf-group');
+
+    if (container) {
+      container.classList.toggle('has-error', hasError);
+    }
+
+    if (group) {
+      group.classList.toggle('is-invalid', hasError);
+    }
+
+    field.classList.toggle('is-invalid', hasError);
+    field.dataset.invalid = hasError ? '1' : '0';
+    field.setAttribute('aria-invalid', hasError ? 'true' : 'false');
+    field.style.borderColor = '';
+
+    const errorNode = getFieldErrorNode(field, hasError);
+    if (errorNode) {
+      errorNode.textContent = text;
+      errorNode.hidden = !hasError;
+    }
+  };
+
+  const clearFieldError = (field) => {
+    setFieldError(field, '');
+  };
+
+  const validateField = (field, context = 'generic') => {
     if (!field || field.disabled) return true;
 
     const key = fieldKey(field);
+    if (key === '' || field.type === 'hidden' || field.type === 'button' || field.type === 'submit') {
+      return true;
+    }
+
     const value = String(field.value || '').trim();
     const currentContext = String(context || 'generic').toLowerCase();
     const form = field.closest('form');
     const createMode = form ? isCreateMode(form) : false;
 
     let message = '';
-    let customAlertHandled = false;
 
     if (key === 'first_name' || key === 'firstname' || key === 'formfirstname' || key === 'editfirstname' || key === 'firstName') {
-      if (!isName(value)) message = 'First name must be 2-40 letters only.';
+      if (!isName(value)) {
+        message = 'First name must be 2-40 letters only.';
+      } else if (!startsWithUppercaseLetter(value)) {
+        message = 'First name must start with an uppercase letter.';
+      }
     }
 
     if (key === 'last_name' || key === 'lastname' || key === 'formlastname' || key === 'editlastname' || key === 'lastName') {
-      if (!isName(value)) message = 'Last name must be 2-40 letters only.';
+      if (!isName(value)) {
+        message = 'Last name must be 2-40 letters only.';
+      } else if (!startsWithUppercaseLetter(value)) {
+        message = 'Last name must start with an uppercase letter.';
+      }
     }
 
     if (key === 'email' || key === 'formemail' || key === 'editemail') {
@@ -1044,11 +1095,8 @@
         const phoneDigits = phoneNormalized.replace(/^\+/, '');
         if (countryInfo && interacted && phoneDigits && countryPrefixDigits && !phoneDigits.startsWith(countryPrefixDigits)) {
           message = `Phone prefix must match ${countryInfo.f} ${countryInfo.name} (${countryInfo.p}).`;
-          if (!silent) {
-            const currentPrefix = `+${phoneDigits.slice(0, countryPrefixDigits.length)}`;
-            warnPrefixMismatchOnce(field, countryInfo, form, currentPrefix);
-            customAlertHandled = true;
-          }
+          const currentPrefix = `+${phoneDigits.slice(0, countryPrefixDigits.length)}`;
+          warnPrefixMismatchOnce(field, countryInfo, currentPrefix);
         }
       }
     }
@@ -1099,16 +1147,11 @@
     }
 
     if (message) {
-      field.dataset.invalid = '1';
-      field.style.borderColor = 'rgba(225, 29, 72, 0.55)';
-      if (!silent && !customAlertHandled) {
-        pushAlert(`${message}`, key);
-      }
+      setFieldError(field, message);
       return false;
     }
 
-    field.dataset.invalid = '0';
-    field.style.borderColor = '';
+    clearFieldError(field);
     return true;
   };
 
@@ -1121,7 +1164,7 @@
     });
 
     for (const field of fields) {
-      if (!validateField(field, context, false)) {
+      if (!validateField(field, context)) {
         field.focus();
         return false;
       }
@@ -1135,51 +1178,11 @@
 
     const fields = form.querySelectorAll('input, select, textarea');
     fields.forEach((field) => {
-      const run = () => validateField(field, context, false);
+      const run = () => validateField(field, context);
+      field.addEventListener('input', run);
       field.addEventListener('blur', run);
       field.addEventListener('change', run);
     });
-  };
-
-  const pushAlert = (message, key = '') => {
-    const currentKey = `${key}::${message}`;
-    if (state.lastAlertKey === currentKey) return;
-    state.lastAlertKey = currentKey;
-
-    if (window.Swal) {
-      window.Swal.fire({
-        toast: true,
-        icon: 'error',
-        title: message,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3200,
-        timerProgressBar: true,
-        background: '#0f172a',
-        color: '#f8fafc',
-        customClass: { container: 'uf-swal-front' },
-      });
-      return;
-    }
-
-    const fallback = document.createElement('div');
-    fallback.textContent = message;
-    fallback.style.cssText = [
-      'position:fixed',
-      'top:14px',
-      'right:14px',
-      'z-index:12000',
-      'background:#111827',
-      'color:#f8fafc',
-      'border:1px solid rgba(239,68,68,0.45)',
-      'padding:10px 12px',
-      'border-radius:12px',
-      'font-size:12px',
-      'box-shadow:0 10px 26px rgba(15,23,42,0.35)',
-    ].join(';');
-
-    document.body.appendChild(fallback);
-    setTimeout(() => fallback.remove(), 2600);
   };
 
   const resolveCountryName = (address = {}) => {
@@ -1309,7 +1312,9 @@
   const confirmLocation = () => {
     const refs = authMapElements();
     if (!state.selectedLocation || !refs.countryInput) {
-      pushAlert('Please choose a location on the map first.', 'country');
+      if (refs.countryInput) {
+        setFieldError(refs.countryInput, 'Please choose a location on the map first.');
+      }
       return;
     }
 
@@ -1320,7 +1325,8 @@
     if (refs.cityInput) refs.cityInput.value = state.selectedLocation.city || '';
     if (refs.fullAddressInput) refs.fullAddressInput.value = state.selectedLocation.fullAddress || state.selectedLocation.country;
 
-    validateField(refs.countryInput, 'auth-register', true);
+    clearFieldError(refs.countryInput);
+    validateField(refs.countryInput, 'auth-register');
     closeMapPicker();
   };
 
@@ -1410,7 +1416,7 @@
         phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
       } else if (shouldWarn && phoneDigits && countryPrefixDigits) {
         const currentPrefix = `+${phoneDigits.slice(0, countryPrefixDigits.length)}`;
-        warnPrefixMismatchOnce(phoneInput, info, countryInput.closest('form'), currentPrefix);
+        warnPrefixMismatchOnce(phoneInput, info, currentPrefix);
       }
       enforceLockedPrefix(phoneInput);
     };
@@ -1425,7 +1431,7 @@
       const countryPrefixDigits = getCountryPrefixDigits(info);
       if (phoneDigits && countryPrefixDigits && !phoneDigits.startsWith(countryPrefixDigits)) {
         const currentPrefix = `+${phoneDigits.slice(0, countryPrefixDigits.length)}`;
-        warnPrefixMismatchOnce(phoneInput, info, phoneInput.closest('form'), currentPrefix);
+        warnPrefixMismatchOnce(phoneInput, info, currentPrefix);
       } else {
         phoneInput.dataset.phoneMismatchKey = '';
       }

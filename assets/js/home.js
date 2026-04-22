@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const openComposerBtn  = document.getElementById('openComposerBtn');
   const composerInput    = document.querySelector('.composer-input');
   const globalSearch     = document.querySelector('.home-global-search input');
+  const liveNowWidgetList = document.getElementById('liveNowWidgetList');
 
   // --------------------------------------------------------
   // FAB — floating action button
@@ -192,6 +193,108 @@ document.addEventListener('DOMContentLoaded', () => {
       }, i * 60);
     });
   }
+
+  // --------------------------------------------------------
+  // LIVE NOW WIDGET + FEED BADGES
+  // --------------------------------------------------------
+  const liveApiUrl = 'profile.php?action=profile_live_stream&mode=list';
+
+  function getHostName(stream) {
+    const host = stream?.host || {};
+    const first = String(host.first_name || '').trim();
+    const last = String(host.last_name || '').trim();
+    return `${first} ${last}`.trim() || 'Member';
+  }
+
+  function renderLiveWidget(streams) {
+    if (!liveNowWidgetList) return;
+    const list = Array.isArray(streams) ? streams : [];
+
+    if (!list.length) {
+      liveNowWidgetList.innerHTML = '<div class="live-now-empty">No one is live right now.</div>';
+      return;
+    }
+
+    liveNowWidgetList.innerHTML = list.slice(0, 5).map((stream) => {
+      const id = Number(stream?.id || 0);
+      const hostName = getHostName(stream);
+      const title = String(stream?.title || '').trim() || `${hostName}'s stream`;
+      const viewers = Math.max(0, Number(stream?.viewer_count || 0));
+      const visibility = String(stream?.visibility || 'public').trim() || 'public';
+      return [
+        '<article class="live-now-item">',
+        `<strong><span class="live-now-dot"></span>${title}</strong>`,
+        `<p>${hostName} · ${viewers} viewer${viewers === 1 ? '' : 's'} · ${visibility}</p>`,
+        `<button type="button" data-live-stream-id="${id}">Join Live</button>`,
+        '</article>'
+      ].join('');
+    }).join('');
+
+    liveNowWidgetList.querySelectorAll('[data-live-stream-id]').forEach((buttonEl) => {
+      buttonEl.addEventListener('click', () => {
+        const streamId = Number(buttonEl.getAttribute('data-live-stream-id') || 0);
+        if (!streamId) return;
+        window.location.href = `live.php?stream=${streamId}&mode=watch`;
+      });
+    });
+  }
+
+  function applyFeedLiveBadges(streams) {
+    const liveByHost = new Set(
+      (Array.isArray(streams) ? streams : [])
+        .map((stream) => getHostName(stream).toLowerCase())
+        .filter(Boolean)
+    );
+
+    document.querySelectorAll('.feed-user-row h4').forEach((heading) => {
+      heading.querySelectorAll('.feed-live-badge').forEach((badge) => badge.remove());
+
+      if (!heading.dataset.baseName) {
+        const titleNode = heading.childNodes[0];
+        heading.dataset.baseName = String(titleNode?.textContent || heading.textContent || '').trim();
+      }
+
+      const baseName = String(heading.dataset.baseName || '').trim().toLowerCase();
+      if (!baseName) return;
+
+      let isLive = false;
+      liveByHost.forEach((hostName) => {
+        if (isLive) return;
+        if (baseName.includes(hostName) || hostName.includes(baseName)) {
+          isLive = true;
+        }
+      });
+
+      if (!isLive) return;
+      const badge = document.createElement('span');
+      badge.className = 'feed-live-badge';
+      badge.textContent = 'LIVE';
+      heading.appendChild(badge);
+    });
+  }
+
+  async function refreshLiveSurface() {
+    try {
+      const response = await fetch(liveApiUrl, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.message || 'Could not load live streams.');
+      }
+      const streams = Array.isArray(payload?.streams) ? payload.streams : [];
+      renderLiveWidget(streams);
+      applyFeedLiveBadges(streams);
+    } catch (_error) {
+      renderLiveWidget([]);
+      applyFeedLiveBadges([]);
+    }
+  }
+
+  refreshLiveSurface();
+  window.setInterval(refreshLiveSurface, 20000);
 
   // --------------------------------------------------------
   // TOAST STACK

@@ -104,7 +104,7 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
                     <input type="checkbox" name="remember_me" class="w-4 h-4 rounded text-cyan-600 focus:ring-cyan-500">
                     <span class="text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-800 dark:group-hover:text-white transition-colors">Remember me</span>
                 </label>
-                <a href="../../auth/forgot_password.html" class="text-indigo-600 dark:text-cyan-400 hover:underline transition-colors font-medium">Forgot password?</a>
+                <a href="forgot-password.php" class="text-indigo-600 dark:text-cyan-400 hover:underline transition-colors font-medium">Forgot password?</a>
             </div>
 
             <div id="gamified-captcha-container" class="mb-6"></div>
@@ -121,6 +121,16 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
                     <span class="px-4 text-zinc-400" style="background-color: var(--color-surface); border-radius: 999px;">Or continue with</span>
                 </div>
             </div>
+
+            <a href="../../index.php?action=google_login" class="w-full py-3.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-all duration-300 flex items-center justify-center gap-3 group shadow-sm text-zinc-700 dark:text-zinc-100 font-medium">
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5Z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C34 6 29.3 4 24 4c-7.7 0-14.3 4.3-17.7 10.7Z"/>
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.3-5.2l-6.1-5.2c-2.1 1.6-4.6 2.4-7.2 2.4-5.3 0-9.7-3.3-11.4-8l-6.6 5.1C9.4 39.6 16.1 44 24 44Z"/>
+                    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.7 2-2 3.7-3.8 4.9l.1-.1 6.1 5.2C37.3 38.3 44 34 44 24c0-1.3-.1-2.4-.4-3.5Z"/>
+                </svg>
+                <span>Continue with Google</span>
+            </a>
 
             <button type="button" id="face-login-btn" class="w-full py-3.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-all duration-300 flex items-center justify-center gap-3 group shadow-sm">
                 <i data-lucide="scan-face" class="w-5 h-5 text-indigo-500 dark:text-cyan-400 group-hover:scale-110 transition-transform"></i>
@@ -190,6 +200,15 @@ unset($_SESSION['flash_error'], $_SESSION['flash_success']);
                 <input type="hidden" id="longitude" name="longitude">
                 <input type="hidden" id="city" name="city">
                 <input type="hidden" id="fullAddress" name="fullAddress">
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-sm font-medium text-zinc-600 dark:text-zinc-300 ml-1">Referral Code <span class="text-zinc-400">(Optional)</span></label>
+                <div class="relative">
+                    <i data-lucide="gift" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+                    <input type="text" id="referralCode" name="referral_code" class="auth-input uppercase" placeholder="Invite code from a friend">
+                </div>
+                <p class="text-xs text-zinc-500 dark:text-gray-400">Use a valid invitation code and we will connect you with your referrer automatically.</p>
             </div>
 
             <!-- Password -->
