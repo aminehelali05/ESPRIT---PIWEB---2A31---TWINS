@@ -77,13 +77,18 @@ if (empty($_SESSION['csrf_token_front'])) {
     $_SESSION['csrf_token_front'] = bin2hex(random_bytes(24));
 }
 $csrfToken = (string)$_SESSION['csrf_token_front'];
-$notice    = ['type' => '', 'message' => ''];
+$notice    = $_SESSION['job_offer_notice_front'] ?? ['type' => '', 'message' => ''];
+unset($_SESSION['job_offer_notice_front']);
 $redirectAfterPost = '';
 $clean     = static fn($v): string => trim((string)($v ?? ''));
+$currentPage = basename(parse_url((string)($_SERVER['REQUEST_URI'] ?? 'jobOffer.php'), PHP_URL_PATH) ?: 'jobOffer.php');
+$currentQuery = (string)($_SERVER['QUERY_STRING'] ?? '');
+$selfRedirect = $currentPage . ($currentQuery !== '' ? '?' . $currentQuery : '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($csrfToken, (string)($_POST['csrf_token'] ?? ''))) {
         $notice = ['type' => 'error', 'message' => 'Invalid security token.'];
+        $redirectAfterPost = $selfRedirect;
     } else {
         $action = strtolower($clean($_POST['action'] ?? ''));
         try {
@@ -91,65 +96,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $payload = [
                     'title'            => $clean($_POST['title'] ?? ''),
                     'description'      => $clean($_POST['description'] ?? ''),
-                    'budget'           => max(0, (float)($_POST['budget'] ?? 0)),
+                    'budget'           => (string)($_POST['budget'] ?? ''),
                     'skills_required'  => $clean($_POST['skills_required'] ?? ''),
                     'location'         => $clean($_POST['location'] ?? ''),
                     'experience_level' => $clean($_POST['experience_level'] ?? 'Mid'),
                     'project_type'     => $clean($_POST['project_type'] ?? 'Fixed Price'),
                     'status'           => $clean($_POST['status'] ?? 'open'),
-                    'deadline_at'      => $controller->parseDateTimeLocal($clean($_POST['deadline_at'] ?? '')),
+                    'deadline_at'      => $clean($_POST['deadline_at'] ?? ''),
                     'client_id'        => $userId,
                 ];
-                if ($payload['title'] === '' || $payload['description'] === '') throw new RuntimeException('Title and description are required.');
                 $controller->createByClient($payload);
                 $notice = ['type' => 'success', 'message' => 'Job offer published successfully!'];
+                $redirectAfterPost = $selfRedirect;
             }
-              if ($action === 'update_offer' && $isClient) {
+            if ($action === 'update_offer' && $isClient) {
                 $offerId = (int)($_POST['offer_id'] ?? 0);
                 if ($offerId <= 0) {
-                  throw new RuntimeException('Invalid offer.');
+                    throw new RuntimeException('Invalid offer.');
                 }
                 $payload = [
-                  'title'            => $clean($_POST['title'] ?? ''),
-                  'description'      => $clean($_POST['description'] ?? ''),
-                  'budget'           => max(0, (float)($_POST['budget'] ?? 0)),
-                  'skills_required'  => $clean($_POST['skills_required'] ?? ''),
-                  'location'         => $clean($_POST['location'] ?? ''),
-                  'experience_level' => $clean($_POST['experience_level'] ?? 'Mid'),
-                  'project_type'     => $clean($_POST['project_type'] ?? 'Fixed Price'),
-                  'status'           => $clean($_POST['status'] ?? 'open'),
-                  'deadline_at'      => $controller->parseDateTimeLocal($clean($_POST['deadline_at'] ?? '')),
+                    'title'            => $clean($_POST['title'] ?? ''),
+                    'description'      => $clean($_POST['description'] ?? ''),
+                    'budget'           => (string)($_POST['budget'] ?? ''),
+                    'skills_required'  => $clean($_POST['skills_required'] ?? ''),
+                    'location'         => $clean($_POST['location'] ?? ''),
+                    'experience_level' => $clean($_POST['experience_level'] ?? 'Mid'),
+                    'project_type'     => $clean($_POST['project_type'] ?? 'Fixed Price'),
+                    'status'           => $clean($_POST['status'] ?? 'open'),
+                    'deadline_at'      => $clean($_POST['deadline_at'] ?? ''),
                 ];
-                if ($payload['title'] === '' || $payload['description'] === '') {
-                  throw new RuntimeException('Title and description are required.');
-                }
                 $targetClientId = $userId;
                 if ($isAdmin) {
-                  $targetOffer = $controller->findById($offerId);
-                  $targetClientId = (int)($targetOffer['client_id'] ?? 0);
+                    $targetOffer = $controller->findById($offerId);
+                    $targetClientId = (int)($targetOffer['client_id'] ?? 0);
                 }
                 $updated = $controller->updateOwnedByClient($offerId, $targetClientId, $payload);
                 if (!$updated) {
-                  throw new RuntimeException('Unable to update this offer.');
+                    throw new RuntimeException('Unable to update this offer.');
                 }
                 $notice = ['type' => 'success', 'message' => 'Offer updated successfully.'];
-              }
+                $redirectAfterPost = $selfRedirect;
+            }
             if ($action === 'delete_offer' && $isClient) {
                 $offerId = (int)($_POST['offer_id'] ?? 0);
                 if ($isAdmin || $controller->isOwnedByClient($offerId, $userId)) {
                     $controller->deleteCascade($offerId);
                     $notice = ['type' => 'success', 'message' => 'Offer deleted.'];
                 }
+                $redirectAfterPost = $selfRedirect;
             }
             if ($action === 'apply_offer' && $canApplyToJobs) {
                 $offerId = (int)($_POST['offer_id'] ?? 0);
-              if ($controller->isOwnedByClient($offerId, $userId)) {
-                throw new RuntimeException('You cannot apply to your own offer.');
-              }
-                if (!$controller->freelancerAlreadyApplied($offerId, $userId)) {
-                    $controller->applyToOffer($offerId, $userId, $clean($_POST['cover_letter'] ?? ''));
-                    $notice = ['type' => 'success', 'message' => 'Application submitted!'];
-                } else { $notice = ['type' => 'error', 'message' => 'You already applied to this offer.']; }
+                $candidatureId = (int)($_POST['candidature_id'] ?? 0);
+                if ($controller->isOwnedByClient($offerId, $userId)) {
+                    throw new RuntimeException('You cannot apply to your own offer.');
+                }
+                $controller->saveCandidatureForFreelancer(
+                    $offerId,
+                    $userId,
+                    $candidatureId > 0 ? $candidatureId : null,
+                    [
+                        'cover_letter' => $clean($_POST['cover_letter'] ?? ''),
+                        'proposed_budget' => $_POST['proposed_budget'] ?? '',
+                        'estimated_delivery_days' => $_POST['estimated_delivery_days'] ?? '',
+                        'skills_experience' => $clean($_POST['skills_experience'] ?? ''),
+                    ],
+                    $_FILES['attachments'] ?? []
+                );
+                $notice = ['type' => 'success', 'message' => $candidatureId > 0 ? 'Application updated.' : 'Application submitted!'];
+                $redirectAfterPost = $selfRedirect;
+            }
+            if ($action === 'delete_candidature' && $canApplyToJobs) {
+                $offerId = (int)($_POST['offer_id'] ?? 0);
+                if ($controller->deleteCandidatureForFreelancer($offerId, $userId)) {
+                    $notice = ['type' => 'success', 'message' => 'Application deleted.'];
+                } else {
+                    $notice = ['type' => 'error', 'message' => 'Application not found.'];
+                }
+                $redirectAfterPost = $selfRedirect;
+            }
+            if ($action === 'delete_candidature_client' && $isClient) {
+                $offerId = (int)($_POST['offer_id'] ?? 0);
+                $applicationId = (int)($_POST['application_id'] ?? 0);
+                if (!$controller->isOwnedByClient($offerId, $userId)) {
+                    throw new RuntimeException('You can only delete applications for your own offers.');
+                }
+                if ($controller->deleteCandidatureById($applicationId)) {
+                    $notice = ['type' => 'success', 'message' => 'Application removed.'];
+                } else {
+                    $notice = ['type' => 'error', 'message' => 'Application not found.'];
+                }
+                $redirectAfterPost = $selfRedirect;
             }
             if ($action === 'decide_application' && $isClient) {
                 $applicationId = (int)($_POST['application_id'] ?? 0);
@@ -157,14 +194,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (in_array($decision, ['accepted', 'rejected'], true)) {
                     $controller->decideApplication($userId, $applicationId, $decision);
                     if ($decision === 'accepted') {
-                      $offerId = (int)($_POST['offer_id'] ?? 0);
-                      $freelancerId = (int)($_POST['freelancer_id'] ?? 0);
-                      $notice = ['type' => 'success', 'message' => 'Application accepted. Prepare the contract to continue.'];
-                      if ($offerId > 0 && $freelancerId > 0) {
-                        $redirectAfterPost = 'contracts.php?open_create=1&offer_id=' . $offerId . '&freelancer_id=' . $freelancerId;
-                      }
+                        $offerId = (int)($_POST['offer_id'] ?? 0);
+                        $freelancerId = (int)($_POST['freelancer_id'] ?? 0);
+                        $notice = ['type' => 'success', 'message' => 'Application accepted. Prepare the contract to continue.'];
+                        if ($offerId > 0 && $freelancerId > 0) {
+                            $redirectAfterPost = 'contracts.php?open_create=1&offer_id=' . $offerId . '&freelancer_id=' . $freelancerId;
+                        }
                     } else {
-                      $notice = ['type' => 'success', 'message' => 'Application rejected.'];
+                        $notice = ['type' => 'success', 'message' => 'Application rejected.'];
+                        $redirectAfterPost = $selfRedirect;
                     }
                 }
             }
@@ -172,8 +210,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if ($redirectAfterPost !== '') {
-  $_SESSION['contract_notice_front'] = $notice;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  if ($redirectAfterPost === '') {
+    $redirectAfterPost = $selfRedirect;
+  }
+  if (str_starts_with($redirectAfterPost, 'contracts.php')) {
+    $_SESSION['contract_notice_front'] = $notice;
+  } else {
+    $_SESSION['job_offer_notice_front'] = $notice;
+  }
   header('Location: ' . $redirectAfterPost);
   exit;
 }
@@ -193,6 +238,17 @@ $contractStateLabels = [
   'completed' => 'Finalized',
   'refused' => 'Refused',
 ];
+$decodeAttachments = static function (?string $json): array {
+  $decoded = json_decode((string)($json ?? ''), true);
+  return is_array($decoded) ? array_values(array_filter($decoded, 'is_array')) : [];
+};
+$assetPath = static function (?string $path): string {
+  $raw = trim((string)($path ?? ''));
+  if ($raw === '') {
+    return '';
+  }
+  return str_starts_with($raw, 'assets/') ? '../../' . $raw : $raw;
+};
 $localDateTime = static function (?string $value): string {
   if (!$value) {
     return '';
@@ -213,12 +269,11 @@ $statusColors = [
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Browse and post job offers on Diversity.is.">
-  <title>Job Offers — Diversity.is</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <title>Job Offers ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Diversity.is</title>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/home.css">
   <style>
-    /* ── Module content inside home-main ── */
+    /* ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Module content inside home-main ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ */
     .module-page-header { margin-bottom: 20px; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
     .module-page-header-text h2 { font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; color: var(--color-text-primary); margin:0; }
     .module-page-header-text p  { font-size: .84rem; color: var(--color-text-secondary); margin: 4px 0 0; }
@@ -281,6 +336,12 @@ $statusColors = [
     .jo-app-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:9px; padding:9px 12px; }
     .jo-app-applicant { font-size:.79rem; font-weight:600; color:var(--color-text-primary); }
     .jo-app-row-actions { display:flex; gap:5px; }
+    .jo-app-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+    .jo-app-meta-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; background:rgba(99,102,241,.08); color:var(--color-accent); font-size:.68rem; font-weight:600; }
+    .jo-attachment-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .jo-attachment-chip { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:999px; background:rgba(15,23,42,.06); border:1px solid rgba(15,23,42,.08); color:var(--color-text-primary); text-decoration:none; font-size:.7rem; font-weight:600; }
+    .jo-attachment-chip:hover { border-color:rgba(99,102,241,.24); color:var(--color-accent); }
+    .jo-helper-text { font-size:.72rem; color:var(--color-text-muted); line-height:1.45; }
 
     /* Modal */
     .jo-modal-backdrop { position:fixed; inset:0; background:rgba(15,21,42,.42); backdrop-filter:blur(5px); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
@@ -311,7 +372,7 @@ $statusColors = [
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <canvas id="gradient-canvas"></canvas>
 
-  <!-- ── Navbar (identical to home.php) ── -->
+  <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Navbar (identical to home.php) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ -->
   <nav class="navbar" id="navbar" aria-label="Primary navigation">
     <div class="container">
       <a href="home.php" class="navbar-brand" aria-label="Diversity home">
@@ -345,7 +406,7 @@ $statusColors = [
     </div>
   </nav>
 
-  <!-- ── Main Hub (exact home.php layout) ── -->
+  <!-- ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Main Hub (exact home.php layout) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ -->
   <main class="home-hub" id="main-content" tabindex="-1">
     <div class="home-grid container">
 
@@ -373,7 +434,7 @@ $statusColors = [
         </nav>
         <div class="left-gamification">
           <div class="mini-score"><span>Reputation</span><strong><?= $reputationScore ?></strong></div>
-          <div class="mini-score"><span>Daily Streak 🔥</span><strong><?= $streak ?> days</strong></div>
+          <div class="mini-score"><span>Daily Streak ÃƒÆ’Ã‚Â°Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒâ€šÃ‚Â¥</span><strong><?= $streak ?> days</strong></div>
         </div>
       </aside>
 
@@ -392,12 +453,18 @@ $statusColors = [
           <?php endif; ?>
         </div>
 
+        <?php if (!empty($notice['message'])): ?>
+        <div class="module-notice <?= htmlspecialchars((string)($notice['type'] ?? 'success')) ?>">
+          <span><?= htmlspecialchars((string)$notice['message']) ?></span>
+        </div>
+        <?php endif; ?>
+
         <!-- Filter Bar -->
         <form method="get">
           <div class="jo-filters">
             <div class="jo-search-wrap">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input class="jo-search" type="text" name="q" value="<?= htmlspecialchars($filters['q']) ?>" placeholder="Search job offers…">
+              <input class="jo-search" type="text" name="q" value="<?= htmlspecialchars($filters['q']) ?>" placeholder="Search job offersÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦">
             </div>
             <select class="jo-sel" name="status">
               <option value="all" <?= $filters['status']==='all'?'selected':'' ?>>All Status</option>
@@ -407,7 +474,7 @@ $statusColors = [
             </select>
             <select class="jo-sel" name="sort">
               <option value="newest" <?= $filters['sort']==='newest'?'selected':'' ?>>Newest</option>
-              <option value="budget_desc" <?= $filters['sort']==='budget_desc'?'selected':'' ?>>Budget ↓</option>
+              <option value="budget_desc" <?= $filters['sort']==='budget_desc'?'selected':'' ?>>Budget ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ</option>
               <option value="deadline" <?= $filters['sort']==='deadline'?'selected':'' ?>>Deadline</option>
             </select>
             <button type="submit" class="jo-filter-btn">
@@ -480,16 +547,44 @@ $statusColors = [
                 <button type="submit" class="jo-btn jo-btn-danger"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> Delete</button>
               </form>
               <?php endif; ?>
-              <?php if ($canApplyToJobs && $rowStatus === 'open' && !$isOwner): ?>
+              <?php if ($canApplyToJobs && !$isOwner): ?>
                 <?php if ($myApp): ?>
-                <span class="jo-app-pill <?= htmlspecialchars((string)($myApp['status'] ?? 'pending')) ?>">Applied — <?= ucfirst((string)($myApp['status'] ?? 'pending')) ?></span>
+                <span class="jo-app-pill <?= htmlspecialchars((string)($myApp['status'] ?? 'pending')) ?>">Application — <?= ucfirst((string)($myApp['status'] ?? 'pending')) ?></span>
+                <button class="jo-btn jo-btn-ghost" type="button"
+                        onclick='openApplyModal(<?= json_encode([
+                          "offerId" => $rowId,
+                          "title" => (string)($row["title"] ?? ""),
+                          "message" => (string)($myApp["message"] ?? $myApp["cover_letter"] ?? ""),
+                          "candidatureId" => (int)($myApp["candidature_id"] ?? 0),
+                          "proposedBudget" => (string)($myApp["proposed_budget"] ?? ""),
+                          "estimatedDeliveryDays" => (string)($myApp["estimated_delivery_days"] ?? ""),
+                          "skillsExperience" => (string)($myApp["skills_experience"] ?? ""),
+                          "attachments" => $decodeAttachments((string)($myApp["attachments_json"] ?? "")),
+                        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>
+                  Edit application
+                </button>
+                <form method="post" style="display:inline" data-confirm="Delete your application?">
+                  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                  <input type="hidden" name="action" value="delete_candidature">
+                  <input type="hidden" name="offer_id" value="<?= $rowId ?>">
+                  <button type="submit" class="jo-btn jo-btn-danger">Delete</button>
+                </form>
                 <?php if ((string)($myApp['status'] ?? '') === 'accepted' && isset($freelancerContracts[$rowId])): ?>
                 <a class="jo-btn jo-btn-success" href="contracts.php?contract=<?= (int)$freelancerContracts[$rowId]['id'] ?>#contract-<?= (int)$freelancerContracts[$rowId]['id'] ?>">
                   <?= htmlspecialchars($contractStateLabels[(string)($freelancerContracts[$rowId]['workflow_state'] ?? 'waiting_freelancer')] ?? 'Review Contract') ?>
                 </a>
                 <?php endif; ?>
-                <?php else: ?>
-                <button class="jo-btn jo-btn-primary" onclick="openApplyModal(<?= $rowId ?>, '<?= htmlspecialchars(addslashes((string)($row['title'] ?? ''))) ?>')">
+                <?php elseif ($rowStatus === 'open'): ?>
+                <button class="jo-btn jo-btn-primary" type="button" onclick='openApplyModal(<?= json_encode([
+                  "offerId" => $rowId,
+                  "title" => (string)($row["title"] ?? ""),
+                  "message" => "",
+                  "candidatureId" => 0,
+                  "proposedBudget" => "",
+                  "estimatedDeliveryDays" => "",
+                  "skillsExperience" => "",
+                  "attachments" => [],
+                ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg> Apply Now
                 </button>
                 <?php endif; ?>
@@ -505,18 +600,49 @@ $statusColors = [
               <?php endif; ?>
               <div class="jo-apps-list">
                 <?php foreach ($apps as $app): ?>
+                <?php $appAttachments = $decodeAttachments((string)($app['attachments_json'] ?? '')); ?>
                 <div class="jo-app-row">
-                  <div class="jo-app-applicant"><?= htmlspecialchars(trim((string)($app['first_name'] ?? '') . ' ' . (string)($app['last_name'] ?? ''))) ?></div>
-                  <div class="jo-app-row-actions">
-                    <?php if ((string)($app['status'] ?? '') === 'pending'): ?>
-                    <form method="post" style="display:inline">
-                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                    <div style="min-width:0;">
+                      <div class="jo-app-applicant"><?= htmlspecialchars(trim((string)($app['first_name'] ?? '') . ' ' . (string)($app['last_name'] ?? ''))) ?></div>
+                      <div style="font-size:.72rem;color:var(--color-text-secondary);line-height:1.45;max-width:420px;white-space:pre-line;"><?= htmlspecialchars(mb_strimwidth(trim((string)($app['message'] ?? '')), 0, 140, 'Ã¢â‚¬Â¦')) ?></div>
+                      <div class="jo-app-meta">
+                        <?php if ((float)($app['proposed_budget'] ?? 0) > 0): ?><span class="jo-app-meta-pill">Budget: <?= number_format((float)($app['proposed_budget'] ?? 0), 2) ?> TND</span><?php endif; ?>
+                        <?php if ((int)($app['estimated_delivery_days'] ?? 0) > 0): ?><span class="jo-app-meta-pill">Delivery: <?= (int)($app['estimated_delivery_days'] ?? 0) ?> day<?= (int)($app['estimated_delivery_days'] ?? 0) > 1 ? 's' : '' ?></span><?php endif; ?>
+                      </div>
+                      <?php if (trim((string)($app['skills_experience'] ?? '')) !== ''): ?>
+                      <div class="jo-helper-text" style="max-width:460px;white-space:pre-line;margin-top:6px;"><?= htmlspecialchars(mb_strimwidth(trim((string)($app['skills_experience'] ?? '')), 0, 180, '...')) ?></div>
+                      <?php endif; ?>
+                      <?php if ($appAttachments): ?>
+                      <div class="jo-attachment-list">
+                        <?php foreach ($appAttachments as $attachment): ?>
+                        <?php $attachmentUrl = $assetPath((string)($attachment['path'] ?? '')); ?>
+                        <?php if ($attachmentUrl !== ''): ?>
+                        <a class="jo-attachment-chip" href="<?= htmlspecialchars($attachmentUrl) ?>" target="_blank" rel="noopener noreferrer">
+                          <span>Attachment</span>
+                          <span><?= htmlspecialchars((string)($attachment['original_name'] ?? 'Open file')) ?></span>
+                        </a>
+                        <?php endif; ?>
+                        <?php endforeach; ?>
+                      </div>
+                      <?php endif; ?>
+                    </div>
+                    <div class="jo-app-row-actions">
+                      <form method="post" style="display:inline" data-confirm="Delete this application?">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                        <input type="hidden" name="action" value="delete_candidature_client">
+                        <input type="hidden" name="offer_id" value="<?= $rowId ?>">
+                        <input type="hidden" name="application_id" value="<?= (int)($app['id'] ?? 0) ?>">
+                        <button type="submit" class="jo-btn jo-btn-danger" style="padding:4px 9px;font-size:.73rem;">Delete</button>
+                      </form>
+                      <?php if ((string)($app['status'] ?? '') === 'pending'): ?>
+                      <form method="post" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                       <input type="hidden" name="action" value="decide_application">
                       <input type="hidden" name="application_id" value="<?= (int)($app['id'] ?? 0) ?>">
                       <input type="hidden" name="offer_id" value="<?= $rowId ?>">
                       <input type="hidden" name="freelancer_id" value="<?= (int)($app['freelancer_id'] ?? 0) ?>">
-                      <button name="decision" value="accepted" class="jo-btn jo-btn-success" style="padding:4px 9px;font-size:.73rem;">✓ Accept</button>
-                      <button name="decision" value="rejected" class="jo-btn jo-btn-danger" style="padding:4px 9px;font-size:.73rem;">✗ Reject</button>
+                      <button name="decision" value="accepted" class="jo-btn jo-btn-success" style="padding:4px 9px;font-size:.73rem;">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ Accept</button>
+                      <button name="decision" value="rejected" class="jo-btn jo-btn-danger" style="padding:4px 9px;font-size:.73rem;">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Reject</button>
                     </form>
                     <?php else: ?>
                       <span class="jo-app-pill <?= htmlspecialchars((string)($app['status'] ?? 'pending')) ?>" style="padding:3px 8px;font-size:.72rem;"><?= ucfirst((string)($app['status'] ?? 'pending')) ?></span>
@@ -560,7 +686,7 @@ $statusColors = [
           <div class="jo-fg"><label class="jo-fl">Project Type</label><select name="project_type" class="jo-fsel"><option value="Fixed Price">Fixed Price</option><option value="Hourly">Hourly</option><option value="Retainer">Retainer</option><option value="Long-term">Long-term</option></select></div>
           <div class="jo-fg full"><label class="jo-fl">Location</label><input type="text" name="location" class="jo-fi" placeholder="e.g. Remote, Tunis, Paris"></div>
           <div class="jo-fg full"><label class="jo-fl">Required Skills <span style="font-weight:400;color:var(--color-text-muted)">(comma-separated)</span></label><input type="text" name="skills_required" class="jo-fi" placeholder="React, Node.js, PostgreSQL"></div>
-          <div class="jo-fg full"><label class="jo-fl">Description *</label><textarea name="description" class="jo-fta" placeholder="Describe the project, responsibilities, and expectations…" required></textarea></div>
+          <div class="jo-fg full"><label class="jo-fl">Description *</label><textarea name="description" class="jo-fta" placeholder="Describe the project, responsibilities, and expectationsÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦" required></textarea></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
           <button type="button" class="jo-btn jo-btn-ghost" onclick="document.getElementById('createModal').classList.remove('open')">Cancel</button>
@@ -606,20 +732,41 @@ $statusColors = [
   <!-- Apply Modal -->
   <?php if ($canApplyToJobs): ?>
   <div class="jo-modal-backdrop" id="applyModal" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="jo-modal" style="max-width:460px;">
+    <div class="jo-modal" style="max-width:560px;">
       <div class="jo-modal-head">
         <h3 id="applyModalTitle">Apply to Offer</h3>
         <button class="jo-modal-close" onclick="document.getElementById('applyModal').classList.remove('open')" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <form method="post">
+      <form method="post" id="applyOfferForm" novalidate enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
         <input type="hidden" name="action" value="apply_offer">
         <input type="hidden" name="offer_id" id="applyOfferId" value="">
-        <div class="jo-fg" style="margin-bottom:14px;">
-          <label class="jo-fl">Cover Letter <span style="font-weight:400;color:var(--color-text-muted)">(optional)</span></label>
-          <textarea name="cover_letter" class="jo-fta" placeholder="Briefly explain why you're the right fit…"></textarea>
+        <input type="hidden" name="candidature_id" id="applyCandidatureId" value="">
+          <div class="jo-fg" style="margin-bottom:14px;">
+          <label class="jo-fl">Application Message *</label>
+          <textarea name="cover_letter" id="applyCoverLetter" class="jo-fta" placeholder="Briefly explain why you're the right fit..." required></textarea>
+          <div class="jo-fgrid" style="margin-top:14px;">
+            <div class="jo-fg">
+              <label class="jo-fl">Proposed Budget (TND) *</label>
+              <input type="number" name="proposed_budget" id="applyProposedBudget" class="jo-fi" min="0" step="0.01" placeholder="1200.00" required>
+            </div>
+            <div class="jo-fg">
+              <label class="jo-fl">Estimated Delivery Time (days) *</label>
+              <input type="number" name="estimated_delivery_days" id="applyEstimatedDeliveryDays" class="jo-fi" min="1" step="1" placeholder="14" required>
+            </div>
+            <div class="jo-fg full">
+              <label class="jo-fl">Skills / Experience *</label>
+              <textarea name="skills_experience" id="applySkillsExperience" class="jo-fta" placeholder="Summarize the skills, tools, and relevant experience you will bring..." required></textarea>
+            </div>
+            <div class="jo-fg full">
+              <label class="jo-fl">Attachments (Optional)</label>
+              <input type="file" name="attachments[]" id="applyAttachments" class="jo-fi" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.rar,.7z,.png,.jpg,.jpeg,.webp" multiple>
+              <div class="jo-helper-text">Upload up to 3 supporting files such as a CV or portfolio. Leave this empty while editing to keep the current attachments.</div>
+              <div class="jo-attachment-list" id="applyAttachmentList"></div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;">
           <button type="button" class="jo-btn jo-btn-ghost" onclick="document.getElementById('applyModal').classList.remove('open')">Cancel</button>
           <button type="submit" class="jo-btn jo-btn-primary"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg> Submit</button>
         </div>
@@ -627,9 +774,29 @@ $statusColors = [
     </div>
   </div>
   <script>
-  function openApplyModal(id, title) {
-    document.getElementById('applyOfferId').value = id;
-    document.getElementById('applyModalTitle').textContent = 'Apply: ' + title;
+  function renderApplyAttachments(attachments) {
+    const list = document.getElementById('applyAttachmentList');
+    if (!list) return;
+    list.innerHTML = '';
+    (attachments || []).forEach((attachment) => {
+      const chip = document.createElement('span');
+      chip.className = 'jo-attachment-chip';
+      chip.innerHTML = `<span>Current</span><span>${String(attachment.original_name || 'Attachment')}</span>`;
+      list.appendChild(chip);
+    });
+  }
+
+  function openApplyModal(payload) {
+    const data = payload || {};
+    document.getElementById('applyOfferId').value = data.offerId || 0;
+    document.getElementById('applyModalTitle').textContent = 'Apply: ' + (data.title || 'Offer');
+    document.getElementById('applyCoverLetter').value = data.message || '';
+    document.getElementById('applyCandidatureId').value = data.candidatureId || 0;
+    document.getElementById('applyProposedBudget').value = data.proposedBudget || '';
+    document.getElementById('applyEstimatedDeliveryDays').value = data.estimatedDeliveryDays || '';
+    document.getElementById('applySkillsExperience').value = data.skillsExperience || '';
+    document.getElementById('applyAttachments').value = '';
+    renderApplyAttachments(Array.isArray(data.attachments) ? data.attachments : []);
     document.getElementById('applyModal').classList.add('open');
   }
   </script>
@@ -640,38 +807,14 @@ $statusColors = [
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mouse-tracking.js"></script>
   <script src="../../assets/js/home.js"></script>
-  <script src="../../assets/js/joboffer.js"></script>
+  <script src="../../assets/js/mvc-inline-validation.js"></script>
 
   <script>
-  const notice = <?= json_encode($notice, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-  if (notice && notice.message && window.Swal) {
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: notice.type === 'success' ? 'success' : 'error',
-      title: notice.message,
-      showConfirmButton: false,
-      timer: 3200,
-      timerProgressBar: true,
-    });
-  }
-
   document.querySelectorAll('form[data-confirm]').forEach((form) => {
     form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      Swal.fire({
-        title: 'Are you sure?',
-        text: form.dataset.confirm || 'Please confirm this action.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, continue',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#6366f1',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          form.submit();
-        }
-      });
+      if (!window.confirm(form.dataset.confirm || 'Please confirm this action.')) {
+        event.preventDefault();
+      }
     });
   });
 
@@ -699,3 +842,5 @@ $statusColors = [
   </script>
 </body>
 </html>
+
+

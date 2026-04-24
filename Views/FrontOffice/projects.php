@@ -20,12 +20,18 @@ $reputationScore = 84; $level = 'Level 12'; $streak = 7;
 
 if (empty($_SESSION['csrf_token_front'])) { $_SESSION['csrf_token_front'] = bin2hex(random_bytes(24)); }
 $csrfToken = (string)$_SESSION['csrf_token_front'];
-$notice    = ['type' => '', 'message' => ''];
+$notice    = $_SESSION['projects_notice_front'] ?? ['type' => '', 'message' => ''];
+unset($_SESSION['projects_notice_front']);
 $clean     = static fn($v): string => trim((string)($v ?? ''));
+$currentPage = basename(parse_url((string)($_SERVER['REQUEST_URI'] ?? 'projects.php'), PHP_URL_PATH) ?: 'projects.php');
+$currentQuery = (string)($_SERVER['QUERY_STRING'] ?? '');
+$selfRedirect = $currentPage . ($currentQuery !== '' ? '?' . $currentQuery : '');
+$redirectAfterPost = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($csrfToken, (string)($_POST['csrf_token'] ?? ''))) {
         $notice = ['type' => 'error', 'message' => 'Invalid security token.'];
+        $redirectAfterPost = $selfRedirect;
     } else {
         $action = strtolower($clean($_POST['action'] ?? ''));
         try {
@@ -36,15 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'short_description' => $clean($_POST['short_description'] ?? ''),
                     'technologies'      => $clean($_POST['technologies'] ?? ''),
                     'status'            => strtolower($clean($_POST['status'] ?? 'planning')),
-                    'progress_percent'  => max(0, min(100, (int)($_POST['progress_percent'] ?? 0))),
-                    'budget'            => max(0, (float)($_POST['budget'] ?? 0)),
-                    'due_date'          => $controller->parseDate($clean($_POST['due_date'] ?? '')),
+                    'progress_percent'  => $_POST['progress_percent'] ?? 0,
+                    'budget'            => $_POST['budget'] ?? '',
+                    'due_date'          => $clean($_POST['due_date'] ?? ''),
                     'owner_id'          => $userId,
                     'visibility'        => strtolower($clean($_POST['visibility'] ?? 'team')),
                 ];
-                if ($payload['title'] === '' || $payload['description'] === '') throw new RuntimeException('Title and description are required.');
                 $controller->create($payload);
                 $notice = ['type' => 'success', 'message' => 'Project created successfully!'];
+                $redirectAfterPost = $selfRedirect;
             }
             if ($action === 'update_project') {
                 $pid     = (int)($_POST['project_id'] ?? 0);
@@ -54,26 +60,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'short_description' => $clean($_POST['short_description'] ?? ''),
                     'technologies'      => $clean($_POST['technologies'] ?? ''),
                     'status'            => strtolower($clean($_POST['status'] ?? 'planning')),
-                    'progress_percent'  => max(0, min(100, (int)($_POST['progress_percent'] ?? 0))),
-                    'budget'            => max(0, (float)($_POST['budget'] ?? 0)),
-                    'due_date'          => $controller->parseDate($clean($_POST['due_date'] ?? '')),
+                    'progress_percent'  => $_POST['progress_percent'] ?? 0,
+                    'budget'            => $_POST['budget'] ?? '',
+                    'due_date'          => $clean($_POST['due_date'] ?? ''),
                     'visibility'        => strtolower($clean($_POST['visibility'] ?? 'team')),
                 ];
                 $controller->updateOwnedByUser($pid, $userId, $payload);
                 $notice = ['type' => 'success', 'message' => 'Project updated.'];
+                $redirectAfterPost = $selfRedirect;
             }
             if ($action === 'delete_project') {
                 $controller->deleteOwnedByUser((int)($_POST['project_id'] ?? 0), $userId);
                 $notice = ['type' => 'success', 'message' => 'Project deleted.'];
+                $redirectAfterPost = $selfRedirect;
+            }
+            if ($action === 'create_task') {
+                $controller->createTask([
+                    'projet_id' => (int)($_POST['projet_id'] ?? 0),
+                    'title' => $clean($_POST['title'] ?? ''),
+                    'description' => $clean($_POST['description'] ?? ''),
+                    'status' => strtolower($clean($_POST['status'] ?? 'todo')),
+                    'deadline' => $clean($_POST['deadline'] ?? ''),
+                    'owner_id' => $userId,
+                ]);
+                $notice = ['type' => 'success', 'message' => 'Task created successfully.'];
+                $redirectAfterPost = $selfRedirect;
+            }
+            if ($action === 'update_task') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $controller->updateTaskForOwner($taskId, $userId, [
+                    'title' => $clean($_POST['title'] ?? ''),
+                    'description' => $clean($_POST['description'] ?? ''),
+                    'status' => strtolower($clean($_POST['status'] ?? 'todo')),
+                    'deadline' => $clean($_POST['deadline'] ?? ''),
+                ]);
+                $notice = ['type' => 'success', 'message' => 'Task updated.'];
+                $redirectAfterPost = $selfRedirect;
+            }
+            if ($action === 'delete_task') {
+                $taskId = (int)($_POST['task_id'] ?? 0);
+                $controller->deleteTaskForOwner($taskId, $userId);
+                $notice = ['type' => 'success', 'message' => 'Task deleted.'];
+                $redirectAfterPost = $selfRedirect;
             }
         } catch (Throwable $e) { $notice = ['type' => 'error', 'message' => $e->getMessage()]; }
     }
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_SESSION['projects_notice_front'] = $notice;
+    header('Location: ' . ($redirectAfterPost !== '' ? $redirectAfterPost : $selfRedirect));
+    exit;
 }
 $filters = [
     'q' => $clean($_GET['q'] ?? ''), 'status' => $clean($_GET['status'] ?? 'all'),
     'visibility' => $clean($_GET['visibility'] ?? 'all'), 'sort' => $clean($_GET['sort'] ?? 'newest'),
 ];
 $rows = $controller->listFrontofficeRows($userId, $filters);
+$projectIds = array_map(static fn(array $row): int => (int) ($row['id'] ?? 0), $rows);
+$tasksByProject = $projectIds !== [] ? $controller->tasksMapForProjects($projectIds) : [];
 $statusMeta = [
     'planning'  => ['bg'=>'rgba(99,102,241,.1)',   'text'=>'#6366f1','dot'=>'#6366f1','label'=>'Planning'],
     'active'    => ['bg'=>'rgba(5,150,105,.1)',    'text'=>'#059669','dot'=>'#10b981','label'=>'Active'],
@@ -89,7 +133,6 @@ $statusMeta = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Explore and manage collaborative projects on Diversity.is.">
   <title>Projects — Diversity.is</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/home.css">
   <style>
@@ -244,6 +287,12 @@ $statusMeta = [
           </button>
         </div>
 
+        <?php if (!empty($notice['message'])): ?>
+        <div class="module-notice <?= htmlspecialchars((string)($notice['type'] ?? 'success')) ?>">
+          <span><?= htmlspecialchars((string)$notice['message']) ?></span>
+        </div>
+        <?php endif; ?>
+
         <form method="get">
           <div class="pj-filters">
             <div class="pj-search-wrap">
@@ -288,6 +337,7 @@ $statusMeta = [
             $budget   = (float)($row['budget'] ?? 0);
             $shortDesc= trim((string)($row['short_description'] ?? '')) ?: trim((string)($row['description'] ?? ''));
             $pVis     = (string)($row['visibility'] ?? 'team');
+            $projectTasks = $tasksByProject[$pId] ?? [];
           ?>
           <div class="pj-card">
             <div class="pj-card-banner"></div>
@@ -311,15 +361,47 @@ $statusMeta = [
                 </div>
                 <span class="pj-vis-pill"><?= ucfirst($pVis) ?></span>
               </div>
+              <?php if (!empty($projectTasks)): ?>
+              <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--color-border);padding-top:10px;">
+                <div style="font-size:.74rem;font-weight:600;color:var(--color-text-muted);display:flex;justify-content:space-between;align-items:center;">
+                  <span>Tasks</span>
+                  <span><?= count($projectTasks) ?></span>
+                </div>
+                <?php foreach ($projectTasks as $task): ?>
+                <div style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+                    <strong style="font-size:.8rem;color:var(--color-text-primary);"><?= htmlspecialchars((string)($task['title'] ?? '')) ?></strong>
+                    <span style="font-size:.68rem;font-weight:700;color:var(--color-accent);text-transform:uppercase;letter-spacing:.04em;"><?= htmlspecialchars((string)($task['status'] ?? 'todo')) ?></span>
+                  </div>
+                  <?php if (trim((string)($task['description'] ?? '')) !== ''): ?><div style="font-size:.72rem;color:var(--color-text-secondary);line-height:1.5;"><?= htmlspecialchars(mb_strimwidth(trim((string)($task['description'] ?? '')), 0, 140, '…')) ?></div><?php endif; ?>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-size:.68rem;color:var(--color-text-muted);"><?= htmlspecialchars((string)($task['deadline'] ?? '')) ?></span>
+                    <?php if ($isOwner): ?>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                      <button type="button" class="pj-btn pj-btn-ghost" style="padding:4px 8px;" onclick='openEditTaskModal(<?= (int)($task["id"] ?? 0) ?>, <?= $pId ?>, <?= json_encode((string)($task["title"] ?? ""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode(trim((string)($task["description"] ?? "")), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string)($task["status"] ?? "todo"), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string)($task["deadline"] ?? ""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>Edit</button>
+                      <form method="post" data-confirm="Delete this task?" style="display:inline">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                        <input type="hidden" name="action" value="delete_task">
+                        <input type="hidden" name="task_id" value="<?= (int)($task['id'] ?? 0) ?>">
+                        <button type="submit" class="pj-btn pj-btn-danger" style="padding:4px 8px;">Delete</button>
+                      </form>
+                    </div>
+                    <?php endif; ?>
+                  </div>
+                </div>
+                <?php endforeach; ?>
+              </div>
+              <?php endif; ?>
             </div>
-            <?php if ($isOwner): ?>
+              <?php if ($isOwner): ?>
             <div class="pj-card-footer">
-              <button class="pj-btn pj-btn-ghost" onclick='openEditModal(<?= $pId ?>,<?= json_encode((string)($row['title'] ?? '')) ?>,<?= json_encode(trim((string)($row['description'] ?? ''))) ?>,<?= json_encode(trim((string)($row['short_description'] ?? ''))) ?>,<?= json_encode((string)($row['technologies'] ?? '')) ?>,<?= json_encode($pStatus) ?>,<?= $progress ?>,<?= $budget ?>,<?= json_encode($dueDate) ?>,<?= json_encode($pVis) ?>)'>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit
-              </button>
-              <form method="post" data-confirm="Delete this project?" style="display:inline">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
-                <input type="hidden" name="action" value="delete_project">
+                <button class="pj-btn pj-btn-ghost" onclick='openEditModal(<?= $pId ?>,<?= json_encode((string)($row['title'] ?? '')) ?>,<?= json_encode(trim((string)($row['description'] ?? ''))) ?>,<?= json_encode(trim((string)($row['short_description'] ?? ''))) ?>,<?= json_encode((string)($row['technologies'] ?? '')) ?>,<?= json_encode($pStatus) ?>,<?= $progress ?>,<?= $budget ?>,<?= json_encode($dueDate) ?>,<?= json_encode($pVis) ?>)'>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit
+                </button>
+                <button type="button" class="pj-btn pj-btn-primary" onclick='openTaskModal(<?= $pId ?>, <?= json_encode((string)($row["title"] ?? ""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>Add Task</button>
+                <form method="post" data-confirm="Delete this project?" style="display:inline">
+                  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                  <input type="hidden" name="action" value="delete_project">
                 <input type="hidden" name="project_id" value="<?= $pId ?>">
                 <button type="submit" class="pj-btn pj-btn-danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> Delete</button>
               </form>
@@ -392,6 +474,54 @@ $statusMeta = [
     </div>
   </div>
 
+  <div class="pj-modal-backdrop" id="taskModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="pj-modal">
+      <div class="pj-modal-head">
+        <h3 id="taskModalTitle">Add Task</h3>
+        <button class="pj-modal-close" onclick="document.getElementById('taskModal').classList.remove('open')" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <form method="post" id="createTaskForm" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+        <input type="hidden" name="action" value="create_task">
+        <input type="hidden" name="projet_id" id="taskProjectId">
+        <div class="pj-fgrid">
+          <div class="pj-fg full"><label class="pj-fl">Task Title *</label><input type="text" name="title" class="pj-fi" required></div>
+          <div class="pj-fg full"><label class="pj-fl">Description *</label><textarea name="description" class="pj-fta" required></textarea></div>
+          <div class="pj-fg"><label class="pj-fl">Status</label><select name="status" class="pj-fsel"><option value="todo">Todo</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select></div>
+          <div class="pj-fg"><label class="pj-fl">Deadline</label><input type="date" name="deadline" class="pj-fi"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+          <button type="button" class="pj-btn pj-btn-ghost" onclick="document.getElementById('taskModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="pj-btn pj-btn-primary">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="pj-modal-backdrop" id="editTaskModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="pj-modal">
+      <div class="pj-modal-head">
+        <h3>Edit Task</h3>
+        <button class="pj-modal-close" onclick="document.getElementById('editTaskModal').classList.remove('open')" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <form method="post" id="editTaskForm" novalidate>
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+        <input type="hidden" name="action" value="update_task">
+        <input type="hidden" name="task_id" id="editTaskId">
+        <div class="pj-fgrid">
+          <div class="pj-fg full"><label class="pj-fl">Task Title *</label><input type="text" name="title" id="editTaskTitle" class="pj-fi" required></div>
+          <div class="pj-fg full"><label class="pj-fl">Description *</label><textarea name="description" id="editTaskDescription" class="pj-fta" required></textarea></div>
+          <div class="pj-fg"><label class="pj-fl">Status</label><select name="status" id="editTaskStatus" class="pj-fsel"><option value="todo">Todo</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select></div>
+          <div class="pj-fg"><label class="pj-fl">Deadline</label><input type="date" name="deadline" id="editTaskDeadline" class="pj-fi"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+          <button type="button" class="pj-btn pj-btn-ghost" onclick="document.getElementById('editTaskModal').classList.remove('open')">Cancel</button>
+          <button type="submit" class="pj-btn pj-btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
   function openEditModal(id,title,desc,shortDesc,tech,status,progress,budget,dueDate,visibility){
     document.getElementById('editProjectId').value   = id;
@@ -406,6 +536,19 @@ $statusMeta = [
     document.getElementById('editVisibility').value  = visibility;
     document.getElementById('editModal').classList.add('open');
   }
+  function openTaskModal(projectId, projectTitle){
+    document.getElementById('taskProjectId').value = projectId;
+    document.getElementById('taskModalTitle').textContent = 'Add Task: ' + (projectTitle || '');
+    document.getElementById('taskModal').classList.add('open');
+  }
+  function openEditTaskModal(taskId, projectId, title, description, status, deadline){
+    document.getElementById('editTaskId').value = taskId;
+    document.getElementById('editTaskTitle').value = title || '';
+    document.getElementById('editTaskDescription').value = description || '';
+    document.getElementById('editTaskStatus').value = status || 'todo';
+    document.getElementById('editTaskDeadline').value = deadline || '';
+    document.getElementById('editTaskModal').classList.add('open');
+  }
   </script>
 
   <div class="home-toast-stack" id="homeToastStack" aria-live="polite"></div>
@@ -413,38 +556,14 @@ $statusMeta = [
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mouse-tracking.js"></script>
   <script src="../../assets/js/home.js"></script>
-  <script src="../../assets/js/project.js"></script>
+  <script src="../../assets/js/mvc-inline-validation.js"></script>
 
   <script>
-  const notice = <?= json_encode($notice, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-  if (notice && notice.message && window.Swal) {
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: notice.type === 'success' ? 'success' : 'error',
-      title: notice.message,
-      showConfirmButton: false,
-      timer: 3200,
-      timerProgressBar: true,
-    });
-  }
-
   document.querySelectorAll('form[data-confirm]').forEach((form) => {
     form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      Swal.fire({
-        title: 'Are you sure?',
-        text: form.dataset.confirm || 'Please confirm this action.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, continue',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#6366f1',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          form.submit();
-        }
-      });
+      if (!window.confirm(form.dataset.confirm || 'Please confirm this action.')) {
+        event.preventDefault();
+      }
     });
   });
 

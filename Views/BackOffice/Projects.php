@@ -69,6 +69,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->deleteById($projectId);
                 $notice = ['type' => 'success', 'message' => 'Project deleted.'];
             }
+
+            if ($action === 'create_task') {
+                $controller->createTask([
+                    'projet_id' => (int) ($_POST['projet_id'] ?? 0),
+                    'title' => $clean($_POST['title'] ?? ''),
+                    'description' => $clean($_POST['description'] ?? ''),
+                    'status' => strtolower($clean($_POST['status'] ?? 'todo')),
+                    'deadline' => $controller->parseDate($clean($_POST['deadline'] ?? '')),
+                ]);
+                $notice = ['type' => 'success', 'message' => 'Task created.'];
+            }
+
+            if ($action === 'update_task') {
+                $taskId = (int) ($_POST['task_id'] ?? 0);
+                $controller->updateTask($taskId, [
+                    'title' => $clean($_POST['title'] ?? ''),
+                    'description' => $clean($_POST['description'] ?? ''),
+                    'status' => strtolower($clean($_POST['status'] ?? 'todo')),
+                    'deadline' => $controller->parseDate($clean($_POST['deadline'] ?? '')),
+                ]);
+                $notice = ['type' => 'success', 'message' => 'Task updated.'];
+            }
+
+            if ($action === 'delete_task') {
+                $taskId = (int) ($_POST['task_id'] ?? 0);
+                $controller->deleteTask($taskId);
+                $notice = ['type' => 'success', 'message' => 'Task deleted.'];
+            }
         } catch (Throwable $exception) {
             $notice = ['type' => 'error', 'message' => $exception->getMessage()];
         }
@@ -77,6 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $users = $controller->listUsers();
 $rows = $controller->listBackofficeRows();
+$projectIds = array_map(static fn(array $row): int => (int) ($row['id'] ?? 0), $rows);
+$tasksByProject = $projectIds !== [] ? $controller->tasksMapForProjects($projectIds) : [];
 $stats = $controller->buildBackofficeStats($rows);
 
 $sessionUser = UserController::currentUser() ?? [];
@@ -420,6 +450,53 @@ $navItems = [
                     </table>
                 </div>
             </section>
+
+            <section class="card span-12 animate-enter" style="animation-delay: 0.22s;" id="tasks-list">
+                <div class="section-head"><h2>Tasks per project</h2><span style="font-size:0.8rem;color:var(--b-text-muted);"><?= count($rows) ?> projects</span></div>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <?php foreach ($rows as $row):
+                        $pId = (int) ($row['id'] ?? 0);
+                        $projectTasks = $tasksByProject[$pId] ?? [];
+                    ?>
+                    <div style="border:1px solid #dfe6ff;border-radius:18px;padding:14px;background:#fbfcff;">
+                        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+                            <div>
+                                <strong style="font-size:.92rem;color:#1f2a44;"><?= htmlspecialchars((string) ($row['title'] ?? '')) ?></strong>
+                                <div style="font-size:.74rem;color:#6b7693;"><?= count($projectTasks) ?> task<?= count($projectTasks) === 1 ? '' : 's' ?></div>
+                            </div>
+                            <button type="button" class="btn-mini" onclick='openTaskModal(<?= $pId ?>, <?= json_encode((string) ($row["title"] ?? ""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>Add task</button>
+                        </div>
+                        <?php if (empty($projectTasks)): ?>
+                            <div style="font-size:.8rem;color:#6b7693;padding:12px 0;">No tasks yet.</div>
+                        <?php else: ?>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;">
+                                <?php foreach ($projectTasks as $task): ?>
+                                <div style="background:#fff;border:1px solid #dfe6ff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:7px;">
+                                    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+                                        <strong style="font-size:.82rem;color:#1f2a44;"><?= htmlspecialchars((string) ($task['title'] ?? '')) ?></strong>
+                                        <span style="font-size:.67rem;font-weight:700;color:#4f46e5;text-transform:uppercase;"><?= htmlspecialchars((string) ($task['status'] ?? 'todo')) ?></span>
+                                    </div>
+                                    <?php if (trim((string) ($task['description'] ?? '')) !== ''): ?><div style="font-size:.72rem;color:#6b7693;line-height:1.45;"><?= htmlspecialchars(mb_strimwidth(trim((string) ($task['description'] ?? '')), 0, 120, '…')) ?></div><?php endif; ?>
+                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:.68rem;color:#6b7693;"><?= htmlspecialchars((string) ($task['deadline'] ?? '')) ?></span>
+                                        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                                            <button type="button" class="btn-mini" style="padding:.42rem .7rem;" onclick='openEditTaskModal(<?= (int) ($task["id"] ?? 0) ?>, <?= $pId ?>, <?= json_encode((string) ($task["title"] ?? ""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode(trim((string) ($task["description"] ?? "")), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($task["status"] ?? "todo"), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($task["deadline"] ?? ""), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>Edit</button>
+                                            <form method="post" onsubmit="return confirm('Delete this task?');" style="display:inline">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                                                <input type="hidden" name="action" value="delete_task">
+                                                <input type="hidden" name="task_id" value="<?= (int) ($task['id'] ?? 0) ?>">
+                                                <button type="submit" class="btn-mini delete" style="padding:.42rem .7rem;">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
         </div>
 
         <div class="bo-modal-backdrop" id="createProjectModal" onclick="if(event.target===this) closeCreateProjectModal()">
@@ -449,6 +526,58 @@ $navItems = [
                 </form>
             </div>
         </div>
+
+        <div class="bo-modal-backdrop" id="taskModal" onclick="if(event.target===this) closeTaskModal()">
+            <div class="bo-modal">
+                <div class="bo-modal-head">
+                    <h3 id="taskModalTitle">Add Task</h3>
+                    <button type="button" class="bo-modal-close" onclick="closeTaskModal()" aria-label="Close">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <form id="createTaskForm" method="post" class="form-panel" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                    <input type="hidden" name="action" value="create_task">
+                    <input type="hidden" name="projet_id" id="taskProjectId">
+                    <div class="field-grid">
+                        <div class="full"><label>Title</label><input type="text" name="title" required></div>
+                        <div class="full"><label>Description</label><textarea name="description" required></textarea></div>
+                        <div><label>Status</label><select name="status"><option value="todo">Todo</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select></div>
+                        <div><label>Deadline</label><input type="date" name="deadline"></div>
+                    </div>
+                    <div class="bo-modal-actions">
+                        <button type="button" class="bo-modal-btn ghost" onclick="closeTaskModal()">Cancel</button>
+                        <button class="bo-modal-btn primary" type="submit">Save Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="bo-modal-backdrop" id="editTaskModal" onclick="if(event.target===this) closeEditTaskModal()">
+            <div class="bo-modal">
+                <div class="bo-modal-head">
+                    <h3>Edit Task</h3>
+                    <button type="button" class="bo-modal-close" onclick="closeEditTaskModal()" aria-label="Close">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <form id="editTaskForm" method="post" class="form-panel" novalidate>
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                    <input type="hidden" name="action" value="update_task">
+                    <input type="hidden" name="task_id" id="editTaskId">
+                    <div class="field-grid">
+                        <div class="full"><label>Title</label><input type="text" name="title" id="editTaskTitle" required></div>
+                        <div class="full"><label>Description</label><textarea name="description" id="editTaskDescription" required></textarea></div>
+                        <div><label>Status</label><select name="status" id="editTaskStatus"><option value="todo">Todo</option><option value="in_progress">In progress</option><option value="blocked">Blocked</option><option value="done">Done</option></select></div>
+                        <div><label>Deadline</label><input type="date" name="deadline" id="editTaskDeadline"></div>
+                    </div>
+                    <div class="bo-modal-actions">
+                        <button type="button" class="bo-modal-btn ghost" onclick="closeEditTaskModal()">Cancel</button>
+                        <button class="bo-modal-btn primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </main>
 </div>
 
@@ -459,10 +588,29 @@ $navItems = [
     function closeCreateProjectModal(){
         document.getElementById('createProjectModal')?.classList.remove('open');
     }
+    function openTaskModal(projectId, projectTitle){
+        document.getElementById('taskProjectId').value = projectId;
+        document.getElementById('taskModalTitle').textContent = 'Add Task: ' + (projectTitle || '');
+        document.getElementById('taskModal')?.classList.add('open');
+    }
+    function closeTaskModal(){
+        document.getElementById('taskModal')?.classList.remove('open');
+    }
+    function openEditTaskModal(taskId, projectId, title, description, status, deadline){
+        document.getElementById('editTaskId').value = taskId;
+        document.getElementById('editTaskTitle').value = title || '';
+        document.getElementById('editTaskDescription').value = description || '';
+        document.getElementById('editTaskStatus').value = status || 'todo';
+        document.getElementById('editTaskDeadline').value = deadline || '';
+        document.getElementById('editTaskModal')?.classList.add('open');
+    }
+    function closeEditTaskModal(){
+        document.getElementById('editTaskModal')?.classList.remove('open');
+    }
     </script>
 
     <script src="../../assets/js/globe-explorer.js"></script>
-    <script src="../../assets/js/project.js"></script>
+    <script src="../../assets/js/mvc-inline-validation.js"></script>
     <script src="../../assets/js/user.js"></script>
     <script src="../../assets/js/skilluser.js"></script>
     <script src="../../assets/js/backoffice-dashboard.js"></script>

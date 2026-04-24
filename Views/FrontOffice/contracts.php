@@ -67,12 +67,18 @@ $reputationScore = 84; $level = 'Level 12'; $streak = 7;
 
 if (empty($_SESSION['csrf_token_front'])) { $_SESSION['csrf_token_front'] = bin2hex(random_bytes(24)); }
 $csrfToken = (string)$_SESSION['csrf_token_front'];
-$notice    = ['type' => '', 'message' => ''];
+$notice    = $_SESSION['contract_notice_front'] ?? ['type' => '', 'message' => ''];
+unset($_SESSION['contract_notice_front']);
 $clean     = static fn($v): string => trim((string)($v ?? ''));
+$currentPage = basename(parse_url((string)($_SERVER['REQUEST_URI'] ?? 'contracts.php'), PHP_URL_PATH) ?: 'contracts.php');
+$currentQuery = (string)($_SERVER['QUERY_STRING'] ?? '');
+$selfRedirect = $currentPage . ($currentQuery !== '' ? '?' . $currentQuery : '');
+$redirectAfterPost = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($csrfToken, (string)($_POST['csrf_token'] ?? ''))) {
         $notice = ['type' => 'error', 'message' => 'Invalid security token.'];
+        $redirectAfterPost = $selfRedirect;
     } else {
         $action = strtolower($clean($_POST['action'] ?? ''));
         try {
@@ -89,74 +95,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('This contract cannot be created (already exists or application is not accepted).');
               }
 
-              $payload = [
+              $contractId = $controller->create([
                 'job_offer_id' => $offerId,
                 'client_id' => $userId,
                 'freelancer_id' => $freelancerId,
                 'terms' => $clean($_POST['terms'] ?? ''),
-                'status' => strtolower($clean($_POST['status'] ?? 'draft')),
-                'amount' => max(0, (float)($_POST['amount'] ?? 0)),
-                'signed_at' => $controller->parseDateTimeLocal($clean($_POST['signed_at'] ?? '')),
-                'starts_at' => $controller->parseDateTimeLocal($clean($_POST['starts_at'] ?? '')),
-                'ends_at' => $controller->parseDateTimeLocal($clean($_POST['ends_at'] ?? '')),
-                'created_by_client_id' => $userId,
-                'client_signature' => $clean($_POST['client_signature'] ?? ''),
+                'amount' => $_POST['amount'] ?? '',
+                'starts_at' => $clean($_POST['starts_at'] ?? ''),
+                'ends_at' => $clean($_POST['ends_at'] ?? ''),
                 'payment_details' => $clean($_POST['payment_details'] ?? ''),
-              ];
-
-              if ($payload['terms'] === '') {
-                throw new RuntimeException('Contract terms are required.');
-              }
-              if (!in_array($payload['status'], ['draft', 'active', 'signed', 'expired', 'cancelled'], true)) {
-                $payload['status'] = 'draft';
-              }
-
-              $controller->create($payload);
-              $notice = ['type' => 'success', 'message' => 'Contract created successfully. The freelancer can now sign it.'];
+                'created_by_client_id' => $userId,
+              ]);
+              $notice = ['type' => 'success', 'message' => 'Contract created. Add the rules to continue.'];
+              $redirectAfterPost = 'contracts.php?contract=' . $contractId . '&open_rules=1#contract-' . $contractId;
             }
 
             if ($action === 'update_contract' && $isClient) {
-              $updated = $controller->updateByClient((int)($_POST['contract_id'] ?? 0), $userId, [
-                    'terms'     => $clean($_POST['terms'] ?? ''),
-                    'status'    => strtolower($clean($_POST['status'] ?? 'draft')),
-                    'amount'    => max(0, (float)($_POST['amount'] ?? 0)),
-                    'starts_at' => $controller->parseDateTimeLocal($clean($_POST['starts_at'] ?? '')),
-                    'ends_at'   => $controller->parseDateTimeLocal($clean($_POST['ends_at'] ?? '')),
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $updated = $controller->updateByClient($contractId, $userId, [
+                    'terms' => $clean($_POST['terms'] ?? ''),
+                    'amount' => $_POST['amount'] ?? '',
+                    'starts_at' => $clean($_POST['starts_at'] ?? ''),
+                    'ends_at' => $clean($_POST['ends_at'] ?? ''),
+                    'payment_details' => $clean($_POST['payment_details'] ?? ''),
                 ]);
               if (!$updated) {
-                throw new RuntimeException('You can only update your own contracts before the freelancer signs.');
+                throw new RuntimeException('You can only update your own unsigned contracts.');
               }
-                $notice = ['type' => 'success', 'message' => 'Contract updated.'];
+              $notice = ['type' => 'success', 'message' => 'Contract updated.'];
+              $redirectAfterPost = 'contracts.php?contract=' . $contractId . '#contract-' . $contractId;
+            }
+            if ($action === 'save_rules' && $isClient) {
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $controller->saveRulesByClient($contractId, $userId, [
+                'rules_terms' => $clean($_POST['rules_terms'] ?? ''),
+                'rules_deadline' => $clean($_POST['rules_deadline'] ?? ''),
+                'rules_payment_terms' => $clean($_POST['rules_payment_terms'] ?? ''),
+                'rules_penalties' => $clean($_POST['rules_penalties'] ?? ''),
+              ]);
+              $notice = ['type' => 'success', 'message' => 'Rules saved. You can now sign the contract.'];
+              $redirectAfterPost = 'contracts.php?contract=' . $contractId . '#contract-' . $contractId;
             }
             if ($action === 'delete_contract' && $isClient) {
-              $deleted = $controller->deleteByClient((int)($_POST['contract_id'] ?? 0), $userId);
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $deleted = $controller->deleteByClient($contractId, $userId);
               if (!$deleted) {
                 throw new RuntimeException('You can only delete your own unsigned contracts.');
               }
-                $notice = ['type' => 'success', 'message' => 'Contract deleted.'];
+              $notice = ['type' => 'success', 'message' => 'Contract deleted.'];
+              $redirectAfterPost = $selfRedirect;
             }
-            if ($action === 'sign_contract' && $isFreelancer) {
-              $signed = $controller->signByFreelancer((int)($_POST['contract_id'] ?? 0), $userId, $clean($_POST['freelancer_signature'] ?? ''));
+            if ($action === 'sign_client_contract' && $isClient) {
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $signed = $controller->signByClient($contractId, $userId, $clean($_POST['client_signature'] ?? ''));
               if (!$signed) {
                 throw new RuntimeException('Unable to sign this contract.');
               }
-                $notice = ['type' => 'success', 'message' => 'Contract signed successfully.'];
+              $notice = ['type' => 'success', 'message' => 'Client signature saved. Waiting for the freelancer signature.'];
+              $redirectAfterPost = 'contracts.php?contract=' . $contractId . '#contract-' . $contractId;
+            }
+            if ($action === 'sign_contract' && $isFreelancer) {
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $signed = $controller->signByFreelancer($contractId, $userId, $clean($_POST['freelancer_signature'] ?? ''));
+              if (!$signed) {
+                throw new RuntimeException('Unable to sign this contract.');
+              }
+              $notice = ['type' => 'success', 'message' => 'Contract signed successfully.'];
+              $redirectAfterPost = 'contracts.php?contract=' . $contractId . '#contract-' . $contractId;
             }
         } catch (Throwable $e) { $notice = ['type' => 'error', 'message' => $e->getMessage()]; }
     }
 }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $_SESSION['contract_notice_front'] = $notice;
+  header('Location: ' . ($redirectAfterPost !== '' ? $redirectAfterPost : $selfRedirect));
+  exit;
+}
 $contracts = $controller->listUserContracts($userId);
 $acceptedPairs = $isClient ? $controller->listClientAcceptedApplicationsWithoutContract($userId) : [];
+$selectedContractId = (int)($_GET['contract'] ?? 0);
 $prefillOfferId = (int)($_GET['offer_id'] ?? 0);
 $prefillFreelancerId = (int)($_GET['freelancer_id'] ?? 0);
 $openCreateModal = $isClient && ((int)($_GET['open_create'] ?? 0) === 1 || ($prefillOfferId > 0 && $prefillFreelancerId > 0));
-      $localDateTime = static function (?string $value): string {
-        if (!$value) {
-          return '';
-        }
-        $ts = strtotime($value);
-        return $ts ? date('Y-m-d\\TH:i', $ts) : '';
-      };
+$openRulesModal = $isClient && ((int)($_GET['open_rules'] ?? 0) === 1) && $selectedContractId > 0;
+$localDateTime = static function (?string $value): string {
+  if (!$value) {
+    return '';
+  }
+  $ts = strtotime($value);
+  return $ts ? date('Y-m-d\\TH:i', $ts) : '';
+};
 $statTotals = ['total'=>0,'waiting'=>0,'finalized'=>0,'pending'=>0];
 $freelancerPendingToSign = 0;
 foreach ($contracts as $c) {
@@ -184,7 +212,6 @@ $statusMeta = [
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Manage your contracts on Diversity.is.">
   <title>Contracts — Diversity.is</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/home.css">
   <style>
@@ -194,6 +221,7 @@ $statusMeta = [
     .module-notice { display:flex; align-items:center; gap:9px; padding:11px 15px; border-radius:12px; margin-bottom:18px; font-size:.84rem; font-weight:500; animation:mnotice .3s ease; }
     .module-notice.success { background:rgba(5,150,105,.09); border:1px solid rgba(5,150,105,.22); color:#065f46; }
     .module-notice.error   { background:rgba(225,29,72,.08); border:1px solid rgba(225,29,72,.18); color:#9f1239; }
+    .module-notice.info    { background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.18); color:#1d4ed8; }
     @keyframes mnotice { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
 
     /* Info banner */
@@ -224,7 +252,15 @@ $statusMeta = [
     .ct-field-label { font-size:.71rem; color:var(--color-text-muted); font-weight:500; margin-bottom:2px; }
     .ct-field-value { font-size:.88rem; font-weight:600; color:var(--color-text-primary); }
     .ct-field-value.amount { font-size:1.05rem; color:var(--color-accent); }
+    .ct-flow-steps { display:flex; flex-wrap:wrap; gap:8px; padding:14px 18px 0; }
+    .ct-flow-step { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:.7rem; font-weight:700; letter-spacing:.01em; background:var(--color-surface-2); color:var(--color-text-muted); border:1px solid var(--color-border); transition:all .18s ease; }
+    .ct-flow-step.done { background:rgba(5,150,105,.1); color:#065f46; border-color:rgba(5,150,105,.22); }
+    .ct-flow-step.current { background:rgba(99,102,241,.1); color:#4338ca; border-color:rgba(99,102,241,.18); }
     .ct-terms-block { padding:12px 18px; font-size:.81rem; color:var(--color-text-secondary); line-height:1.65; border-top:1px solid var(--color-border); white-space:pre-line; }
+    .ct-rules-grid { padding:12px 18px; border-top:1px solid var(--color-border); display:grid; grid-template-columns:1fr 1fr; gap:12px; background:var(--color-surface); }
+    .ct-rules-grid .full { grid-column:1/-1; }
+    .ct-rules-copy { font-size:.79rem; color:var(--color-text-secondary); line-height:1.6; white-space:pre-line; }
+    .ct-rules-empty { padding:12px 18px; border-top:1px solid var(--color-border); font-size:.79rem; color:var(--color-text-secondary); background:rgba(148,163,184,.06); }
     .ct-card-footer { padding:12px 18px; background:var(--color-surface-2); border-top:1px solid var(--color-border); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
     /* Edit panel */
@@ -270,6 +306,7 @@ $statusMeta = [
     .ct-signature-canvas { width:100%; height:150px; display:block; background:#fff; border:1px solid var(--color-border); border-radius:8px; touch-action:none; cursor:crosshair; }
     .ct-signature-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
     .ct-signature-help { font-size:.72rem; color:var(--color-text-muted); }
+    .ct-sign-modal-copy { font-size:.82rem; color:var(--color-text-secondary); line-height:1.55; margin-bottom:12px; }
 
     /* Empty */
     .ct-empty { text-align:center; padding:44px 20px; }
@@ -281,6 +318,7 @@ $statusMeta = [
       .ct-stats { grid-template-columns:1fr 1fr; }
       .ct-card-body { grid-template-columns:1fr 1fr; }
       .ct-edit-grid { grid-template-columns:1fr 1fr; }
+      .ct-rules-grid { grid-template-columns:1fr; }
     }
     @media(max-width:460px){
       .ct-stats { grid-template-columns:1fr; }
@@ -352,7 +390,7 @@ $statusMeta = [
         <div class="module-page-header">
           <div>
             <h2>Contracts</h2>
-            <p><?= $isClient ? 'Create and manage contracts from accepted job applications.' : 'View and sign contracts assigned to you.' ?></p>
+            <p><?= $isClient ? 'Create the contract first, add the rules next, then sign when everything is ready.' : 'Review contract details and sign after the client completes the setup.' ?></p>
           </div>
           <?php if ($isClient): ?>
             <button type="button" class="ct-btn ct-btn-primary" onclick="openCreateContractModal()">
@@ -362,11 +400,21 @@ $statusMeta = [
           <?php endif; ?>
         </div>
 
+        <?php if (!empty($notice['message'])): ?>
+        <div class="module-notice <?= htmlspecialchars((string)($notice['type'] ?? 'success')) ?>">
+          <span><?= htmlspecialchars((string)$notice['message']) ?></span>
+        </div>
+        <?php elseif ($freelancerPendingToSign > 0): ?>
+        <div class="module-notice info">
+          <span>Your application has been accepted. The contract is ready for your signature.</span>
+        </div>
+        <?php endif; ?>
+
         <div class="ct-info">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
           <div class="ct-info-text">
             <h4>How contracts work</h4>
-            <p><?= $isClient ? 'Accept an application in Job Offers, then create the contract manually here and sign first.' : 'Sign contracts assigned to you after the client signs them.' ?></p>
+            <p><?= $isClient ? 'Step 1: create the contract. Step 2: add the rules. Step 3: sign as client. Step 4: the freelancer signs last.' : 'Wait for the client to create the contract, add the rules, and sign before you complete the final signature.' ?></p>
           </div>
         </div>
 
@@ -434,11 +482,15 @@ $statusMeta = [
                 <input type="hidden" name="action" value="update_contract">
                 <input type="hidden" name="contract_id" value="<?= $cId ?>">
                 <input type="hidden" name="status" value="<?= htmlspecialchars($cStatus) ?>">
-                <div class="ct-edit-grid">
+            <div class="ct-edit-grid">
                   <div><label class="ct-edit-label">Amount (TND)</label><input type="number" name="amount" min="0" step="0.01" value="<?= (float)($row['amount'] ?? 0) ?>" class="ct-edit-input" required></div>
                   <div><label class="ct-edit-label">Start Date</label><input type="datetime-local" name="starts_at" value="<?= htmlspecialchars($localDateTime((string)($row['starts_at'] ?? ''))) ?>" class="ct-edit-input"></div>
                   <div><label class="ct-edit-label">End Date</label><input type="datetime-local" name="ends_at" value="<?= htmlspecialchars($localDateTime((string)($row['ends_at'] ?? ''))) ?>" class="ct-edit-input"></div>
                   <div class="full"><label class="ct-edit-label">Terms</label><textarea name="terms" class="ct-edit-textarea" required><?= htmlspecialchars((string)($row['terms'] ?? '')) ?></textarea></div>
+                  <div class="full"><label class="ct-edit-label">Rules Terms</label><textarea name="rules_terms" class="ct-edit-textarea" required><?= htmlspecialchars((string)($row['rules_terms'] ?? '')) ?></textarea></div>
+                  <div><label class="ct-edit-label">Rules Deadline</label><input type="date" name="rules_deadline" value="<?= htmlspecialchars((string)($row['rules_deadline'] ?? '')) ?>" class="ct-edit-input" required></div>
+                  <div class="full"><label class="ct-edit-label">Payment Terms</label><textarea name="rules_payment_terms" class="ct-edit-textarea" required><?= htmlspecialchars((string)($row['rules_payment_terms'] ?? '')) ?></textarea></div>
+                  <div class="full"><label class="ct-edit-label">Penalties</label><textarea name="rules_penalties" class="ct-edit-textarea" required><?= htmlspecialchars((string)($row['rules_penalties'] ?? '')) ?></textarea></div>
                 </div>
                 <div class="ct-edit-actions">
                   <button type="button" class="ct-btn ct-btn-ghost" onclick="toggleEdit(<?= $cId ?>)">Cancel</button>
@@ -541,6 +593,22 @@ $statusMeta = [
             <input type="text" name="payment_details" class="ct-modal-fi" placeholder="Bank transfer, cash, card, milestone payment..." required>
           </div>
           <div class="ct-modal-fg full">
+            <label class="ct-modal-fl">Rules Terms *</label>
+            <textarea name="rules_terms" class="ct-modal-ta" placeholder="State the rules that apply to this contract..." required></textarea>
+          </div>
+          <div class="ct-modal-fg">
+            <label class="ct-modal-fl">Rules Deadline *</label>
+            <input type="date" name="rules_deadline" class="ct-modal-fi" required>
+          </div>
+          <div class="ct-modal-fg full">
+            <label class="ct-modal-fl">Payment Terms *</label>
+            <textarea name="rules_payment_terms" class="ct-modal-ta" placeholder="Describe the payment schedule and method..." required></textarea>
+          </div>
+          <div class="ct-modal-fg full">
+            <label class="ct-modal-fl">Penalties *</label>
+            <textarea name="rules_penalties" class="ct-modal-ta" placeholder="Describe penalties for late work or breach..." required></textarea>
+          </div>
+          <div class="ct-modal-fg full">
             <label class="ct-modal-fl">Client Signature *</label>
             <div class="ct-signature-wrap">
               <canvas id="clientSignatureCanvas" class="ct-signature-canvas"></canvas>
@@ -600,7 +668,7 @@ $statusMeta = [
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mouse-tracking.js"></script>
   <script src="../../assets/js/home.js"></script>
-  <script src="../../assets/js/contraacts.js"></script>
+  <script src="../../assets/js/mvc-inline-validation.js"></script>
 
   <script>
   const notice = <?= json_encode($notice, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
@@ -735,20 +803,6 @@ $statusMeta = [
     document.getElementById('client_signature'),
     document.getElementById('clearClientSignature')
   );
-
-  const createContractForm = document.getElementById('createContractForm');
-  createContractForm?.addEventListener('submit', (event) => {
-    const signatureField = document.getElementById('client_signature');
-    if (!signatureField || !signatureField.value) {
-      event.preventDefault();
-      Swal.fire({
-        icon: 'warning',
-        title: 'Signature required',
-        text: 'Please sign the contract before creating it.',
-        confirmButtonColor: '#6366f1',
-      });
-    }
-  });
 
   document.querySelectorAll('.ct-sign-trigger').forEach((button) => {
     button.addEventListener('click', () => {

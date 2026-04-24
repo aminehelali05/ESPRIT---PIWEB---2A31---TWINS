@@ -1,16 +1,19 @@
 <?php
 
 include_once(__DIR__ . '/../config.php');
+include_once(__DIR__ . '/RulesController.php');
 
 class ContractController
 {
     private PDO $pdo;
+    private RulesController $rulesController;
     private array $columnCache = [];
 
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? config::getConnexion();
         $this->ensureContractSchema();
+        $this->rulesController = new RulesController($this->pdo);
     }
 
     private function contractHasColumn(string $column): bool
@@ -56,6 +59,16 @@ class ContractController
         $this->ensureColumn('freelancer_refused_at', 'DATETIME NULL');
     }
 
+    private function sanitizeText(string $value): string
+    {
+        return trim(preg_replace('/\s+/', ' ', strip_tags($value)) ?? $value);
+    }
+
+    private function startsWithUppercase(string $value): bool
+    {
+        return (bool) preg_match('/^\p{Lu}/u', $value);
+    }
+
     private function normalizeSignature(string $signature): string
     {
         $signature = trim($signature);
@@ -70,12 +83,105 @@ class ContractController
         return preg_replace('/\s+/', '', $signature) ?? $signature;
     }
 
+    private function normalizeContractPayload(array $payload): array
+    {
+        $title = $this->sanitizeText((string) ($payload['title'] ?? ''));
+        $description = $this->sanitizeText((string) ($payload['description'] ?? ''));
+        $terms = $this->sanitizeText((string) ($payload['terms'] ?? ''));
+        $paymentDetails = $this->sanitizeText((string) ($payload['payment_details'] ?? ''));
+        $amountRaw = trim((string) ($payload['amount'] ?? ''));
+        $amount = is_numeric($amountRaw) ? round((float) $amountRaw, 2) : null;
+
+        if ($title === '') {
+            $title = 'Contract';
+        }
+        if ($terms === '') {
+            throw new RuntimeException('Contract terms are required.');
+        }
+        if (mb_strlen($terms) < 20 || mb_strlen($terms) > 4000) {
+            throw new RuntimeException('Contract terms must be between 20 and 4000 characters.');
+        }
+        if (!$this->startsWithUppercase($terms)) {
+            throw new RuntimeException('Contract terms must start with an uppercase letter.');
+        }
+        if ($paymentDetails === '') {
+            throw new RuntimeException('Payment details are required.');
+        }
+        if (mb_strlen($paymentDetails) < 5 || mb_strlen($paymentDetails) > 2000) {
+            throw new RuntimeException('Payment details must be between 5 and 2000 characters.');
+        }
+        if ($amount === null || $amount <= 0) {
+            throw new RuntimeException('Amount must be greater than 0.');
+        }
+        if ($amount > 10000000) {
+            throw new RuntimeException('Amount is too high.');
+        }
+
+        $startsAtRaw = trim((string) ($payload['starts_at'] ?? ''));
+        $endsAtRaw = trim((string) ($payload['ends_at'] ?? ''));
+        $deadlineAtRaw = trim((string) ($payload['deadline_at'] ?? ''));
+        $startsAt = $this->parseDateTimeLocal($startsAtRaw);
+        $endsAt = $this->parseDateTimeLocal($endsAtRaw);
+        $deadlineAt = $this->parseDateTimeLocal($deadlineAtRaw);
+
+        if ($startsAtRaw !== '' && $startsAt === null) {
+            throw new RuntimeException('Start date is invalid.');
+        }
+        if ($endsAtRaw !== '' && $endsAt === null) {
+            throw new RuntimeException('End date is invalid.');
+        }
+        if ($deadlineAtRaw !== '' && $deadlineAt === null) {
+            throw new RuntimeException('Deadline is invalid.');
+        }
+        if ($startsAt !== null && $endsAt !== null && strtotime($endsAt) <= strtotime($startsAt)) {
+            throw new RuntimeException('End date must be after the start date.');
+        }
+
+        return [
+            'title' => $title,
+            'description' => $description,
+            'terms' => $terms,
+            'payment_details' => $paymentDetails,
+            'amount' => $amount,
+            'deadline_at' => $deadlineAt,
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
+            'created_by_client_id' => (int) ($payload['created_by_client_id'] ?? 0),
+        ];
+    }
+
+    private function extractRulesPayload(array $payload): ?array
+    {
+        $rules = $payload['rules'] ?? [
+            'terms' => (string) ($payload['rules_terms'] ?? ''),
+            'deadline' => (string) ($payload['rules_deadline'] ?? ''),
+            'payment_terms' => (string) ($payload['rules_payment_terms'] ?? ''),
+            'penalties' => (string) ($payload['rules_penalties'] ?? ''),
+        ];
+
+        $hasContent = false;
+        foreach ($rules as $value) {
+            if (trim((string) $value) !== '') {
+                $hasContent = true;
+                break;
+            }
+        }
+
+        return $hasContent ? $rules : null;
+    }
+
     private function fetchContractRowForUpdate(int $contractId): ?array
     {
         $stmt = $this->pdo->prepare('SELECT * FROM contracts WHERE id = :id LIMIT 1 FOR UPDATE');
         $stmt->execute(['id' => $contractId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
+    }
+
+    private function withDerivedStatus(array $row): array
+    {
+        $row['status'] = $this->derivedStatus($row);
+        return $row;
     }
 
     private function derivedStatus(array $row): string
@@ -91,12 +197,6 @@ class ContractController
             return 'waiting';
         }
         return 'draft';
-    }
-
-    private function withDerivedStatus(array $row): array
-    {
-        $row['status'] = $this->derivedStatus($row);
-        return $row;
     }
 
     public function workflowState(array $row): string
@@ -162,10 +262,15 @@ class ContractController
         $sql = 'SELECT c.*,
                        COALESCE(c.title, o.title, CONCAT("Contract #", c.id)) AS contract_title,
                        o.title AS offer_title,
+                       r.terms AS rules_terms,
+                       r.deadline AS rules_deadline,
+                       r.payment_terms AS rules_payment_terms,
+                       r.penalties AS rules_penalties,
                        cu.first_name AS client_first, cu.last_name AS client_last,
                        fu.first_name AS freelancer_first, fu.last_name AS freelancer_last
                 FROM contracts c
                 LEFT JOIN job_offers o ON o.id = c.job_offer_id
+                LEFT JOIN rules r ON r.contract_id = c.id
                 LEFT JOIN users cu ON cu.id = c.client_id
                 LEFT JOIN users fu ON fu.id = c.freelancer_id
                 ORDER BY c.created_at DESC';
@@ -202,10 +307,15 @@ class ContractController
                        COALESCE(c.title, o.title, CONCAT("Contract #", c.id)) AS contract_title,
                        o.title AS offer_title,
                        o.description AS offer_description,
+                       r.terms AS rules_terms,
+                       r.deadline AS rules_deadline,
+                       r.payment_terms AS rules_payment_terms,
+                       r.penalties AS rules_penalties,
                        cu.first_name AS client_first, cu.last_name AS client_last,
                        fu.first_name AS freelancer_first, fu.last_name AS freelancer_last
                 FROM contracts c
                 LEFT JOIN job_offers o ON o.id = c.job_offer_id
+                LEFT JOIN rules r ON r.contract_id = c.id
                 INNER JOIN users cu ON cu.id = c.client_id
                 INNER JOIN users fu ON fu.id = c.freelancer_id
                 WHERE c.client_id = :uid OR c.freelancer_id = :uid
@@ -297,9 +407,7 @@ class ContractController
             $sql = 'SELECT a.id,
                            o.client_id,
                            o.title AS offer_title,
-                           o.description AS offer_description,
-                           o.budget,
-                           o.deadline_at
+                           o.description AS offer_description
                     FROM job_offer_applications a
                     INNER JOIN job_offers o ON o.id = a.job_offer_id
                     LEFT JOIN contracts c ON c.job_offer_id = a.job_offer_id AND c.freelancer_id = a.freelancer_id
@@ -323,55 +431,47 @@ class ContractController
                 throw new RuntimeException('This accepted application is no longer available for contract creation.');
             }
 
-            $title = trim((string) ($payload['title'] ?? ''));
-            $description = trim((string) ($payload['description'] ?? ''));
-            $terms = trim((string) ($payload['terms'] ?? ''));
-            $paymentDetails = trim((string) ($payload['payment_details'] ?? ''));
-            $signature = $this->normalizeSignature((string) ($payload['client_signature'] ?? ''));
-            $deadlineAt = $payload['deadline_at'] ?? null;
-
-            if ($title === '') {
-                $title = 'Contract for ' . trim((string) ($pair['offer_title'] ?? 'this project'));
+            $contractData = $this->normalizeContractPayload($payload + ['created_by_client_id' => $clientId]);
+            if ($contractData['title'] === 'Contract') {
+                $contractData['title'] = 'Contract for ' . trim((string) ($pair['offer_title'] ?? 'this project'));
             }
-            if ($description === '') {
-                $description = trim((string) ($pair['offer_description'] ?? ''));
-            }
-            if ($terms === '') {
-                throw new RuntimeException('Terms are required.');
-            }
-            if ($paymentDetails === '') {
-                throw new RuntimeException('Payment details are required.');
+            if ($contractData['description'] === '') {
+                $contractData['description'] = trim((string) ($pair['offer_description'] ?? ''));
             }
 
             $insert = $this->pdo->prepare('INSERT INTO contracts (
                     job_offer_id, freelancer_id, client_id, title, description, terms, amount,
                     payment_details, deadline_at, starts_at, ends_at, created_by_client_id,
                     client_signed, freelancer_signed, client_signature, freelancer_signature,
-                    created_at, updated_at
+                    signed_at, created_at, updated_at
                 ) VALUES (
                     :job_offer_id, :freelancer_id, :client_id, :title, :description, :terms, :amount,
                     :payment_details, :deadline_at, :starts_at, :ends_at, :created_by_client_id,
-                    1, 0, :client_signature, NULL,
-                    NOW(), NOW()
+                    0, 0, NULL, NULL,
+                    NULL, NOW(), NOW()
                 )');
 
             $insert->execute([
                 'job_offer_id' => $offerId,
                 'freelancer_id' => $freelancerId,
                 'client_id' => $clientId,
-                'title' => $title,
-                'description' => $description ?: null,
-                'terms' => $terms,
-                'amount' => max(0, (float) ($payload['amount'] ?? 0)),
-                'payment_details' => $paymentDetails,
-                'deadline_at' => $deadlineAt,
-                'starts_at' => $payload['starts_at'] ?? null,
-                'ends_at' => $payload['ends_at'] ?? null,
+                'title' => $contractData['title'],
+                'description' => $contractData['description'] !== '' ? $contractData['description'] : null,
+                'terms' => $contractData['terms'],
+                'amount' => $contractData['amount'],
+                'payment_details' => $contractData['payment_details'],
+                'deadline_at' => $contractData['deadline_at'],
+                'starts_at' => $contractData['starts_at'],
+                'ends_at' => $contractData['ends_at'],
                 'created_by_client_id' => $clientId,
-                'client_signature' => $signature,
             ]);
 
             $contractId = (int) $this->pdo->lastInsertId();
+            $rulesPayload = $this->extractRulesPayload($payload);
+            if ($rulesPayload !== null) {
+                $this->rulesController->upsertForContract($contractId, $rulesPayload);
+            }
+
             $this->pdo->commit();
             return $contractId;
         } catch (Throwable $exception) {
@@ -393,17 +493,22 @@ class ContractController
         }
 
         return $this->createFromAcceptedApplication($clientId, $offerId, $freelancerId, [
-            'title' => trim((string) ($payload['title'] ?? '')),
-            'description' => trim((string) ($payload['description'] ?? '')),
-            'terms' => trim((string) ($payload['terms'] ?? '')),
-            'amount' => max(0, (float) ($payload['amount'] ?? 0)),
+            'title' => (string) ($payload['title'] ?? ''),
+            'description' => (string) ($payload['description'] ?? ''),
+            'terms' => (string) ($payload['terms'] ?? ''),
+            'amount' => (string) ($payload['amount'] ?? ''),
             'payment_details' => trim((string) ($payload['payment_details'] ?? '')) !== ''
-                ? trim((string) ($payload['payment_details'] ?? ''))
-                : ('Payment amount: ' . max(0, (float) ($payload['amount'] ?? 0)) . ' TND'),
-            'deadline_at' => $payload['deadline_at'] ?? null,
-            'starts_at' => $payload['starts_at'] ?? null,
-            'ends_at' => $payload['ends_at'] ?? null,
-            'client_signature' => trim((string) ($payload['client_signature'] ?? '')),
+                ? (string) ($payload['payment_details'] ?? '')
+                : ('Payment amount: ' . trim((string) ($payload['amount'] ?? '0')) . ' TND'),
+            'deadline_at' => (string) ($payload['deadline_at'] ?? ''),
+            'starts_at' => (string) ($payload['starts_at'] ?? ''),
+            'ends_at' => (string) ($payload['ends_at'] ?? ''),
+            'rules' => $payload['rules'] ?? [
+                'terms' => (string) ($payload['rules_terms'] ?? ''),
+                'deadline' => (string) ($payload['rules_deadline'] ?? ''),
+                'payment_terms' => (string) ($payload['rules_payment_terms'] ?? ''),
+                'penalties' => (string) ($payload['rules_penalties'] ?? ''),
+            ],
         ]);
     }
 
@@ -416,25 +521,128 @@ class ContractController
 
     public function updateByClient(int $contractId, int $clientId, array $payload): bool
     {
-        $stmt = $this->pdo->prepare('UPDATE contracts
-            SET terms = :terms,
-                amount = :amount,
-                starts_at = :starts_at,
-                ends_at = :ends_at,
-                updated_at = NOW()
-            WHERE id = :id
-              AND client_id = :client_id
-              AND freelancer_signed = 0');
-        $stmt->execute([
-            'terms' => trim((string) ($payload['terms'] ?? '')),
-            'amount' => max(0, (float) ($payload['amount'] ?? 0)),
-            'starts_at' => trim((string) ($payload['starts_at'] ?? '')) ?: null,
-            'ends_at' => trim((string) ($payload['ends_at'] ?? '')) ?: null,
-            'id' => $contractId,
-            'client_id' => $clientId,
-        ]);
+        $this->pdo->beginTransaction();
 
-        return $stmt->rowCount() > 0;
+        try {
+            $contract = $this->fetchContractRowForUpdate($contractId);
+            if (!$contract || (int) ($contract['client_id'] ?? 0) !== $clientId) {
+                return false;
+            }
+            if ((int) ($contract['client_signed'] ?? 0) === 1 || (int) ($contract['freelancer_signed'] ?? 0) === 1) {
+                return false;
+            }
+
+            $clean = $this->normalizeContractPayload($payload + [
+                'title' => (string) ($contract['title'] ?? ''),
+                'description' => (string) ($contract['description'] ?? ''),
+                'created_by_client_id' => (int) ($contract['created_by_client_id'] ?? $clientId),
+            ]);
+
+            $stmt = $this->pdo->prepare('UPDATE contracts
+                SET terms = :terms,
+                    amount = :amount,
+                    payment_details = :payment_details,
+                    starts_at = :starts_at,
+                    ends_at = :ends_at,
+                    deadline_at = :deadline_at,
+                    updated_at = NOW()
+                WHERE id = :id
+                  AND client_id = :client_id
+                  AND client_signed = 0
+                  AND freelancer_signed = 0');
+            $stmt->execute([
+                'terms' => $clean['terms'],
+                'amount' => $clean['amount'],
+                'payment_details' => $clean['payment_details'],
+                'starts_at' => $clean['starts_at'],
+                'ends_at' => $clean['ends_at'],
+                'deadline_at' => $clean['deadline_at'],
+                'id' => $contractId,
+                'client_id' => $clientId,
+            ]);
+
+            $this->pdo->commit();
+            return $stmt->rowCount() > 0;
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function saveRulesByClient(int $contractId, int $clientId, array $payload): int
+    {
+        $this->pdo->beginTransaction();
+
+        try {
+            $contract = $this->fetchContractRowForUpdate($contractId);
+            if (!$contract || (int) ($contract['client_id'] ?? 0) !== $clientId) {
+                throw new RuntimeException('You can only manage rules for your own contracts.');
+            }
+            if ((int) ($contract['client_signed'] ?? 0) === 1 || (int) ($contract['freelancer_signed'] ?? 0) === 1) {
+                throw new RuntimeException('Rules can no longer be changed after signing starts.');
+            }
+
+            $rulesId = $this->rulesController->upsertForContract($contractId, [
+                'terms' => (string) ($payload['rules_terms'] ?? ''),
+                'deadline' => (string) ($payload['rules_deadline'] ?? ''),
+                'payment_terms' => (string) ($payload['rules_payment_terms'] ?? ''),
+                'penalties' => (string) ($payload['rules_penalties'] ?? ''),
+            ]);
+
+            $this->pdo->prepare('UPDATE contracts SET updated_at = NOW() WHERE id = :id')->execute(['id' => $contractId]);
+            $this->pdo->commit();
+            return $rulesId;
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function signByClient(int $contractId, int $clientId, string $signature): bool
+    {
+        $signature = $this->normalizeSignature($signature);
+        $this->pdo->beginTransaction();
+
+        try {
+            $contract = $this->fetchContractRowForUpdate($contractId);
+            if (!$contract || (int) ($contract['client_id'] ?? 0) !== $clientId) {
+                throw new RuntimeException('You cannot sign this contract.');
+            }
+            if ((int) ($contract['client_signed'] ?? 0) === 1) {
+                throw new RuntimeException('This contract has already been signed by the client.');
+            }
+            if ((int) ($contract['freelancer_signed'] ?? 0) === 1) {
+                throw new RuntimeException('This contract has already been finalized.');
+            }
+            if (trim((string) ($contract['freelancer_refused_at'] ?? '')) !== '') {
+                throw new RuntimeException('This contract has already been refused.');
+            }
+            if (!$this->rulesController->findByContractId($contractId)) {
+                throw new RuntimeException('Add the contract rules before signing.');
+            }
+
+            $update = $this->pdo->prepare('UPDATE contracts
+                SET client_signed = 1,
+                    client_signature = :signature,
+                    updated_at = NOW()
+                WHERE id = :id');
+            $update->execute([
+                'signature' => $signature,
+                'id' => $contractId,
+            ]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
     }
 
     public function signByFreelancer(int $contractId, int $freelancerId, string $signature = ''): bool
@@ -447,22 +655,23 @@ class ContractController
             if (!$contract || (int) ($contract['freelancer_id'] ?? 0) !== $freelancerId) {
                 throw new RuntimeException('You cannot sign this contract.');
             }
-
             if ((int) ($contract['client_signed'] ?? 0) !== 1) {
                 throw new RuntimeException('The client must sign first.');
             }
-
             if ((int) ($contract['freelancer_signed'] ?? 0) === 1) {
                 throw new RuntimeException('This contract has already been signed.');
             }
-
             if (trim((string) ($contract['freelancer_refused_at'] ?? '')) !== '') {
                 throw new RuntimeException('This contract has been refused and cannot be signed.');
+            }
+            if (!$this->rulesController->findByContractId($contractId)) {
+                throw new RuntimeException('The contract rules must be completed before signing.');
             }
 
             $update = $this->pdo->prepare('UPDATE contracts
                 SET freelancer_signed = 1,
                     freelancer_signature = :signature,
+                    signed_at = NOW(),
                     updated_at = NOW()
                 WHERE id = :id');
             $update->execute([
@@ -531,6 +740,7 @@ class ContractController
         $stmt = $this->pdo->prepare('DELETE FROM contracts
             WHERE id = :id
               AND client_id = :client_id
+              AND client_signed = 0
               AND freelancer_signed = 0');
 
         $stmt->execute([

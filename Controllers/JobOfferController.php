@@ -1,16 +1,19 @@
 <?php
 
 include_once(__DIR__ . '/../config.php');
+include_once(__DIR__ . '/CandidatureController.php');
 
 class JobOfferController
 {
     private PDO $pdo;
+    private CandidatureController $candidatureController;
     private array $columnCache = [];
 
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? config::getConnexion();
         $this->ensureJobOffersSchema();
+        $this->candidatureController = new CandidatureController($this->pdo);
     }
 
     private function jobOfferHasColumn(string $column): bool
@@ -57,6 +60,88 @@ class JobOfferController
 
         $snippet = preg_replace('/\s+/', ' ', $description);
         return mb_substr((string) $snippet, 0, 120);
+    }
+
+    private function sanitizeText(string $value): string
+    {
+        return trim(preg_replace('/\s+/', ' ', strip_tags($value)) ?? $value);
+    }
+
+    private function normalizeDateTime(?string $value): ?string
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+        $date = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $value) ?: DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s', $value);
+        return $date instanceof DateTimeInterface ? $date->format('Y-m-d H:i:s') : null;
+    }
+
+    private function validateOfferPayload(array $payload): array
+    {
+        $title = $this->sanitizeText((string) ($payload['title'] ?? ''));
+        $description = $this->sanitizeText((string) ($payload['description'] ?? ''));
+        $skills = $this->sanitizeText((string) ($payload['skills_required'] ?? ''));
+        $location = $this->sanitizeText((string) ($payload['location'] ?? ''));
+        $budget = max(0, (float) ($payload['budget'] ?? 0));
+        $deadline = $this->normalizeDateTime((string) ($payload['deadline_at'] ?? ''));
+        $status = strtolower($this->sanitizeText((string) ($payload['status'] ?? 'open')));
+        $experience = $this->sanitizeText((string) ($payload['experience_level'] ?? 'Mid'));
+        $projectType = $this->sanitizeText((string) ($payload['project_type'] ?? 'Fixed Price'));
+        $clientId = (int) ($payload['client_id'] ?? 0);
+
+        if ($title === '') {
+            throw new RuntimeException('Title is required.');
+        }
+        if (mb_strlen($title) < 10 || mb_strlen($title) > 140) {
+            throw new RuntimeException('Title must be between 10 and 140 characters.');
+        }
+        if ($description === '') {
+            throw new RuntimeException('Description is required.');
+        }
+        if (mb_strlen($description) < 40 || mb_strlen($description) > 3500) {
+            throw new RuntimeException('Description must be between 40 and 3500 characters.');
+        }
+        if ($skills !== '' && (mb_strlen($skills) < 3 || mb_strlen($skills) > 255)) {
+            throw new RuntimeException('Skills must be between 3 and 255 characters.');
+        }
+        if ($location !== '' && (mb_strlen($location) < 2 || mb_strlen($location) > 120)) {
+            throw new RuntimeException('Location must be between 2 and 120 characters.');
+        }
+        if ($budget <= 0) {
+            throw new RuntimeException('Budget must be greater than 0.');
+        }
+        if ($budget > 10000000) {
+            throw new RuntimeException('Budget is too high.');
+        }
+        if ($deadline !== null && new DateTimeImmutable($deadline) <= new DateTimeImmutable()) {
+            throw new RuntimeException('Deadline must be in the future.');
+        }
+        if (!in_array($status, ['open', 'in_progress', 'closed', 'archived'], true)) {
+            throw new RuntimeException('Invalid status selected.');
+        }
+        if (!in_array($experience, ['Junior', 'Mid', 'Senior', 'Expert'], true)) {
+            throw new RuntimeException('Invalid experience level.');
+        }
+        if (!in_array($projectType, ['Fixed Price', 'Hourly', 'Retainer', 'Long-term'], true)) {
+            throw new RuntimeException('Invalid project type.');
+        }
+        if ($clientId <= 0) {
+            throw new RuntimeException('Client is required.');
+        }
+
+        return [
+            'title' => $title,
+            'description' => $description,
+            'skills_required' => $skills,
+            'location' => $location,
+            'budget' => $budget,
+            'deadline_at' => $deadline,
+            'status' => $status,
+            'experience_level' => $experience,
+            'project_type' => $projectType,
+            'client_id' => $clientId,
+        ];
     }
 
     public function listUsers(): array
@@ -114,18 +199,19 @@ class JobOfferController
     public function createFromBackoffice(array $payload): int
     {
         $this->ensureJobOffersSchema();
+        $clean = $this->validateOfferPayload($payload);
         $stmt = $this->pdo->prepare('INSERT INTO job_offers (title, description, budget, skills_required, location, experience_level, project_type, status, deadline_at, client_id, created_at, updated_at) VALUES (:title, :description, :budget, :skills_required, :location, :experience_level, :project_type, :status, :deadline_at, :client_id, NOW(), NOW())');
         $stmt->execute([
-            'title' => $this->normalizedTitle($payload),
-            'description' => trim((string) ($payload['description'] ?? '')),
-            'budget' => max(0, (float) ($payload['budget'] ?? 0)),
-            'skills_required' => trim((string) ($payload['skills_required'] ?? '')) ?: null,
-            'location' => trim((string) ($payload['location'] ?? '')) ?: null,
-            'experience_level' => trim((string) ($payload['experience_level'] ?? 'Mid')) ?: 'Mid',
-            'project_type' => trim((string) ($payload['project_type'] ?? 'Fixed Price')) ?: 'Fixed Price',
-            'status' => trim((string) ($payload['status'] ?? 'open')),
-            'deadline_at' => $payload['deadline_at'] ?? null,
-            'client_id' => (int) ($payload['client_id'] ?? 0),
+            'title' => $clean['title'],
+            'description' => $clean['description'],
+            'budget' => $clean['budget'],
+            'skills_required' => $clean['skills_required'] ?: null,
+            'location' => $clean['location'] ?: null,
+            'experience_level' => $clean['experience_level'],
+            'project_type' => $clean['project_type'],
+            'status' => $clean['status'],
+            'deadline_at' => $clean['deadline_at'],
+            'client_id' => $clean['client_id'],
         ]);
         return (int) $this->pdo->lastInsertId();
     }
@@ -138,9 +224,19 @@ class JobOfferController
 
     public function deleteCascade(int $offerId): void
     {
-        $this->pdo->prepare('DELETE FROM job_offer_applications WHERE job_offer_id = :id')->execute(['id' => $offerId]);
-        $this->pdo->prepare('DELETE FROM contracts WHERE job_offer_id = :id')->execute(['id' => $offerId]);
-        $this->pdo->prepare('DELETE FROM job_offers WHERE id = :id')->execute(['id' => $offerId]);
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->prepare('DELETE FROM candidatures WHERE offre_id = :id')->execute(['id' => $offerId]);
+            $this->pdo->prepare('DELETE FROM job_offer_applications WHERE job_offer_id = :id')->execute(['id' => $offerId]);
+            $this->pdo->prepare('DELETE FROM contracts WHERE job_offer_id = :id')->execute(['id' => $offerId]);
+            $this->pdo->prepare('DELETE FROM job_offers WHERE id = :id')->execute(['id' => $offerId]);
+            $this->pdo->commit();
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
     }
 
     public function listFrontofficeRows(array $filters): array
@@ -215,17 +311,18 @@ class JobOfferController
     public function updateOwnedByClient(int $offerId, int $clientId, array $payload): bool
     {
         $this->ensureJobOffersSchema();
+        $clean = $this->validateOfferPayload($payload);
         $stmt = $this->pdo->prepare('UPDATE job_offers SET title = :title, description = :description, budget = :budget, skills_required = :skills_required, location = :location, experience_level = :experience_level, project_type = :project_type, status = :status, deadline_at = :deadline_at, updated_at = NOW() WHERE id = :id AND client_id = :client_id');
         return $stmt->execute([
-            'title' => $this->normalizedTitle($payload),
-            'description' => trim((string) ($payload['description'] ?? '')),
-            'budget' => max(0, (float) ($payload['budget'] ?? 0)),
-            'skills_required' => trim((string) ($payload['skills_required'] ?? '')) ?: null,
-            'location' => trim((string) ($payload['location'] ?? '')) ?: null,
-            'experience_level' => trim((string) ($payload['experience_level'] ?? 'Mid')),
-            'project_type' => trim((string) ($payload['project_type'] ?? 'Fixed Price')),
-            'status' => trim((string) ($payload['status'] ?? 'open')),
-            'deadline_at' => $payload['deadline_at'] ?? null,
+            'title' => $clean['title'],
+            'description' => $clean['description'],
+            'budget' => $clean['budget'],
+            'skills_required' => $clean['skills_required'] ?: null,
+            'location' => $clean['location'] ?: null,
+            'experience_level' => $clean['experience_level'],
+            'project_type' => $clean['project_type'],
+            'status' => $clean['status'],
+            'deadline_at' => $clean['deadline_at'],
             'id' => $offerId,
             'client_id' => $clientId,
         ]);
@@ -244,21 +341,171 @@ class JobOfferController
         return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function applyToOffer(int $offerId, int $freelancerId, ?string $coverLetter): int
+    public function applyToOffer(int $offerId, int $freelancerId, array $payload = [], array $files = []): int
     {
-        $stmt = $this->pdo->prepare('INSERT INTO job_offer_applications (job_offer_id, freelancer_id, cover_letter, status, applied_at, created_at, updated_at) VALUES (:job_offer_id, :freelancer_id, :cover_letter, :status, NOW(), NOW(), NOW())');
-        $stmt->execute([
-            'job_offer_id' => $offerId,
-            'freelancer_id' => $freelancerId,
-            'cover_letter' => $coverLetter ?: null,
-            'status' => 'pending',
-        ]);
-        return (int) $this->pdo->lastInsertId();
+        return $this->saveCandidatureForFreelancer($offerId, $freelancerId, null, $payload, $files);
+    }
+
+    public function saveCandidatureForFreelancer(int $offerId, int $freelancerId, ?int $candidatureId, array $payload, array $files = []): int
+    {
+        $clean = $this->candidatureController->normalizeApplicationPayload($payload);
+
+        $this->pdo->beginTransaction();
+        try {
+            $applicationStmt = $this->pdo->prepare('SELECT * FROM job_offer_applications WHERE job_offer_id = :job_offer_id AND freelancer_id = :freelancer_id LIMIT 1 FOR UPDATE');
+            $applicationStmt->execute([
+                'job_offer_id' => $offerId,
+                'freelancer_id' => $freelancerId,
+            ]);
+            $applicationRow = $applicationStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            if ($candidatureId > 0) {
+                $candidatureStmt = $this->pdo->prepare('SELECT * FROM candidatures WHERE id = :id AND offre_id = :offre_id AND freelancer_id = :freelancer_id LIMIT 1 FOR UPDATE');
+                $candidatureStmt->execute([
+                    'id' => $candidatureId,
+                    'offre_id' => $offerId,
+                    'freelancer_id' => $freelancerId,
+                ]);
+            } else {
+                $candidatureStmt = $this->pdo->prepare('SELECT * FROM candidatures WHERE offre_id = :offre_id AND freelancer_id = :freelancer_id LIMIT 1 FOR UPDATE');
+                $candidatureStmt->execute([
+                    'offre_id' => $offerId,
+                    'freelancer_id' => $freelancerId,
+                ]);
+            }
+            $candidatureRow = $candidatureStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            $attachmentsJson = $this->candidatureController->storeAttachmentsFromFiles($files, $freelancerId);
+            if ($attachmentsJson === null && $candidatureRow) {
+                $attachmentsJson = (string) ($candidatureRow['attachments_json'] ?? '') ?: null;
+            }
+
+            if ($applicationRow) {
+                $updateApp = $this->pdo->prepare('UPDATE job_offer_applications SET cover_letter = :cover_letter, updated_at = NOW() WHERE id = :id');
+                $updateApp->execute([
+                    'cover_letter' => $clean['message'],
+                    'id' => (int) ($applicationRow['id'] ?? 0),
+                ]);
+                $applicationId = (int) ($applicationRow['id'] ?? 0);
+            } else {
+                $insertApp = $this->pdo->prepare('INSERT INTO job_offer_applications (job_offer_id, freelancer_id, cover_letter, status, applied_at, created_at, updated_at) VALUES (:job_offer_id, :freelancer_id, :cover_letter, :status, NOW(), NOW(), NOW())');
+                $insertApp->execute([
+                    'job_offer_id' => $offerId,
+                    'freelancer_id' => $freelancerId,
+                    'cover_letter' => $clean['message'],
+                    'status' => 'pending',
+                ]);
+                $applicationId = (int) $this->pdo->lastInsertId();
+            }
+
+            if ($candidatureRow) {
+                $updateCandidature = $this->pdo->prepare('UPDATE candidatures
+                    SET message = :message,
+                        proposed_budget = :proposed_budget,
+                        estimated_delivery_days = :estimated_delivery_days,
+                        skills_experience = :skills_experience,
+                        attachments_json = :attachments_json,
+                        updated_at = NOW()
+                    WHERE id = :id');
+                $updateCandidature->execute([
+                    'message' => $clean['message'],
+                    'proposed_budget' => $clean['proposed_budget'],
+                    'estimated_delivery_days' => $clean['estimated_delivery_days'],
+                    'skills_experience' => $clean['skills_experience'],
+                    'attachments_json' => $attachmentsJson,
+                    'id' => (int) ($candidatureRow['id'] ?? 0),
+                ]);
+            } else {
+                $insertCandidature = $this->pdo->prepare('INSERT INTO candidatures (
+                    offre_id, freelancer_id, message, proposed_budget, estimated_delivery_days, skills_experience, attachments_json, created_at, updated_at
+                ) VALUES (
+                    :offre_id, :freelancer_id, :message, :proposed_budget, :estimated_delivery_days, :skills_experience, :attachments_json, NOW(), NOW()
+                )');
+                $insertCandidature->execute([
+                    'offre_id' => $offerId,
+                    'freelancer_id' => $freelancerId,
+                    'message' => $clean['message'],
+                    'proposed_budget' => $clean['proposed_budget'],
+                    'estimated_delivery_days' => $clean['estimated_delivery_days'],
+                    'skills_experience' => $clean['skills_experience'],
+                    'attachments_json' => $attachmentsJson,
+                ]);
+            }
+
+            $this->pdo->commit();
+            return $applicationId;
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function deleteCandidatureForFreelancer(int $offerId, int $freelancerId): bool
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $stmt1 = $this->pdo->prepare('DELETE FROM job_offer_applications WHERE job_offer_id = :job_offer_id AND freelancer_id = :freelancer_id');
+            $stmt1->execute(['job_offer_id' => $offerId, 'freelancer_id' => $freelancerId]);
+            $stmt2 = $this->pdo->prepare('DELETE FROM candidatures WHERE offre_id = :offre_id AND freelancer_id = :freelancer_id');
+            $stmt2->execute(['offre_id' => $offerId, 'freelancer_id' => $freelancerId]);
+            $this->pdo->commit();
+            return ($stmt1->rowCount() + $stmt2->rowCount()) > 0;
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function deleteCandidatureById(int $applicationId): bool
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $lookup = $this->pdo->prepare('SELECT job_offer_id, freelancer_id FROM job_offer_applications WHERE id = :id LIMIT 1');
+            $lookup->execute(['id' => $applicationId]);
+            $row = $lookup->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                return false;
+            }
+
+            $this->pdo->prepare('DELETE FROM job_offer_applications WHERE id = :id')->execute(['id' => $applicationId]);
+            $this->pdo->prepare('DELETE FROM candidatures WHERE offre_id = :offre_id AND freelancer_id = :freelancer_id')->execute([
+                'offre_id' => (int) ($row['job_offer_id'] ?? 0),
+                'freelancer_id' => (int) ($row['freelancer_id'] ?? 0),
+            ]);
+            $this->pdo->commit();
+            return true;
+        } catch (Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function listAllCandidatures(): array
+    {
+        $sql = 'SELECT c.id AS candidature_id, c.offre_id, c.freelancer_id, c.message, c.proposed_budget, c.estimated_delivery_days,
+                       c.skills_experience, c.attachments_json, c.created_at AS candidature_created_at,
+                       a.id AS application_id, a.status, a.applied_at, a.decided_at,
+                       o.title AS offer_title, o.client_id, u.first_name, u.last_name, u.email
+                FROM candidatures c
+                INNER JOIN job_offers o ON o.id = c.offre_id
+                INNER JOIN users u ON u.id = c.freelancer_id
+                LEFT JOIN job_offer_applications a ON a.job_offer_id = c.offre_id AND a.freelancer_id = c.freelancer_id
+                ORDER BY c.created_at DESC';
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function freelancerApplicationsMap(int $freelancerId): array
     {
-        $stmt = $this->pdo->prepare('SELECT job_offer_id, status, cover_letter, applied_at FROM job_offer_applications WHERE freelancer_id = :freelancer_id');
+        $stmt = $this->pdo->prepare('SELECT a.id AS application_id, c.id AS candidature_id, a.job_offer_id, a.status, a.cover_letter, a.applied_at,
+                c.message, c.proposed_budget, c.estimated_delivery_days, c.skills_experience, c.attachments_json
+            FROM job_offer_applications a
+            INNER JOIN candidatures c ON c.offre_id = a.job_offer_id AND c.freelancer_id = a.freelancer_id
+            WHERE a.freelancer_id = :freelancer_id');
         $stmt->execute(['freelancer_id' => $freelancerId]);
         $map = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $app) {
@@ -319,9 +566,11 @@ class JobOfferController
 
     public function clientApplicationsByOffer(int $clientId): array
     {
-        $sql = 'SELECT a.*, u.first_name, u.last_name, u.email
+        $sql = 'SELECT a.*, c.id AS candidature_id, c.message, c.proposed_budget, c.estimated_delivery_days,
+                       c.skills_experience, c.attachments_json, u.first_name, u.last_name, u.email
                 FROM job_offer_applications a
                 INNER JOIN job_offers o ON o.id = a.job_offer_id
+                INNER JOIN candidatures c ON c.offre_id = a.job_offer_id AND c.freelancer_id = a.freelancer_id
                 INNER JOIN users u ON u.id = a.freelancer_id
                 WHERE o.client_id = :client_id
                 ORDER BY a.applied_at DESC';

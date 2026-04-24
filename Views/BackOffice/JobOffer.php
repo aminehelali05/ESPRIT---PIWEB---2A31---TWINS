@@ -64,6 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $controller->deleteCascade($offerId);
                 $notice = ['type' => 'success', 'message' => 'Offer deleted.'];
             }
+
+            if ($action === 'delete_candidature') {
+                $applicationId = (int) ($_POST['application_id'] ?? 0);
+                if ($controller->deleteCandidatureById($applicationId)) {
+                    $notice = ['type' => 'success', 'message' => 'Application deleted.'];
+                } else {
+                    $notice = ['type' => 'error', 'message' => 'Application not found.'];
+                }
+            }
         } catch (Throwable $exception) {
             $notice = ['type' => 'error', 'message' => $exception->getMessage()];
         }
@@ -72,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $users = $controller->listUsers();
 $rows = $controller->listBackofficeRows();
+$candidatures = $controller->listAllCandidatures();
 $stats = $controller->buildBackofficeStats($rows);
 
 $sessionUser = UserController::currentUser() ?? [];
@@ -354,7 +364,7 @@ $navItems = [
             <div class="header-actions">
                 <div class="search-bar">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
-                    <input type="text" placeholder="Search offers..." aria-label="Search offers" disabled>
+                    <input type="text" id="jobOfferSearch" placeholder="Search offers or applications..." aria-label="Search offers or applications">
                 </div>
             </div>
         </header>
@@ -412,6 +422,36 @@ $navItems = [
                     </table>
                 </div>
             </section>
+
+            <section class="card span-12 animate-enter" style="animation-delay: 0.22s;" id="candidatures-list">
+                <div class="section-head"><h2>Candidatures</h2><span style="font-size:0.8rem;color:var(--b-text-muted);"><?= count($candidatures) ?> rows</span></div>
+                <div style="overflow-x: auto;">
+                    <table class="elegant-table">
+                        <thead><tr><th>ID</th><th>Offer</th><th>Freelancer</th><th>Message</th><th>Status</th><th>Created</th><th style="text-align:right;">Actions</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($candidatures as $candidature): ?>
+                            <tr>
+                                <td><?= (int) ($candidature['application_id'] ?? $candidature['candidature_id'] ?? 0) ?></td>
+                                <td><strong><?= htmlspecialchars((string) ($candidature['offer_title'] ?? '')) ?></strong></td>
+                                <td><?= htmlspecialchars(trim((string) ($candidature['first_name'] ?? '') . ' ' . (string) ($candidature['last_name'] ?? ''))) ?></td>
+                                <td style="max-width:360px;"><?= htmlspecialchars(mb_strimwidth(trim((string) ($candidature['message'] ?? '')), 0, 120, '…')) ?></td>
+                                <td><?= htmlspecialchars((string) ($candidature['status'] ?? 'pending')) ?></td>
+                                <td><?= htmlspecialchars((string) ($candidature['candidature_created_at'] ?? $candidature['applied_at'] ?? '')) ?></td>
+                                <td style="text-align:right;">
+                                    <form method="post" onsubmit="return confirm('Delete this application?');" style="display:inline">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                                        <input type="hidden" name="action" value="delete_candidature">
+                                        <input type="hidden" name="application_id" value="<?= (int) ($candidature['application_id'] ?? 0) ?>">
+                                        <button class="btn-mini delete" type="submit">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <?php if (!$candidatures): ?><tr><td colspan="7">No candidatures yet.</td></tr><?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
         <div class="bo-modal-backdrop" id="createOfferModal" onclick="if(event.target===this) closeCreateOfferModal()">
@@ -453,10 +493,20 @@ $navItems = [
     function closeCreateOfferModal(){
         document.getElementById('createOfferModal')?.classList.remove('open');
     }
+    const jobOfferSearch = document.getElementById('jobOfferSearch');
+    const filterOfferTables = () => {
+        const term = String(jobOfferSearch?.value || '').trim().toLowerCase();
+        ['offers-list', 'candidatures-list'].forEach((sectionId) => {
+            document.querySelectorAll(`#${sectionId} tbody tr`).forEach((row) => {
+                row.style.display = !term || row.textContent.toLowerCase().includes(term) ? '' : 'none';
+            });
+        });
+    };
+    jobOfferSearch?.addEventListener('input', filterOfferTables);
     </script>
 
     <script src="../../assets/js/globe-explorer.js"></script>
-    <script src="../../assets/js/joboffer.js"></script>
+    <script src="../../assets/js/mvc-inline-validation.js"></script>
     <script src="../../assets/js/user.js"></script>
     <script src="../../assets/js/skilluser.js"></script>
     <script src="../../assets/js/backoffice-dashboard.js"></script>

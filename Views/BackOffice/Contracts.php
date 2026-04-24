@@ -246,6 +246,12 @@ $navItems = [
             background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
         }
         .btn-mini.delete:hover { box-shadow: 0 12px 24px rgba(225, 29, 72, 0.30); }
+        .btn-mini.view {
+            border-color: #a5b4fc;
+            color: #2b3959;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+        }
+        .btn-mini.view:hover { box-shadow: 0 12px 24px rgba(79, 70, 229, 0.16); }
         @media (max-width:1200px) { .action-stack { flex-wrap: wrap; } }
         .module-actions { margin: 0 0 1rem; display:flex; justify-content:flex-end; }
         .bo-modal-backdrop {
@@ -391,10 +397,10 @@ $navItems = [
             </div>
 
             <section class="card span-12 animate-enter" style="animation-delay: 0.18s;" id="contracts-list">
-                <div class="section-head"><h2>Contracts list</h2><span style="font-size:0.8rem;color:var(--b-text-muted);"><?= count($rows) ?> rows</span></div>
-                <div style="overflow-x: auto;">
+                        <div class="section-head"><h2>Contracts list</h2><span style="font-size:0.8rem;color:var(--b-text-muted);"><?= count($rows) ?> rows</span></div>
+                        <div style="overflow-x: auto;">
                     <table class="elegant-table">
-                        <thead><tr><th>ID</th><th>Offer</th><th>Client / Freelancer</th><th>Status</th><th>Amount</th><th style="text-align:right;">Actions</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Offer</th><th>Client / Freelancer</th><th>Status</th><th>Amount</th><th>Rules</th><th style="text-align:right;">Actions</th></tr></thead>
                         <tbody>
                         <?php foreach ($rows as $row): ?>
                             <tr>
@@ -403,8 +409,14 @@ $navItems = [
                                 <td><?= htmlspecialchars(trim((string) ($row['client_first'] ?? '') . ' ' . (string) ($row['client_last'] ?? ''))) ?> / <?= htmlspecialchars(trim((string) ($row['freelancer_first'] ?? '') . ' ' . (string) ($row['freelancer_last'] ?? ''))) ?></td>
                                 <td><?= htmlspecialchars((string) ($row['status'] ?? 'draft')) ?></td>
                                 <td><?= number_format((float) ($row['amount'] ?? 0), 2) ?></td>
+                                <td style="max-width:260px;">
+                                    <div style="font-size:.76rem;color:#5e6b8f;line-height:1.45;"><?= htmlspecialchars(mb_strimwidth(trim((string) ($row['rules_terms'] ?? '')), 0, 80, '…')) ?></div>
+                                    <div style="font-size:.68rem;color:#6b7693;"><?= htmlspecialchars((string) ($row['rules_deadline'] ?? '')) ?></div>
+                                </td>
                                 <td style="text-align:right;">
                                     <div class="action-stack" style="justify-content:flex-end;">
+                                        <button type="button" class="btn-mini view"
+                                                onclick='openContractViewModal(<?= (int) ($row["id"] ?? 0) ?>, <?= json_encode((string) ($row["offer_title"] ?? "Offer"), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode(trim((string) ($row["client_first"] ?? '') . ' ' . (string) ($row["client_last"] ?? '')), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode(trim((string) ($row["freelancer_first"] ?? '') . ' ' . (string) ($row["freelancer_last"] ?? '')), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($row["status"] ?? "draft"), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode(number_format((float) ($row["amount"] ?? 0), 2), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($row["terms"] ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($row["rules_terms"] ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($row["rules_deadline"] ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($row["rules_payment_terms"] ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>, <?= json_encode((string) ($row["rules_penalties"] ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>)'>View</button>
                                         <form method="post" class="action-stack">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>"><input type="hidden" name="action" value="update_contract"><input type="hidden" name="contract_id" value="<?= (int) ($row['id'] ?? 0) ?>">
                                             <select name="status" class="action-select"><?php foreach (['draft', 'active', 'signed', 'expired', 'cancelled'] as $status): ?><option value="<?= $status ?>" <?= (string) ($row['status'] ?? '') === $status ? 'selected' : '' ?>><?= ucfirst($status) ?></option><?php endforeach; ?></select>
@@ -415,7 +427,7 @@ $navItems = [
                                 </td>
                             </tr>
                         <?php endforeach; ?>
-                        <?php if (!$rows): ?><tr><td colspan="6">No contracts yet.</td></tr><?php endif; ?>
+                        <?php if (!$rows): ?><tr><td colspan="7">No contracts yet.</td></tr><?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -442,6 +454,10 @@ $navItems = [
                         <div><label>Start at</label><input type="datetime-local" name="starts_at"></div>
                         <div><label>End at</label><input type="datetime-local" name="ends_at"></div>
                         <div class="full"><label>Terms</label><textarea name="terms"></textarea></div>
+                        <div class="full"><label>Rules Terms</label><textarea name="rules_terms"></textarea></div>
+                        <div><label>Rules Deadline</label><input type="date" name="rules_deadline"></div>
+                        <div class="full"><label>Payment Terms</label><textarea name="rules_payment_terms"></textarea></div>
+                        <div class="full"><label>Penalties</label><textarea name="rules_penalties"></textarea></div>
                         <div class="full">
                             <label>Client signature</label>
                             <div class="bo-signature-wrap">
@@ -459,6 +475,34 @@ $navItems = [
                 </form>
             </div>
         </div>
+
+        <div class="bo-modal-backdrop" id="viewContractModal" onclick="if(event.target===this) closeContractViewModal()">
+            <div class="bo-modal" style="max-width:760px;">
+                <div class="bo-modal-head">
+                    <h3>Contract Details</h3>
+                    <button type="button" class="bo-modal-close" onclick="closeContractViewModal()" aria-label="Close">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+                <div class="form-panel">
+                    <div class="field-grid">
+                        <div class="full"><label>Offer</label><input type="text" id="viewContractOffer" readonly></div>
+                        <div><label>Client</label><input type="text" id="viewContractClient" readonly></div>
+                        <div><label>Freelancer</label><input type="text" id="viewContractFreelancer" readonly></div>
+                        <div><label>Status</label><input type="text" id="viewContractStatus" readonly></div>
+                        <div><label>Amount</label><input type="text" id="viewContractAmount" readonly></div>
+                        <div class="full"><label>Contract Terms</label><textarea id="viewContractTerms" readonly></textarea></div>
+                        <div class="full"><label>Rules Terms</label><textarea id="viewRulesTerms" readonly></textarea></div>
+                        <div><label>Rules Deadline</label><input type="text" id="viewRulesDeadline" readonly></div>
+                        <div class="full"><label>Payment Terms</label><textarea id="viewRulesPayment" readonly></textarea></div>
+                        <div class="full"><label>Penalties</label><textarea id="viewRulesPenalties" readonly></textarea></div>
+                    </div>
+                </div>
+                <div class="bo-modal-actions">
+                    <button type="button" class="bo-modal-btn ghost" onclick="closeContractViewModal()">Close</button>
+                </div>
+            </div>
+        </div>
     </main>
 </div>
 
@@ -468,6 +512,22 @@ $navItems = [
     }
     function closeCreateContractModal(){
         document.getElementById('createContractModal')?.classList.remove('open');
+    }
+    function openContractViewModal(id, offer, client, freelancer, status, amount, terms, rulesTerms, rulesDeadline, rulesPayment, rulesPenalties){
+        document.getElementById('viewContractOffer').value = offer || '';
+        document.getElementById('viewContractClient').value = client || '';
+        document.getElementById('viewContractFreelancer').value = freelancer || '';
+        document.getElementById('viewContractStatus').value = status || '';
+        document.getElementById('viewContractAmount').value = amount || '';
+        document.getElementById('viewContractTerms').value = terms || '';
+        document.getElementById('viewRulesTerms').value = rulesTerms || '';
+        document.getElementById('viewRulesDeadline').value = rulesDeadline || '';
+        document.getElementById('viewRulesPayment').value = rulesPayment || '';
+        document.getElementById('viewRulesPenalties').value = rulesPenalties || '';
+        document.getElementById('viewContractModal')?.classList.add('open');
+    }
+    function closeContractViewModal(){
+        document.getElementById('viewContractModal')?.classList.remove('open');
     }
 
     function setupBackSignaturePad(canvas, hiddenInput, clearButton) {
@@ -550,22 +610,10 @@ $navItems = [
         document.getElementById('backClearSignature')
     );
 
-    document.getElementById('createContractForm')?.addEventListener('submit', (event) => {
-        const signature = document.getElementById('back_client_signature');
-        if (signature && !signature.value) {
-            event.preventDefault();
-            Swal.fire({
-                icon: 'warning',
-                title: 'Signature required',
-                text: 'Please add the client signature before creating the contract.',
-                confirmButtonColor: '#4f46e5'
-            });
-        }
-    });
     </script>
 
     <script src="../../assets/js/globe-explorer.js"></script>
-    <script src="../../assets/js/contraacts.js"></script>
+    <script src="../../assets/js/mvc-inline-validation.js"></script>
     <script src="../../assets/js/user.js"></script>
     <script src="../../assets/js/skilluser.js"></script>
     <script src="../../assets/js/backoffice-dashboard.js"></script>

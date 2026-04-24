@@ -16,6 +16,25 @@ class Project
     private $visibility;
     private $created_at;
     private $updated_at;
+    private $taches = [];
+
+    public function __construct($title = null, $description = null, $cover_image = null, $short_description = null, $technologies = null, $status = null, $progress_percent = null, $budget = null, $due_date = null, $owner_id = null, $visibility = null, $created_at = null, $updated_at = null, $id = null)
+    {
+        $this->title = $title;
+        $this->description = $description;
+        $this->cover_image = $cover_image;
+        $this->short_description = $short_description;
+        $this->technologies = $technologies;
+        $this->status = $status;
+        $this->progress_percent = $progress_percent;
+        $this->budget = $budget;
+        $this->due_date = $due_date;
+        $this->owner_id = $owner_id;
+        $this->visibility = $visibility;
+        $this->created_at = $created_at;
+        $this->updated_at = $updated_at;
+        $this->id = $id;
+    }
 
     public function getId() { return $this->id; }
     public function getTitle() { return $this->title; }
@@ -31,6 +50,7 @@ class Project
     public function getVisibility() { return $this->visibility; }
     public function getCreatedAt() { return $this->created_at; }
     public function getUpdatedAt() { return $this->updated_at; }
+    public function getTaches() { return is_array($this->taches) ? $this->taches : []; }
 
     public function setId($value) { $this->id = $value; }
     public function setTitle($value) { $this->title = $value; }
@@ -46,4 +66,5 @@ class Project
     public function setVisibility($value) { $this->visibility = $value; }
     public function setCreatedAt($value) { $this->created_at = $value; }
     public function setUpdatedAt($value) { $this->updated_at = $value; }
+    public function setTaches($value) { $this->taches = is_array($value) ? $value : []; }
 }

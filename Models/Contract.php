@@ -15,6 +15,24 @@ class Contract
     private $created_by_client_id;
     private $created_at;
     private $updated_at;
+    private $rules = null;
+
+    public function __construct($job_offer_id = null, $freelancer_id = null, $client_id = null, $terms = null, $status = null, $amount = null, $signed_at = null, $starts_at = null, $ends_at = null, $created_by_client_id = null, $created_at = null, $updated_at = null, $id = null)
+    {
+        $this->job_offer_id = $job_offer_id;
+        $this->freelancer_id = $freelancer_id;
+        $this->client_id = $client_id;
+        $this->terms = $terms;
+        $this->status = $status;
+        $this->amount = $amount;
+        $this->signed_at = $signed_at;
+        $this->starts_at = $starts_at;
+        $this->ends_at = $ends_at;
+        $this->created_by_client_id = $created_by_client_id;
+        $this->created_at = $created_at;
+        $this->updated_at = $updated_at;
+        $this->id = $id;
+    }
 
     public function getId() { return $this->id; }
     public function getJobOfferId() { return $this->job_offer_id; }
@@ -29,6 +47,7 @@ class Contract
     public function getCreatedByClientId() { return $this->created_by_client_id; }
     public function getCreatedAt() { return $this->created_at; }
     public function getUpdatedAt() { return $this->updated_at; }
+    public function getRules() { return $this->rules; }
 
     public function setId($value) { $this->id = $value; }
     public function setJobOfferId($value) { $this->job_offer_id = $value; }
@@ -43,4 +62,5 @@ class Contract
     public function setCreatedByClientId($value) { $this->created_by_client_id = $value; }
     public function setCreatedAt($value) { $this->created_at = $value; }
     public function setUpdatedAt($value) { $this->updated_at = $value; }
+    public function setRules($value) { $this->rules = $value; }
 }
