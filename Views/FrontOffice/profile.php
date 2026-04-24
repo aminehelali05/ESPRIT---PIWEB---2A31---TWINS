@@ -4,7 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include_once(__DIR__ . '/../../Controllers/UserController.php');
-include_once(__DIR__ . '/../../Controllers/AssistantController.php');
 
 if (!UserController::isAuthenticated()) {
   $_SESSION['flash_error'] = 'Please sign in to access your profile.';
@@ -13,7 +12,6 @@ if (!UserController::isAuthenticated()) {
 }
 
 $userController = new UserController();
-$assistantBootstrap = AssistantController::bootstrapConfig();
 $db = config::getConnexion();
 
 $tableHasColumn = static function (PDO $dbConn, string $table, string $column): bool {
@@ -6356,11 +6354,6 @@ $displayAvatarResolved = $displayAvatarUrl;
       'currentUserName' => $displayName,
       'currentUserRole' => $displayRoleNormalized,
       'currentUserAvatar' => $displayAvatarResolved,
-      'provider' => $assistantBootstrap['provider'] ?? 'OpenRouter',
-      'model' => $assistantBootstrap['model'] ?? 'openai/gpt-5.2',
-      'realtime' => $assistantBootstrap['realtime'] ?? [],
-      'api' => $assistantBootstrap['api'] ?? [],
-      'features' => $assistantBootstrap['features'] ?? [],
       'page' => 'profile',
       'theme' => 'profile',
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
