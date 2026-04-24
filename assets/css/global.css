@@ -1218,6 +1218,31 @@ body.with-global-left-sidebar .navbar {
   display: block !important;
 }
 
+body.with-global-left-sidebar .profile-page-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.with-global-left-sidebar .profile-page-layout .home-left {
+  display: none;
+}
+
+body.with-global-left-sidebar .home-grid .home-left,
+body.with-global-left-sidebar .live-page-layout .home-left {
+  display: none;
+}
+
+body.with-global-left-sidebar .home-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.with-global-left-sidebar .home-grid.home-grid--dashboard {
+  grid-template-columns: minmax(0, 1fr) 310px;
+}
+
+body.with-global-left-sidebar .live-page-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .global-left-sidebar {
   position: fixed;
   top: 88px;

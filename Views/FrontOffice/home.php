@@ -20,22 +20,497 @@ $displayEmail = (string) ($currentUser['email'] ?? 'member@diversity.is');
 $isAdminSidebar = strtolower(trim($displayEmail)) === 'admin@diversity.is';
 $navInitials = strtoupper(substr($firstName, 0, 1) . substr($lastName !== '' ? $lastName : 'M', 0, 1));
 
-$reputationScore = 84;
-$level = 'Level 12';
+$db = config::getConnexion();
+$homeUserId = (int) ($currentUser['id'] ?? 0);
+$homeSummary = $userController->getProfileExportSummary($homeUserId);
+$homePersonalStats = is_array($homeSummary['stats'] ?? null) ? (array) $homeSummary['stats'] : [];
+$homeActivitySummary = is_array($homeSummary['activity'] ?? null) ? (array) $homeSummary['activity'] : [];
+
+$homeAvatarUrl = (string) ($currentUser['avatar_url'] ?? '');
+if ($homeAvatarUrl === '') {
+  $homeAvatarUrl = 'https://api.dicebear.com/7.x/initials/svg?seed=' . rawurlencode(trim($displayName ?: 'Member'));
+}
+
+$homeFetchCount = static function (PDO $dbConn, string $sql, array $params = []): int {
+  try {
+    $stmt = $dbConn->prepare($sql);
+    $stmt->execute($params);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    return (int) ($row['cnt'] ?? 0);
+  } catch (Exception $e) {
+    return 0;
+  }
+};
+
+$homeFetchRows = static function (PDO $dbConn, string $sql, array $params = []): array {
+  try {
+    $stmt = $dbConn->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+  } catch (Exception $e) {
+    return [];
+  }
+};
+
+$homeFormatTime = static function (?string $value): string {
+  $value = trim((string) $value);
+  if ($value === '') {
+    return '';
+  }
+
+  $timestamp = strtotime($value);
+  if ($timestamp === false) {
+    return '';
+  }
+
+  $diff = time() - $timestamp;
+  if ($diff < 60) {
+    return 'Just now';
+  }
+  if ($diff < 3600) {
+    return floor($diff / 60) . ' min ago';
+  }
+  if ($diff < 86400) {
+    return floor($diff / 3600) . ' h ago';
+  }
+  return date('M j', $timestamp);
+};
+
+$homeAvatarSeed = static function (string $seed): string {
+  $seed = trim($seed);
+  if ($seed === '') {
+    $seed = 'Diversity';
+  }
+  return 'https://api.dicebear.com/7.x/initials/svg?seed=' . rawurlencode($seed);
+};
+
+$homeStatIcon = static function (string $icon): string {
+  $common = 'width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+  switch ($icon) {
+    case 'users':
+      return '<svg ' . $common . '><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M20 21v-2a3 3 0 0 0-2-2.9"/><path d="M16 3.5a4 4 0 0 1 0 7.8"/></svg>';
+    case 'messages':
+      return '<svg ' . $common . '><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15H11l-4 4v-4H6.5A2.5 2.5 0 0 1 4 12.5z"/></svg>';
+    case 'projects':
+      return '<svg ' . $common . '><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M8 9h8"/><path d="M8 13h3"/><path d="M8 16.5l1.5 1.5 3-3"/></svg>';
+    case 'live':
+      return '<svg ' . $common . '><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 1 0 7"/><path d="M15.5 15.5a5 5 0 0 0 0-7"/><path d="M5.8 5.8a9 9 0 0 1 0 12.4"/><path d="M18.2 5.8a9 9 0 0 1 0 12.4"/></svg>';
+    case 'stories':
+      return '<svg ' . $common . '><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M5 20h14"/></svg>';
+    default:
+      return '<svg ' . $common . '><circle cx="12" cy="12" r="4"/></svg>';
+  }
+};
+
+$currentXp = (int) ($currentUser['xp'] ?? 0);
+$reputationScore = max(12, min(100, (int) round($currentXp / 10)));
+$level = 'Level ' . max(1, (int) floor($currentXp / 120) + 1);
 $streak = 7;
+try {
+  $signinStreak = $homeFetchCount($db, 'SELECT COUNT(DISTINCT DATE(signed_in_at)) AS cnt FROM user_signin_history WHERE user_id = :uid AND signed_in_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)', ['uid' => $homeUserId]);
+  if ($signinStreak > 0) {
+    $streak = max($streak, min(30, $signinStreak));
+  }
+} catch (Exception $e) {
+}
 $dailyXp = 25;
+
+$activeUsersCount = $homeFetchCount($db, 'SELECT COUNT(*) AS cnt FROM users WHERE status = 1');
+$messagesCount = $homeFetchCount($db, 'SELECT COUNT(*) AS cnt FROM messages WHERE COALESCE(is_deleted, 0) = 0');
+$projectsCount = $homeFetchCount($db, 'SELECT COUNT(*) AS cnt FROM projects');
+$liveSessionsCount = $homeFetchCount($db, "SELECT COUNT(*) AS cnt FROM live_streams WHERE status = 'live'");
+$storiesCount = $homeFetchCount($db, 'SELECT COUNT(*) AS cnt FROM stories');
+
+$homeStats = [
+  [
+    'label' => 'Active members',
+    'value' => $activeUsersCount,
+    'meta' => 'Online across the platform',
+    'icon' => 'users',
+  ],
+  [
+    'label' => 'Messages',
+    'value' => $messagesCount,
+    'meta' => 'Conversation activity',
+    'icon' => 'messages',
+  ],
+  [
+    'label' => 'Projects',
+    'value' => $projectsCount,
+    'meta' => 'Open and archived collaborations',
+    'icon' => 'projects',
+  ],
+  [
+    'label' => 'Live now',
+    'value' => $liveSessionsCount,
+    'meta' => 'Streams broadcasting right now',
+    'icon' => 'live',
+  ],
+  [
+    'label' => 'Stories',
+    'value' => $storiesCount,
+    'meta' => 'Fresh updates in the network',
+    'icon' => 'stories',
+  ],
+];
+
+$recentMessages = $homeFetchRows($db, '
+  SELECT
+    m.id,
+    COALESCE(NULLIF(m.body, ""), NULLIF(m.content, "")) AS message_text,
+    m.created_at,
+    m.receiver_id,
+    u.first_name AS receiver_first_name,
+    u.last_name AS receiver_last_name,
+    u.avatar_url AS receiver_avatar_url
+  FROM messages m
+  LEFT JOIN users u ON u.id = m.receiver_id
+  WHERE m.sender_id = :uid AND COALESCE(m.is_deleted, 0) = 0
+  ORDER BY m.created_at DESC
+  LIMIT 3
+', ['uid' => $homeUserId]);
+
+$recentProjects = $homeFetchRows($db, '
+  SELECT
+    p.id,
+    p.title,
+    p.short_description,
+    p.description,
+    p.progress_percent,
+    p.status,
+    p.technologies,
+    p.visibility,
+    p.created_at
+  FROM projects p
+  WHERE p.owner_id = :uid
+  ORDER BY p.created_at DESC
+  LIMIT 3
+', ['uid' => $homeUserId]);
+
+$recentStories = $homeFetchRows($db, '
+  SELECT
+    s.id,
+    s.caption,
+    s.story_type,
+    s.media_type,
+    s.visibility,
+    s.location_label,
+    s.created_at,
+    s.gradient_bg
+  FROM stories s
+  WHERE s.user_id = :uid
+  ORDER BY s.created_at DESC
+  LIMIT 3
+', ['uid' => $homeUserId]);
+
+$recentLiveStreams = $homeFetchRows($db, '
+  SELECT
+    l.id,
+    l.title,
+    l.description,
+    l.viewer_count,
+    l.visibility,
+    l.category,
+    l.status,
+    l.started_at,
+    l.cover_image_url
+  FROM live_streams l
+  WHERE l.host_user_id = :uid
+  ORDER BY l.started_at DESC
+  LIMIT 3
+', ['uid' => $homeUserId]);
+
+$recentJobOffers = $homeFetchRows($db, '
+  SELECT
+    j.id,
+    j.title,
+    j.description,
+    j.location,
+    j.skills_required,
+    j.status,
+    j.created_at
+  FROM job_offers j
+  WHERE j.client_id = :uid
+  ORDER BY j.created_at DESC
+  LIMIT 3
+', ['uid' => $homeUserId]);
+
+$homeFeedItems = [];
+$homePushFeedItem = static function (array $item) use (&$homeFeedItems): void {
+  $homeFeedItems[] = $item;
+};
+
+foreach ($recentMessages as $row) {
+  $receiverName = trim((string) (($row['receiver_first_name'] ?? '') . ' ' . ($row['receiver_last_name'] ?? '')));
+  $homePushFeedItem([
+    'type' => 'message',
+    'badge' => 'Message',
+    'name' => $displayName,
+    'role' => 'Message sent',
+    'avatar' => $homeAvatarUrl,
+    'content' => trim((string) ($row['message_text'] ?? 'New message sent.')),
+    'meta' => $receiverName !== '' ? 'To ' . $receiverName : 'Conversation update',
+    'time' => $homeFormatTime((string) ($row['created_at'] ?? '')),
+    'cover_label' => 'Direct message',
+    'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(79,82,217,0.95), rgba(14,165,233,0.9));',
+    'tags' => array_values(array_filter([
+      'Direct',
+      $receiverName !== '' ? $receiverName : null,
+    ])),
+    'href' => 'messages.php',
+    'created_at' => (string) ($row['created_at'] ?? ''),
+  ]);
+}
+
+foreach ($recentProjects as $row) {
+  $tags = array_values(array_filter(array_map('trim', explode(',', (string) ($row['technologies'] ?? '')))));
+  $homePushFeedItem([
+    'type' => 'project',
+    'badge' => 'Project',
+    'name' => $displayName,
+    'role' => 'Project update',
+    'avatar' => $homeAvatarUrl,
+    'content' => trim((string) ($row['short_description'] ?: $row['description'] ?: 'Project update available.')),
+    'meta' => 'Status: ' . ucfirst((string) ($row['status'] ?? 'planning')),
+    'time' => $homeFormatTime((string) ($row['created_at'] ?? '')),
+    'cover_label' => ((int) ($row['progress_percent'] ?? 0)) . '% complete',
+    'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(99,102,241,0.9), rgba(16,185,129,0.86));',
+    'tags' => array_values(array_filter(array_merge([
+      ucfirst((string) ($row['visibility'] ?? 'team')),
+    ], array_slice($tags, 0, 3)))),
+    'href' => 'projects.php',
+    'created_at' => (string) ($row['created_at'] ?? ''),
+  ]);
+}
+
+foreach ($recentStories as $row) {
+  $homePushFeedItem([
+    'type' => 'story',
+    'badge' => 'Story',
+    'name' => $displayName,
+    'role' => 'Story shared',
+    'avatar' => $homeAvatarUrl,
+    'content' => trim((string) ($row['caption'] ?: 'New story update available.')),
+    'meta' => trim((string) (($row['story_type'] ?? 'story') . ' story')) . ($row['location_label'] ? ' · ' . $row['location_label'] : ''),
+    'time' => $homeFormatTime((string) ($row['created_at'] ?? '')),
+    'cover_label' => strtoupper((string) ($row['media_type'] ?? 'image')) . ' story',
+    'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(236,72,153,0.9), rgba(168,85,247,0.88));',
+    'tags' => array_values(array_filter([
+      ucfirst((string) ($row['visibility'] ?? 'friends')),
+      $row['location_label'] ? (string) $row['location_label'] : null,
+    ])),
+    'href' => 'story.php',
+    'created_at' => (string) ($row['created_at'] ?? ''),
+  ]);
+}
+
+foreach ($recentLiveStreams as $row) {
+  $homePushFeedItem([
+    'type' => 'live',
+    'badge' => 'Live',
+    'name' => $displayName,
+    'role' => 'Live session',
+    'avatar' => $homeAvatarUrl,
+    'content' => trim((string) ($row['description'] ?: 'A live session is running now.')),
+    'meta' => 'Viewers: ' . (int) ($row['viewer_count'] ?? 0) . ' · ' . ucfirst((string) ($row['visibility'] ?? 'public')),
+    'time' => $homeFormatTime((string) ($row['started_at'] ?? $row['created_at'] ?? '')),
+    'cover_label' => (int) ($row['viewer_count'] ?? 0) . ' viewers live',
+    'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(244,63,94,0.92), rgba(249,115,22,0.88));',
+    'tags' => array_values(array_filter([
+      $row['category'] ? (string) $row['category'] : null,
+      ucfirst((string) ($row['visibility'] ?? 'public')),
+    ])),
+    'href' => 'live.php',
+    'created_at' => (string) ($row['started_at'] ?? $row['created_at'] ?? ''),
+  ]);
+}
+
+foreach ($recentJobOffers as $row) {
+  $homePushFeedItem([
+    'type' => 'job',
+    'badge' => 'Job',
+    'name' => $displayName,
+    'role' => 'Job offer',
+    'avatar' => $homeAvatarUrl,
+    'content' => trim((string) ($row['description'] ?: 'New opportunity available.')),
+    'meta' => trim((string) (($row['location'] ?? '') . ($row['status'] ? ' · ' . ucfirst((string) $row['status']) : ''))),
+    'time' => $homeFormatTime((string) ($row['created_at'] ?? '')),
+    'cover_label' => 'Open opportunity',
+    'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(14,165,233,0.9), rgba(79,82,217,0.9));',
+    'tags' => array_values(array_filter([
+      $row['location'] ? (string) $row['location'] : null,
+      $row['skills_required'] ? trim((string) $row['skills_required']) : null,
+    ])),
+    'href' => 'jobOffer.php',
+    'created_at' => (string) ($row['created_at'] ?? ''),
+  ]);
+}
+
+if ($homeFeedItems === []) {
+  $globalProjects = $homeFetchRows($db, '
+    SELECT
+      p.id,
+      p.title,
+      p.short_description,
+      p.description,
+      p.progress_percent,
+      p.status,
+      p.technologies,
+      p.visibility,
+      p.created_at,
+      u.first_name,
+      u.last_name,
+      u.avatar_url
+    FROM projects p
+    LEFT JOIN users u ON u.id = p.owner_id
+    ORDER BY p.created_at DESC
+    LIMIT 2
+  ');
+
+  $globalStories = $homeFetchRows($db, '
+    SELECT
+      s.id,
+      s.caption,
+      s.story_type,
+      s.media_type,
+      s.visibility,
+      s.location_label,
+      s.created_at,
+      u.first_name,
+      u.last_name,
+      u.avatar_url
+    FROM stories s
+    LEFT JOIN users u ON u.id = s.user_id
+    ORDER BY s.created_at DESC
+    LIMIT 2
+  ');
+
+  $globalLiveStreams = $homeFetchRows($db, '
+    SELECT
+      l.id,
+      l.title,
+      l.description,
+      l.viewer_count,
+      l.visibility,
+      l.category,
+      l.started_at,
+      u.first_name,
+      u.last_name,
+      u.avatar_url
+    FROM live_streams l
+    LEFT JOIN users u ON u.id = l.host_user_id
+    WHERE l.status = "live"
+    ORDER BY l.started_at DESC
+    LIMIT 2
+  ');
+
+  foreach ($globalProjects as $row) {
+    $ownerName = trim((string) (($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? '')));
+    $homePushFeedItem([
+      'type' => 'project',
+      'badge' => 'Project',
+      'name' => $ownerName !== '' ? $ownerName : 'Member',
+      'role' => 'Project update',
+      'avatar' => $row['avatar_url'] ?: $homeAvatarUrl,
+      'content' => trim((string) ($row['short_description'] ?: $row['description'] ?: 'Project update available.')),
+      'meta' => 'Status: ' . ucfirst((string) ($row['status'] ?? 'planning')),
+      'time' => $homeFormatTime((string) ($row['created_at'] ?? '')),
+      'cover_label' => ((int) ($row['progress_percent'] ?? 0)) . '% complete',
+      'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(99,102,241,0.9), rgba(16,185,129,0.86));',
+      'tags' => array_values(array_filter([
+        ucfirst((string) ($row['visibility'] ?? 'team')),
+      ])),
+      'href' => 'projects.php',
+      'created_at' => (string) ($row['created_at'] ?? ''),
+    ]);
+  }
+
+  foreach ($globalStories as $row) {
+    $ownerName = trim((string) (($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? '')));
+    $homePushFeedItem([
+      'type' => 'story',
+      'badge' => 'Story',
+      'name' => $ownerName !== '' ? $ownerName : 'Member',
+      'role' => 'Story shared',
+      'avatar' => $row['avatar_url'] ?: $homeAvatarUrl,
+      'content' => trim((string) ($row['caption'] ?: 'New story update available.')),
+      'meta' => trim((string) (($row['story_type'] ?? 'story') . ' story')) . ($row['location_label'] ? ' · ' . $row['location_label'] : ''),
+      'time' => $homeFormatTime((string) ($row['created_at'] ?? '')),
+      'cover_label' => strtoupper((string) ($row['media_type'] ?? 'image')) . ' story',
+      'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(236,72,153,0.9), rgba(168,85,247,0.88));',
+      'tags' => array_values(array_filter([
+        ucfirst((string) ($row['visibility'] ?? 'friends')),
+        $row['location_label'] ? (string) $row['location_label'] : null,
+      ])),
+      'href' => 'story.php',
+      'created_at' => (string) ($row['created_at'] ?? ''),
+    ]);
+  }
+
+  foreach ($globalLiveStreams as $row) {
+    $ownerName = trim((string) (($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? '')));
+    $homePushFeedItem([
+      'type' => 'live',
+      'badge' => 'Live',
+      'name' => $ownerName !== '' ? $ownerName : 'Member',
+      'role' => 'Live session',
+      'avatar' => $row['avatar_url'] ?: $homeAvatarUrl,
+      'content' => trim((string) ($row['description'] ?: 'A live session is running now.')),
+      'meta' => 'Viewers: ' . (int) ($row['viewer_count'] ?? 0) . ' · ' . ucfirst((string) ($row['visibility'] ?? 'public')),
+      'time' => $homeFormatTime((string) ($row['started_at'] ?? '')),
+      'cover_label' => (int) ($row['viewer_count'] ?? 0) . ' viewers live',
+      'cover_style' => 'height: 240px; background: linear-gradient(135deg, rgba(244,63,94,0.92), rgba(249,115,22,0.88));',
+      'tags' => array_values(array_filter([
+        $row['category'] ? (string) $row['category'] : null,
+        ucfirst((string) ($row['visibility'] ?? 'public')),
+      ])),
+      'href' => 'live.php',
+      'created_at' => (string) ($row['started_at'] ?? ''),
+    ]);
+  }
+}
+
+usort($homeFeedItems, static function (array $left, array $right): int {
+  $leftTime = strtotime((string) ($left['created_at'] ?? '')) ?: 0;
+  $rightTime = strtotime((string) ($right['created_at'] ?? '')) ?: 0;
+  return $rightTime <=> $leftTime;
+});
+
+$homeFeedItems = array_slice($homeFeedItems, 0, 8);
+
+$homeRecentActivityItems = array_slice($homeFeedItems, 0, 4);
+if ($homeRecentActivityItems === []) {
+  $homeRecentActivityItems = [
+    [
+      'label' => 'Messages',
+      'text' => (int) ($homePersonalStats['messages'] ?? 0) . ' messages sent',
+      'time' => $homeFormatTime((string) ($homeActivitySummary['latest_message_at'] ?? '')),
+    ],
+    [
+      'label' => 'Stories',
+      'text' => (int) ($homePersonalStats['stories'] ?? 0) . ' stories shared',
+      'time' => $homeFormatTime((string) ($homeActivitySummary['latest_story_at'] ?? '')),
+    ],
+    [
+      'label' => 'Live',
+      'text' => (int) ($homePersonalStats['live_sessions'] ?? 0) . ' live sessions hosted',
+      'time' => $homeFormatTime((string) ($homeActivitySummary['latest_live_at'] ?? '')),
+    ],
+  ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Diversity.is Home — social discovery, opportunities, and daily collaboration engagement hub.">
-  <title>Home — Diversity.is</title>
+  <meta name="description" content="Diversity.is Home - social discovery, opportunities, and daily collaboration engagement hub.">
+  <title>Home - Diversity.is</title>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/home.css">
+  <link rel="stylesheet" href="../../assets/css/sidebar.css">
 </head>
-<body class="grid-dot-bg home-page-body">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <canvas id="gradient-canvas"></canvas>
 
@@ -72,59 +547,32 @@ $dailyXp = 25;
     </div>
   </nav>
 
-  <main class="home-hub" id="main-content" tabindex="-1">
-    <div class="home-grid container">
-      <aside class="home-left glass-card" aria-label="Quick profile and navigation">
-        <div class="left-profile">
-          <div class="left-avatar"><?= htmlspecialchars($navInitials) ?></div>
-          <div>
-            <h4><?= htmlspecialchars($displayName) ?></h4>
-            <p><?= htmlspecialchars($level) ?></p>
-          </div>
-        </div>
-        <nav class="left-nav">
-          <a class="active" href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg> Home Feed</a>
-          <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg> Social</a>
-          <a href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg> Profile</a>
-          <a href="jobOffer.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Job Offers</a>
-          <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg> Projects & Collaborators</a>
-          <a href="contracts.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h10M7 17h6"/></svg> Contracts</a>
-          <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg> Challenges & Daily Quiz</a>
-          <?php if ($isAdminSidebar): ?>
-            <div style="margin: 12px 0 6px 12px; font-size: 0.7rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em;">BackOffice</div>
-            <a href="../BackOffice/dashboardUser.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Dashboard</a>
-          <?php endif; ?>
-        </nav>
-        <div class="left-gamification">
-          <div class="mini-score">
-            <span>Reputation</span>
-            <strong><?= $reputationScore ?></strong>
-          </div>
-          <div class="mini-score">
-            <span>Daily Streak 🔥</span>
-            <strong><?= $streak ?> days</strong>
-          </div>
-        </div>
-      </aside>
+  <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
 
+  <main class="home-hub" id="main-content" tabindex="-1">
+    <div class="home-grid home-grid--dashboard container">
       <section class="home-main" aria-label="Home feed content">
         <article class="home-hero-card glass-card fade-in-section" aria-labelledby="home-hero-title">
           <div class="home-hero-left">
-            <p class="hero-greeting">Good morning, <?= htmlspecialchars($firstName) ?> 👋</p>
+            <p class="hero-greeting">Good morning, <?= htmlspecialchars($firstName) ?></p>
             <h1 id="home-hero-title">Welcome back to your collaboration hub</h1>
             <p class="hero-sub">Stay connected, discover opportunities, and earn XP through daily collaboration moments.</p>
-            <div class="hero-points" style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px;">
+            <div class="hero-points hero-points--dynamic">
               <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/></svg>
-                Smart Insights
+                <?= $homeStatIcon('users') ?>
+                <?= (int) ($homePersonalStats['friends'] ?? 0) ?> Connections
               </span>
               <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M21 12l-9 5-9-5"/></svg>
-                Premium Collaboration
+                <?= $homeStatIcon('messages') ?>
+                <?= (int) ($homePersonalStats['messages'] ?? 0) ?> Messages
               </span>
               <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Reputation Growth
+                <?= $homeStatIcon('stories') ?>
+                <?= (int) ($homePersonalStats['stories'] ?? 0) ?> Stories
+              </span>
+              <span class="profile-tag" style="display:inline-flex;align-items:center;gap:6px;">
+                <?= $homeStatIcon('live') ?>
+                <?= (int) ($homePersonalStats['live_sessions'] ?? 0) ?> Live Sessions
               </span>
             </div>
             <div class="hero-cta-row">
@@ -136,14 +584,27 @@ $dailyXp = 25;
             <div class="reputation-ring" style="--progress: <?= (int) $reputationScore ?>;">
               <div class="ring-inner"><strong><?= (int) $reputationScore ?></strong><span>REP</span></div>
             </div>
-            <p class="ring-label"><?= htmlspecialchars($level) ?> • <?= (int) $streak ?>-day streak</p>
+            <p class="ring-label"><?= htmlspecialchars($level) ?> - <?= (int) $streak ?>-day streak</p>
           </div>
         </article>
+
+        <section class="home-stats-grid fade-in-section" aria-label="Platform statistics">
+          <?php foreach ($homeStats as $stat): ?>
+            <article class="home-stat-card glass-card">
+              <div class="home-stat-head">
+                <span class="home-stat-icon"><?= $homeStatIcon((string) ($stat['icon'] ?? '')) ?></span>
+                <span class="home-stat-label"><?= htmlspecialchars((string) ($stat['label'] ?? '')) ?></span>
+              </div>
+              <strong class="home-stat-value" data-home-counter data-count-target="<?= (int) ($stat['value'] ?? 0) ?>"><?= (int) ($stat['value'] ?? 0) ?></strong>
+              <p class="home-stat-meta"><?= htmlspecialchars((string) ($stat['meta'] ?? '')) ?></p>
+            </article>
+          <?php endforeach; ?>
+        </section>
 
         <article class="composer-card glass-card fade-in-section" aria-label="Post composer">
           <div class="composer-top">
             <div class="left-avatar small"><?= htmlspecialchars($navInitials) ?></div>
-            <button class="composer-input" id="openComposerBtn">What’s happening in your projects today?</button>
+            <button class="composer-input" id="openComposerBtn">What's happening in your projects today?</button>
           </div>
           <div class="composer-actions">
             <button><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" /></svg> Attach Project</button>
@@ -154,12 +615,12 @@ $dailyXp = 25;
         </article>
 
         <div class="feed-headline-row fade-in-section" role="region" aria-labelledby="main-feed-title">
-          <h2 id="main-feed-title">Main Social Feed</h2>
+          <h2 id="main-feed-title">Your Activity Feed</h2>
           <div class="feed-filters">
             <button class="active">For You</button>
             <button>Projects</button>
-            <button>Challenges</button>
-            <button>Certificates</button>
+            <button>Stories</button>
+            <button>Live</button>
           </div>
         </div>
 
@@ -292,6 +753,22 @@ $dailyXp = 25;
   </nav>
 
   <div class="home-toast-stack" id="homeToastStack" aria-live="polite"></div>
+
+  <script>
+    window.homeDashboardBootstrap = <?= json_encode([
+      'displayName' => $displayName,
+      'avatarUrl' => $homeAvatarUrl,
+      'reputationScore' => $reputationScore,
+      'level' => $level,
+      'streak' => $streak,
+      'dailyXp' => $dailyXp,
+      'personalStats' => $homePersonalStats,
+      'activitySummary' => $homeActivitySummary,
+      'stats' => $homeStats,
+      'feedItems' => $homeFeedItems,
+      'recentActivityItems' => $homeRecentActivityItems,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  </script>
 
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mouse-tracking.js"></script>

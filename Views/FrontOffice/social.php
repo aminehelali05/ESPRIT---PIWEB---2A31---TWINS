@@ -20,9 +20,10 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
   <title>Social Feed — Diversity.is</title>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/social.css">
+  <link rel="stylesheet" href="../../assets/css/sidebar.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="grid-dot-bg">
+<body class="grid-dot-bg with-global-left-sidebar">
   <canvas id="gradient-canvas"></canvas>
 
   <nav class="navbar" id="navbar">
@@ -64,6 +65,8 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
       <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
     </div>
   </nav>
+
+  <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
 
   <main class="profile-main" id="main-content" tabindex="-1">
     <div class="container profile-page-layout">

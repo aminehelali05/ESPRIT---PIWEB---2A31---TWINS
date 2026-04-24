@@ -6,18 +6,147 @@ document.addEventListener('DOMContentLoaded', () => {
   // --------------------------------------------------------
   // ELEMENT REFS
   // --------------------------------------------------------
+  const bootstrap = window.homeDashboardBootstrap || {};
   const fabButton        = document.getElementById('homeFab');
   const fabMenu          = document.getElementById('fabMenu');
   const toastStack       = document.getElementById('homeToastStack');
-  const feedFilters      = document.querySelectorAll('.feed-filters button');
-  const feedCards        = document.querySelectorAll('.feed-card');
-  const reactBtns        = document.querySelectorAll('.react-btn, .skill-boost, .comment-btn');
-  const connectBtns      = document.querySelectorAll('.people-item button, .project-mini-card button');
+  const feedList         = document.getElementById('feedList');
+  const activityCard     = document.querySelector('.activity-highlight');
   const quickPublishBtn  = document.getElementById('quickPublishBtn');
   const openComposerBtn  = document.getElementById('openComposerBtn');
   const composerInput    = document.querySelector('.composer-input');
   const globalSearch     = document.querySelector('.home-global-search input');
   const liveNowWidgetList = document.getElementById('liveNowWidgetList');
+
+  const escapeHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+  const formatNumber = (value) => {
+    const parsed = Number(value || 0);
+    if (!Number.isFinite(parsed)) {
+      return '0';
+    }
+    try {
+      return new Intl.NumberFormat().format(parsed);
+    } catch (_error) {
+      return String(Math.round(parsed));
+    }
+  };
+
+  const renderFeedCard = (item) => {
+    const type = String(item?.type || 'activity');
+    const name = String(item?.name || 'Member');
+    const role = String(item?.role || 'Activity');
+    const avatar = String(item?.avatar || '');
+    const badge = String(item?.badge || 'Update');
+    const content = String(item?.content || '');
+    const meta = String(item?.meta || '');
+    const time = String(item?.time || '');
+    const coverLabel = String(item?.cover_label || '');
+    const coverStyle = String(item?.cover_style || 'height:240px;background:linear-gradient(135deg,#a5b4fc,#818cf8);');
+    const tags = Array.isArray(item?.tags) ? item.tags : [];
+
+    return [
+      `<article class="feed-card glass-card fade-in-section home-feed-card home-feed-card--${escapeHtml(type)}">`,
+      '<div class="feed-user-row">',
+      `<img src="${escapeHtml(avatar)}" alt="${escapeHtml(name)}">`,
+      '<div>',
+      `<h4>${escapeHtml(name)} <span class="rep-pill">${escapeHtml(badge)}</span></h4>`,
+      `<p>${escapeHtml(role)}${time ? ` · ${escapeHtml(time)}` : ''}</p>`,
+      '</div>',
+      '</div>',
+      `<p class="feed-content">${escapeHtml(content)}</p>`,
+      coverLabel ? `<div class="feed-cover" style="${escapeHtml(coverStyle)}display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;letter-spacing:1px;text-align:center;padding:1rem;min-height:240px;">${escapeHtml(coverLabel)}</div>` : '',
+      tags.length ? `<div class="post-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join('')}</div>` : '',
+      `<div class="feed-meta"><span>${escapeHtml(meta)}</span><span>${escapeHtml(time || 'Just now')}</span><span>${escapeHtml(type.charAt(0).toUpperCase() + type.slice(1))}</span></div>`,
+      '<div class="feed-actions">',
+      '<button class="react-btn" type="button"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514" /></svg> Like</button>',
+      '<button class="comment-btn" type="button"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> Comment</button>',
+      '<button type="button"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg> Share</button>',
+      '<button type="button"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg> Save</button>',
+      '<button class="skill-boost" type="button"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /></svg> Skill Boost</button>',
+      '</div>',
+      '</article>',
+    ].join('');
+  };
+
+  const renderRecentActivityCard = (items) => {
+    const list = Array.isArray(items) ? items : [];
+    return [
+      '<article class="activity-highlight glass-card fade-in-section">',
+      '<h3>Recent Activity</h3>',
+      '<ul>',
+      list.map((item) => {
+        const label = String(item?.label || 'Update');
+        const text = String(item?.text || '');
+        const time = String(item?.time || '');
+        return `<li><strong>${escapeHtml(label)}</strong>${escapeHtml(text)}${time ? ` <span>${escapeHtml(time)}</span>` : ''}</li>`;
+      }).join(''),
+      '</ul>',
+      '<a href="profile.php">See full profile activity</a>',
+      '</article>',
+    ].join('');
+  };
+
+  const renderHomeFeed = () => {
+    if (!feedList) {
+      return;
+    }
+
+    const items = Array.isArray(bootstrap.feedItems) ? bootstrap.feedItems : [];
+    const feedMarkup = items.length
+      ? items.map(renderFeedCard).join('')
+      : [
+          '<article class="feed-card glass-card fade-in-section">',
+          '<div class="feed-user-row">',
+          `<img src="${escapeHtml(bootstrap.avatarUrl || '')}" alt="${escapeHtml(bootstrap.displayName || 'Member')}">`,
+          '<div>',
+          `<h4>${escapeHtml(bootstrap.displayName || 'Member')} <span class="rep-pill">Ready</span></h4>`,
+          '<p>Dashboard activity · Just now</p>',
+          '</div>',
+          '</div>',
+          '<p class="feed-content">Your dashboard is ready. Start a project, share a story, or go live to populate the feed.</p>',
+          '<div class="feed-cover" style="height:240px; background:linear-gradient(135deg, rgba(79,82,217,0.95), rgba(14,165,233,0.9)); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; letter-spacing:1px; text-align:center; padding:1rem;">New activity will appear here</div>',
+          '<div class="feed-meta"><span>Waiting for updates</span><span>Dashboard</span><span>Home</span></div>',
+          '</article>',
+        ].join('');
+
+    feedList.innerHTML = feedMarkup + renderRecentActivityCard(bootstrap.recentActivityItems || []);
+  };
+
+  const animateHomeCounters = () => {
+    document.querySelectorAll('[data-home-counter]').forEach((el) => {
+      const target = Math.max(0, Number(el.getAttribute('data-count-target') || el.textContent || 0));
+      if (!Number.isFinite(target)) {
+        return;
+      }
+
+      const duration = 1100;
+      const startedAt = performance.now();
+      const tick = (now) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = formatNumber(Math.round(target * eased));
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        }
+      };
+
+      requestAnimationFrame(tick);
+    });
+  };
+
+  renderHomeFeed();
+  animateHomeCounters();
+
+  let feedFilters = document.querySelectorAll('.feed-filters button');
+  let feedCards = document.querySelectorAll('.feed-card');
+  const reactBtns = document.querySelectorAll('.react-btn, .skill-boost, .comment-btn');
+  const connectBtns = document.querySelectorAll('.people-item button, .project-mini-card button');
 
   // --------------------------------------------------------
   // FAB — floating action button

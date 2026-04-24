@@ -61,10 +61,11 @@ $bootstrap = [
 
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/home.css">
+  <link rel="stylesheet" href="../../assets/css/sidebar.css">
   <link rel="stylesheet" href="../../assets/css/live.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="grid-dot-bg home-page-body">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar">
   <a class="skip-link" href="#live-main-content">Skip to main content</a>
 
   <!-- ── Navbar ───────────────────────────────────── -->
@@ -102,6 +103,8 @@ $bootstrap = [
   </nav>
 
   <!-- ── Main ─────────────────────────────────────── -->
+  <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
+
   <main class="live-main-page" id="live-main-content" tabindex="-1">
     <div class="container live-page-layout">
 

@@ -26,19 +26,27 @@ $sidebarRouteMap = [
     'jobOffer.php' => 'job-offer',
     'JobOffer.php' => 'job-offer',
     'projects.php' => 'projects',
-    'contracts.php' => 'contracts',
-    'reviews.php' => 'contracts',
+    'contracts.php' => 'contract',
 ];
 $sidebarActive = $sidebarRouteMap[$sidebarRoute] ?? '';
 
 $sidebarMode = (string) ($sidebarMode ?? '');
 if ($sidebarMode === '') {
-    $sidebarMode = $sidebarRoute === 'challenges.php' ? 'fixed' : 'sticky';
+    $sidebarMode = 'fixed';
 }
 
-$sidebarClass = trim((string) ($sidebarClass ?? 'shared-sidebar glass-card'));
+$sidebarClass = trim((string) ($sidebarClass ?? 'shared-sidebar glass-card global-left-sidebar'));
 if ($sidebarClass === '') {
-    $sidebarClass = 'shared-sidebar glass-card';
+    $sidebarClass = 'shared-sidebar glass-card global-left-sidebar';
+}
+if (!str_contains($sidebarClass, 'shared-sidebar')) {
+    $sidebarClass = 'shared-sidebar ' . $sidebarClass;
+}
+if (!str_contains($sidebarClass, 'glass-card')) {
+    $sidebarClass .= ' glass-card';
+}
+if (!str_contains($sidebarClass, 'global-left-sidebar')) {
+    $sidebarClass .= ' global-left-sidebar';
 }
 
 $sidebarLabel = (string) ($sidebarLabel ?? 'Primary navigation');
@@ -75,7 +83,7 @@ $sidebarItems = [
     ['key' => 'ai-agent', 'href' => 'ai-agent.php', 'label' => 'AI Agent', 'icon' => 'ai-agent'],
     ['key' => 'job-offer', 'href' => 'jobOffer.php', 'label' => 'Job Offer', 'icon' => 'job-offer'],
     ['key' => 'projects', 'href' => 'projects.php', 'label' => 'Projects & Tasks', 'icon' => 'projects'],
-    ['key' => 'contracts', 'href' => 'contracts.php', 'label' => 'Contracts', 'icon' => 'contracts'],
+    ['key' => 'contract', 'href' => 'contracts.php', 'label' => 'Contract', 'icon' => 'contracts'],
 ];
 ?>
 <aside class="<?= htmlspecialchars($sidebarClass) ?>" data-sidebar-mode="<?= htmlspecialchars($sidebarMode) ?>" aria-label="<?= htmlspecialchars($sidebarLabel) ?>">

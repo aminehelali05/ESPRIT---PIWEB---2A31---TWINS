@@ -1,0 +1,63 @@
+[Fri Apr 24 20:55:00 2026] PHP 8.0.30 Development Server (http://127.0.0.1:3000) started
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53621 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53621 [200]: GET /Views/FrontOffice/auth.php
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53621 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53807 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:52568 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53807 [200]: GET /assets/css/global.css
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:52568 [200]: GET /assets/css/auth.css
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53807 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:52568 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:51545 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53504 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:51545 [200]: GET /assets/js/main.js
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53504 [200]: GET /assets/js/user.js
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:51545 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53504 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:58659 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:58659 [302]: POST /index.php?action=login
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:58659 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:60937 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:60937 [200]: GET /Views/BackOffice/dashboardUser.php
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:60937 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62140 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:49501 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62533 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62140 [200]: GET /assets/css/backoffice-dashboard.css
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62533 [200]: GET /assets/css/user-form.css
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:49501 [404]: GET /assets/images/avatars/default-avatar.jpg - No such file or directory
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62140 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:49501 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62533 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:51429 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:51429 [200]: GET /assets/js/globe-explorer.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:51429 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:52895 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:52895 [200]: GET /assets/js/user.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:52895 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55124 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55124 [200]: GET /assets/js/skilluser.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55124 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:53501 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:53501 [200]: GET /assets/js/backoffice-dashboard.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:53501 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:50852 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:57902 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:50852 [200]: GET /Views/BackOffice/dashboardUser.php?action=list
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:50852 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:57902 [200]: GET /Views/BackOffice/dashboardUser.php?action=list_delete_requests&status=pending
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:57902 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55402 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55402 [200]: GET /Views/BackOffice/dashboardUser.php?action=stats
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55402 Closing
+[Fri Apr 24 20:56:11 2026] 127.0.0.1:60878 Accepted
+[Fri Apr 24 20:56:11 2026] PHP Warning:  Undefined variable $userController in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php on line 25
+[Fri Apr 24 20:56:11 2026] PHP Fatal error:  Uncaught Error: Call to a member function getProfileExportSummary() on null in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php:25
+Stack trace:
+#0 {main}
+  thrown in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php on line 25
+[Fri Apr 24 20:56:11 2026] 127.0.0.1:60878 [200]: GET /Views/FrontOffice/home.php - Uncaught Error: Call to a member function getProfileExportSummary() on null in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php:25
+Stack trace:
+#0 {main}
+  thrown in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php on line 25
+[Fri Apr 24 20:56:11 2026] 127.0.0.1:60878 Closing

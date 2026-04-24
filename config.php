@@ -18,6 +18,19 @@ class config
             return [];
         }
 
+        $autoloadPath = __DIR__ . '/vendor/autoload.php';
+        if (is_file($autoloadPath)) {
+            try {
+                require_once $autoloadPath;
+                if (class_exists(\Dotenv\Dotenv::class)) {
+                    $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
+                    $dotenv->safeLoad();
+                }
+            } catch (Throwable $e) {
+                // Fall back to the lightweight parser below.
+            }
+        }
+
         $rawLines = file($envPath, FILE_IGNORE_NEW_LINES);
         if ($rawLines === false) {
             return [];
@@ -88,8 +101,8 @@ class config
     {
         if (!isset(self::$pdo)) {
             $servername = (string) self::get('DB_HOST', 'localhost');
-            $username = (string) self::get('DB_USERNAME', 'root');
-            $password = (string) self::get('DB_PASSWORD', '');
+            $username = (string) self::get('DB_USER', self::get('DB_USERNAME', 'root'));
+            $password = (string) self::get('DB_PASS', self::get('DB_PASSWORD', ''));
             $dbname = (string) self::get('DB_NAME', 'projet');
             $charset = (string) self::get('DB_CHARSET', 'utf8mb4');
             try {

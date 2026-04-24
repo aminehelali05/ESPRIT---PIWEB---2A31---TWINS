@@ -4474,6 +4474,7 @@ $displayAvatarResolved = $displayAvatarUrl;
   <link rel="stylesheet" href="../../assets/css/home.css">
   <link rel="stylesheet" href="../../assets/css/profile.css">
   <link rel="stylesheet" href="../../assets/css/profile-light.css">
+  <link rel="stylesheet" href="../../assets/css/sidebar.css">
   <link rel="stylesheet" href="../../assets/css/profile-ai-assistant.css">
   <link rel="stylesheet" href="../../assets/css/user-form.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -5437,7 +5438,7 @@ $displayAvatarResolved = $displayAvatarUrl;
     }
   </style>
 </head>
-<body class="grid-dot-bg home-page-body" data-account-blocked="<?= $displayIsBlocked === 1 ? '1' : '0' ?>" data-delete-request-pending="<?= $hasPendingDeleteRequest ? '1' : '0' ?>">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar" data-account-blocked="<?= $displayIsBlocked === 1 ? '1' : '0' ?>" data-delete-request-pending="<?= $hasPendingDeleteRequest ? '1' : '0' ?>">
   <a class="skip-link" href="#profile-main-content">Skip to main content</a>
   <canvas id="gradient-canvas"></canvas>
 
@@ -5477,6 +5478,8 @@ $displayAvatarResolved = $displayAvatarUrl;
   </nav>
 
   <!-- ── Main ──────────────────────────────────────── -->
+  <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
+
   <main class="profile-main" id="profile-main-content" tabindex="-1">
     <div class="container profile-page-layout">
 

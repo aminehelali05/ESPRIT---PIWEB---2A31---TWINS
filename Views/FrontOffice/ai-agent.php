@@ -47,8 +47,8 @@ $modelOptions = array_values(array_unique(array_filter([
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Diversity.is AI Agent â€” a voice-first autonomous assistant for profile and browser tasks.">
-  <title>AI Agent â€” Diversity.is</title>
+  <meta name="description" content="Diversity.is AI Agent - a voice-first autonomous assistant for profile and browser tasks.">
+  <title>AI Agent - Diversity.is</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -58,7 +58,7 @@ $modelOptions = array_values(array_unique(array_filter([
   <link rel="stylesheet" href="../../assets/css/ai-agent.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="grid-dot-bg home-page-body ai-agent-page">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar ai-agent-page">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <canvas id="gradient-canvas"></canvas>
 
@@ -109,14 +109,19 @@ $modelOptions = array_values(array_unique(array_filter([
       <section class="ai-agent-workspace" data-agent-shell data-agent-state="idle" data-settings-open="true">
         <article class="ai-agent-stage glass-card fade-in-section" aria-label="AI agent control center">
           <div class="ai-agent-stage-head">
-            <div class="ai-agent-pill" aria-hidden="true">
-              <span class="ai-agent-pill-dot"></span>
-              Voice Activated
-            </div>
+          <div class="ai-agent-pill" aria-hidden="true">
+            <span class="ai-agent-pill-dot"></span>
+            Voice Activated
+          </div>
+          <div class="ai-agent-head-actions">
+            <button class="ai-agent-history-toggle" type="button" data-agent-history-toggle aria-controls="aiAgentHistoryPanel" aria-expanded="false" aria-label="Toggle command history">
+              <i data-lucide="history" class="w-4 h-4"></i>
+            </button>
             <button class="ai-agent-settings-toggle" type="button" data-agent-settings-toggle aria-label="Toggle settings panel">
               <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
             </button>
           </div>
+        </div>
 
           <div class="ai-agent-hero-copy">
             <p class="ai-agent-kicker">AI Assistant</p>
@@ -228,6 +233,19 @@ $modelOptions = array_values(array_unique(array_filter([
             Smooth, minimal, and state-driven. No logs, just the current mode.
           </div>
         </aside>
+
+        <aside class="ai-agent-history glass-card fade-in-section" id="aiAgentHistoryPanel" data-agent-history-panel hidden aria-label="Recent assistant activity">
+          <div class="ai-history-head">
+            <div>
+              <p class="ai-settings-label">History</p>
+              <h2>Recent commands</h2>
+            </div>
+            <span class="ai-settings-chip" data-agent-history-count>0</span>
+          </div>
+          <div class="ai-history-list" data-agent-history-list>
+            <div class="ai-history-empty">Open this panel to review your latest commands and execution states.</div>
+          </div>
+        </aside>
       </section>
     </div>
   </main>
@@ -238,6 +256,7 @@ $modelOptions = array_values(array_unique(array_filter([
         'currentUserName' => $displayName,
         'currentUserAvatar' => $displayAvatarUrl,
         'model' => $currentModel,
+        'modelOptions' => $modelOptions,
         'page' => 'ai-agent',
         'theme' => 'ai-agent',
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;

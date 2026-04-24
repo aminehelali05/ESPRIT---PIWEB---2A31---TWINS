@@ -118,12 +118,13 @@ Diversity/
 ### Installation
 1. Clone the repository.
 2. Copy the project into your web server directory.
-3. Create a database for the project.
-4. Import `User.sql` into your database.
-5. Create a root `.env` file for app settings and secrets.
-6. Update database credentials in `.env` if needed.
-7. Start Apache and MySQL.
-8. Open the app through `index.php` in your browser.
+3. Run `composer install` to fetch PHP dependencies, including `vlucas/phpdotenv`.
+4. Create a database for the project.
+5. Import `User.sql` into your database.
+6. Create a root `.env` file for app settings and secrets.
+7. Update database credentials in `.env` if needed.
+8. Start Apache and MySQL.
+9. Open the app through `index.php` in your browser.
 
 ### Local Run Example
 ```bash

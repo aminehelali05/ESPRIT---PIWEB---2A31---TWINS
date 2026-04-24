@@ -390,6 +390,119 @@ document.addEventListener('DOMContentLoaded', () => {
     return result;
   };
 
+  const buildExportPalette = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return isDark
+      ? {
+          surface: '#111827',
+          surfaceSoft: 'rgba(255, 255, 255, 0.05)',
+          border: 'rgba(255, 255, 255, 0.10)',
+          borderStrong: 'rgba(255, 255, 255, 0.14)',
+          text: '#f8fafc',
+          muted: '#94a3b8',
+          accent: '#6366f1',
+          accentSoft: 'rgba(99, 102, 241, 0.16)',
+          chip: 'rgba(255, 255, 255, 0.06)',
+        }
+      : {
+          surface: '#ffffff',
+          surfaceSoft: 'rgba(248, 250, 252, 0.9)',
+          border: 'rgba(148, 163, 184, 0.2)',
+          borderStrong: 'rgba(148, 163, 184, 0.26)',
+          text: '#0f172a',
+          muted: '#64748b',
+          accent: '#4f46e5',
+          accentSoft: 'rgba(79, 70, 229, 0.12)',
+          chip: 'rgba(79, 70, 229, 0.08)',
+        };
+  };
+
+  const buildExportModalHtml = (payload, palette) => {
+    const summary = payload.summary || {};
+    const user = summary.user || {};
+    const stats = summary.stats || {};
+    const activity = summary.activity || {};
+    const templates = Array.isArray(payload.templates) && payload.templates.length > 0
+      ? payload.templates
+      : [
+          { id: 'modern', label: 'Modern' },
+          { id: 'minimal', label: 'Minimal' },
+          { id: 'dark', label: 'Dark' },
+        ];
+
+    const statCards = [
+      ['Friends', stats.friends || 0],
+      ['Messages', stats.messages || 0],
+      ['Stories', stats.stories || 0],
+      ['Live', stats.live_sessions || 0],
+    ].map(([label, value]) => `
+      <div style="padding:12px;border-radius:14px;border:1px solid ${palette.border};background:${palette.surfaceSoft};">
+        <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:${palette.muted};margin-bottom:4px;">${label}</div>
+        <div style="font-size:18px;font-weight:700;color:${palette.text};">${value}</div>
+      </div>
+    `).join('');
+
+    const activityLines = [
+      ['Latest message', activity.latest_message_at || 'No messages yet'],
+      ['Latest story', activity.latest_story_at || 'No stories yet'],
+      ['Latest live', activity.latest_live_at || 'No live sessions yet'],
+      ['Story views', stats.story_views || 0],
+    ].map(([label, value]) => `
+      <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid ${palette.border};">
+        <span style="color:${palette.muted};font-size:12px;">${label}</span>
+        <span style="color:${palette.text};font-size:12px;font-weight:600;text-align:right;">${String(value)}</span>
+      </div>
+    `).join('');
+
+    const templateCards = templates.map((template, index) => {
+      const isSelected = index === 0;
+      return `
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:16px;border:1px solid ${isSelected ? palette.borderStrong : palette.border};background:${isSelected ? palette.accentSoft : palette.chip};cursor:pointer;">
+          <input type="radio" name="profileExportTheme" value="${String(template.id)}" ${isSelected ? 'checked' : ''} style="margin-top:3px;">
+          <span style="display:grid;gap:4px;">
+            <strong style="color:${palette.text};font-size:13px;">${String(template.label)}</strong>
+            <span style="color:${palette.muted};font-size:12px;line-height:1.45;">${template.id === 'dark' ? 'High contrast export for dark brand moods.' : template.id === 'minimal' ? 'Clean report with fewer decorative elements.' : 'Balanced export with accent color and cards.'}</span>
+          </span>
+        </label>
+      `;
+    }).join('');
+
+    return `
+      <div style="display:grid;gap:16px;text-align:left;">
+        <div style="padding:14px 16px;border-radius:18px;border:1px solid ${palette.border};background:${palette.surfaceSoft};display:grid;gap:8px;">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+            <div style="display:grid;gap:4px;">
+              <strong style="font-size:18px;color:${palette.text};">${String(user.full_name || 'Profile Export')}</strong>
+              <span style="font-size:12px;color:${palette.muted};">${String(user.email || 'No email provided')}</span>
+            </div>
+            <span style="padding:6px 10px;border-radius:999px;background:${palette.accentSoft};border:1px solid ${palette.border};color:${palette.text};font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">PDF Preview</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            ${['User info', 'Statistics', 'Activity', 'Achievements'].map((label) => `
+              <span style="padding:6px 10px;border-radius:999px;background:${palette.chip};border:1px solid ${palette.border};color:${palette.text};font-size:11px;font-weight:600;">${label}</span>
+            `).join('')}
+          </div>
+        </div>
+
+        <div style="display:grid;gap:10px;">
+          <p style="margin:0;color:${palette.muted};font-size:13px;line-height:1.6;">
+            Choose the export style. The PDF will include profile details, statistics, activity summary, skills, and referral information.
+          </p>
+          <div style="display:grid;gap:10px;">${templateCards}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+          ${statCards}
+        </div>
+
+        <div style="padding:14px 16px;border-radius:16px;border:1px solid ${palette.border};background:${palette.surfaceSoft};display:grid;gap:8px;">
+          <strong style="font-size:13px;color:${palette.text};">Activity summary</strong>
+          <div>${activityLines}</div>
+        </div>
+      </div>
+    `;
+  };
+
   const addWrappedLines = (doc, text, x, y, maxWidth, fontSize = 10.5) => {
     doc.setFontSize(fontSize);
     const lines = doc.splitTextToSize(String(text || ''), maxWidth);
@@ -397,13 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return y + (lines.length * fontSize * 0.6);
   };
 
-  const exportProfilePdf = async (theme = 'modern') => {
+  const exportProfilePdf = async (theme = 'modern', payload = null) => {
     if (!window.jspdf?.jsPDF) {
       throw new Error('PDF engine is not available.');
     }
 
-    const payload = await loadProfileExportSummary();
-    const summary = payload.summary || {};
+    const exportPayload = payload || await loadProfileExportSummary();
+    const summary = exportPayload.summary || {};
     const user = summary.user || {};
     const stats = summary.stats || {};
     const activity = summary.activity || {};
@@ -2871,37 +2984,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (exportProfileBtn) {
     exportProfileBtn.addEventListener('click', async () => {
+      let summaryPayload = null;
+      const palette = buildExportPalette();
       try {
+        exportProfileBtn.disabled = true;
+        summaryPayload = await loadProfileExportSummary();
         let selectedTheme = 'modern';
         if (window.Swal) {
           const result = await window.Swal.fire({
             title: 'Export profile data',
-            html: `
-              <div style="text-align:left;display:grid;gap:12px;">
-                <p style="margin:0;color:#475569;font-size:13px;line-height:1.6;">Choose a PDF style for your profile export. We will include your profile details, stats, and activity summary.</p>
-                <select id="profileExportTheme" class="swal2-select" style="display:flex;">
-                  <option value="modern">Modern</option>
-                  <option value="minimal">Minimal</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </div>
-            `,
+            html: buildExportModalHtml(summaryPayload, palette),
             showCancelButton: true,
-            confirmButtonText: 'Export PDF',
+            confirmButtonText: 'Download PDF',
             cancelButtonText: 'Cancel',
-            background: '#ffffff',
-            color: '#0f172a',
+            width: 760,
+            background: palette.surface,
+            color: palette.text,
             preConfirm: () => {
               const popup = window.Swal.getPopup();
-              return String(popup?.querySelector('#profileExportTheme')?.value || 'modern');
+              return String(popup?.querySelector('input[name="profileExportTheme"]:checked')?.value || 'modern');
             }
           });
           if (!result.isConfirmed) return;
           selectedTheme = String(result.value || 'modern');
         }
 
-        exportProfileBtn.disabled = true;
-        await exportProfilePdf(selectedTheme);
+        await exportProfilePdf(selectedTheme, summaryPayload);
         showToast('Profile PDF exported successfully.', 'success');
       } catch (error) {
         showToast(error.message || 'Could not export profile PDF.', 'error');

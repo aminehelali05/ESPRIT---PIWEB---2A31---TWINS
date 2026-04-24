@@ -135,6 +135,7 @@ $statusMeta = [
   <title>Projects — Diversity.is</title>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/home.css">
+  <link rel="stylesheet" href="../../assets/css/sidebar.css">
   <style>
     .module-page-header { margin-bottom:20px; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; }
     .module-page-header-text h2 { font-size:1.35rem; font-weight:700; letter-spacing:-.02em; color:var(--color-text-primary); margin:0; }
@@ -216,7 +217,7 @@ $statusMeta = [
     .pj-fta { resize:vertical; min-height:80px; }
   </style>
 </head>
-<body class="grid-dot-bg home-page-body">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar">
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <canvas id="gradient-canvas"></canvas>
 
@@ -247,6 +248,8 @@ $statusMeta = [
       <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle mobile menu" aria-controls="navbar-nav" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </nav>
+
+  <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
 
   <main class="home-hub" id="main-content" tabindex="-1">
     <div class="home-grid container">

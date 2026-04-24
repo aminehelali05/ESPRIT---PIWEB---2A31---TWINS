@@ -38,6 +38,7 @@ if (!$displayAvatarUrl) {
   <link rel="stylesheet" href="../../assets/css/home.css">
   <link rel="stylesheet" href="../../assets/css/profile.css">
   <link rel="stylesheet" href="../../assets/css/profile-light.css">
+  <link rel="stylesheet" href="../../assets/css/sidebar.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
@@ -1837,7 +1838,7 @@ if (!$displayAvatarUrl) {
     .msg-bubble-row.is-outgoing .msg-bubble:hover::after { background: rgba(255,255,255,0.06); }
   </style>
 </head>
-<body class="grid-dot-bg home-page-body">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar">
 
   <!-- ── Navbar ────────────────────────────────────── -->
   <nav class="navbar" id="navbar" aria-label="Primary navigation">
@@ -1872,6 +1873,8 @@ if (!$displayAvatarUrl) {
   </nav>
 
   <!-- ── Main layout ──────────────────────────────── -->
+  <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
+
   <main class="profile-main" id="main-content" tabindex="-1">
     <div class="container profile-page-layout" style="gap: 18px; height: 100%; max-height: calc(100vh - 70px);">
 
