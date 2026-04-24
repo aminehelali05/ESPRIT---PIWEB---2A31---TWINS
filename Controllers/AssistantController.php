@@ -28,6 +28,10 @@ class AssistantController
     {
         $appUrl = rtrim(config::getBaseUrl(), '/');
         $model = trim((string) config::get('OPENROUTER_MODEL', self::DEFAULT_MODEL));
+        $contextModel = trim((string) ($context['model'] ?? ''));
+        if ($contextModel !== '') {
+            $model = $contextModel;
+        }
         if ($model === '') {
             $model = self::DEFAULT_MODEL;
         }

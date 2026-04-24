@@ -120,9 +120,10 @@ Diversity/
 2. Copy the project into your web server directory.
 3. Create a database for the project.
 4. Import `User.sql` into your database.
-5. Update database credentials in `config.php` if needed.
-6. Start Apache and MySQL.
-7. Open the app through `index.php` in your browser.
+5. Create a root `.env` file for app settings and secrets.
+6. Update database credentials in `.env` if needed.
+7. Start Apache and MySQL.
+8. Open the app through `index.php` in your browser.
 
 ### Local Run Example
 ```bash
@@ -160,6 +161,7 @@ Make sure the schema in `User.sql` matches your local database before starting t
 The interface uses dedicated CSS files in `assets/css/` for:
 - `home.css`
 - `profile.css`
+- `sidebar.css`
 - `projects.css`
 - `reviews.css`
 - `social.css`

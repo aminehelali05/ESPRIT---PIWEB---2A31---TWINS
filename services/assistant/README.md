@@ -11,9 +11,9 @@ This folder contains the autonomous assistant service layer used by the profile 
 
 ## Required app settings
 
-- `OPENROUTER_API_KEY` in `config.local.php`
-- `OPENROUTER_MODEL` in `config.local.php`
-- `APP_URL` in `config.local.php` or `ASSISTANT_APP_URL` in the Node process
+- `OPENROUTER_API_KEY` in root `.env`
+- `OPENROUTER_MODEL` in root `.env`
+- `APP_URL` in root `.env` or `ASSISTANT_APP_URL` in the Node process
 
 ## Install
 
@@ -39,4 +39,3 @@ npm run whatsapp
 - The worker uses a persistent Chrome profile in `storage/assistant/browser-profile/`
 - WhatsApp login is handled by `whatsapp-web.js` via QR code the first time
 - Browser actions rely on stable selectors such as `data-*` attributes and page ids
-

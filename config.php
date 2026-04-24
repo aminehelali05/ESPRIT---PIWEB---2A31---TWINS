@@ -3,22 +3,77 @@ class config
 {
     private static $pdo = null;
     private static array $settings = [];
+    private static bool $environmentLoaded = false;
 
-    private static function loadLocalSettings(): array
+    private static function loadEnvironmentSettings(): array
     {
-        $localPath = __DIR__ . '/config.local.php';
-        if (!is_file($localPath)) {
+        if (self::$environmentLoaded) {
+            return self::$settings;
+        }
+
+        self::$environmentLoaded = true;
+
+        $envPath = __DIR__ . '/.env';
+        if (!is_file($envPath)) {
             return [];
         }
 
-        $settings = include $localPath;
+        $rawLines = file($envPath, FILE_IGNORE_NEW_LINES);
+        if ($rawLines === false) {
+            return [];
+        }
+
+        $settings = [];
+        foreach ($rawLines as $rawLine) {
+            $line = trim((string) $rawLine);
+            if ($line === '' || str_starts_with($line, '#') || str_starts_with($line, ';')) {
+                continue;
+            }
+
+            if (str_starts_with($line, 'export ')) {
+                $line = trim(substr($line, 7));
+            }
+
+            $separator = strpos($line, '=');
+            if ($separator === false) {
+                continue;
+            }
+
+            $key = trim(substr($line, 0, $separator));
+            if ($key === '') {
+                continue;
+            }
+
+            $value = trim(substr($line, $separator + 1));
+            if ($value !== '') {
+                $firstChar = $value[0];
+                $lastChar = substr($value, -1);
+                if (($firstChar === '"' && $lastChar === '"') || ($firstChar === "'" && $lastChar === "'")) {
+                    $value = substr($value, 1, -1);
+                    if ($firstChar === '"') {
+                        $value = stripcslashes($value);
+                    }
+                }
+            }
+
+            $existing = getenv($key);
+            if ($existing === false || $existing === '') {
+                putenv($key . '=' . $value);
+                $existing = $value;
+            }
+
+            $_ENV[$key] = $existing;
+            $_SERVER[$key] = $existing;
+            $settings[$key] = $existing;
+        }
+
         return is_array($settings) ? $settings : [];
     }
 
     public static function get(string $key, $default = null)
     {
         if (self::$settings === []) {
-            self::$settings = self::loadLocalSettings();
+            self::$settings = self::loadEnvironmentSettings();
         }
 
         $envValue = getenv($key);
