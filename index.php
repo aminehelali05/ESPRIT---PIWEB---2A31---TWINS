@@ -5,8 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include_once(__DIR__ . '/config.php');
 include_once(__DIR__ . '/Controllers/UserController.php');
+include_once(__DIR__ . '/Controllers/AssistantController.php');
 
 $authController = new UserController();
+$assistantController = new AssistantController();
 
 $action = $_GET['action'] ?? null;
 $page = $_GET['page'] ?? null;
@@ -21,6 +23,27 @@ function send_json_response(array $payload, int $status = 200): void
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
+}
+
+function read_json_request_body(): array
+{
+    $raw = file_get_contents('php://input');
+    if (!is_string($raw) || trim($raw) === '') {
+        return [];
+    }
+
+    $decoded = json_decode($raw, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function is_local_request(): bool
+{
+    $remote = strtolower(trim((string) ($_SERVER['REMOTE_ADDR'] ?? '')));
+    if ($remote === '') {
+        return false;
+    }
+
+    return in_array($remote, ['127.0.0.1', '::1', 'localhost'], true) || str_starts_with($remote, '127.');
 }
 
 function json_actions(): array
@@ -38,6 +61,9 @@ function json_actions(): array
         'get_map_users',
         'update_location',
         'upload_message_media',
+        'assistant_command',
+        'assistant_status',
+        'assistant_task',
     ];
 }
 
@@ -444,6 +470,77 @@ if ($action === 'upload_message_media' && $_SERVER['REQUEST_METHOD'] === 'POST')
         'mime_type' => $mimeType,
         'extension' => $ext,
     ]);
+}
+
+if ($action === 'assistant_status') {
+    if (!UserController::isAuthenticated()) {
+        send_json_response(['success' => false, 'message' => 'Not authenticated.'], 401);
+    }
+
+    $currentUserId = (int) ($_SESSION['auth_user']['id'] ?? 0);
+    send_json_response($assistantController->getBootstrapState($currentUserId));
+}
+
+if ($action === 'assistant_task') {
+    if (!UserController::isAuthenticated()) {
+        send_json_response(['success' => false, 'message' => 'Not authenticated.'], 401);
+    }
+
+    $currentUserId = (int) ($_SESSION['auth_user']['id'] ?? 0);
+    $taskId = trim((string) ($_GET['task_id'] ?? $_POST['task_id'] ?? ''));
+    if ($taskId === '') {
+        send_json_response(['success' => false, 'message' => 'Task id is required.'], 400);
+    }
+
+    $task = $assistantController->getTaskById($taskId, $currentUserId);
+    if (!$task) {
+        send_json_response(['success' => false, 'message' => 'Task not found.'], 404);
+    }
+
+    send_json_response(['success' => true, 'task' => $task]);
+}
+
+if ($action === 'assistant_command' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $payload = read_json_request_body();
+    if ($payload === []) {
+        $payload = $_POST;
+    }
+
+    $source = strtolower(trim((string) ($payload['source'] ?? 'web')));
+    if (!in_array($source, ['web', 'voice', 'whatsapp'], true)) {
+        $source = 'web';
+    }
+
+    $sessionUser = UserController::currentUser() ?? [];
+    $currentUserId = (int) ($sessionUser['id'] ?? 0);
+    if ($currentUserId <= 0) {
+        if ($source !== 'whatsapp' || !is_local_request()) {
+            send_json_response(['success' => false, 'message' => 'Not authenticated.'], 401);
+        }
+
+        $bootstrap = $assistantController->getBootstrapState(0);
+        $currentUserId = (int) ($bootstrap['last_active_user_id'] ?? 0);
+    }
+
+    $message = trim((string) ($payload['message'] ?? $payload['text'] ?? ''));
+    if ($message === '') {
+        send_json_response(['success' => false, 'message' => 'Command message is required.'], 400);
+    }
+
+    $context = is_array($payload['context'] ?? null) ? $payload['context'] : [];
+    $context['source'] = $source;
+    $context['user_id'] = $currentUserId;
+    $context['page'] = (string) ($payload['page'] ?? ($context['page'] ?? 'profile'));
+
+    try {
+        $result = $assistantController->submitCommand($currentUserId, $message, $context);
+        send_json_response($result);
+    } catch (Throwable $exception) {
+        send_json_response([
+            'success' => false,
+            'message' => $exception->getMessage() ?: 'Could not queue assistant task.',
+        ], 400);
+    }
 }
 
 header('Location: Views/FrontOffice/home.php');

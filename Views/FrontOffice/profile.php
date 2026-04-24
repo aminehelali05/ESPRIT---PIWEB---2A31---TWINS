@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include_once(__DIR__ . '/../../Controllers/UserController.php');
+include_once(__DIR__ . '/../../Controllers/AssistantController.php');
 
 if (!UserController::isAuthenticated()) {
   $_SESSION['flash_error'] = 'Please sign in to access your profile.';
@@ -12,6 +13,7 @@ if (!UserController::isAuthenticated()) {
 }
 
 $userController = new UserController();
+$assistantBootstrap = AssistantController::bootstrapConfig();
 $db = config::getConnexion();
 
 $tableHasColumn = static function (PDO $dbConn, string $table, string $column): bool {
@@ -4474,6 +4476,7 @@ $displayAvatarResolved = $displayAvatarUrl;
   <link rel="stylesheet" href="../../assets/css/home.css">
   <link rel="stylesheet" href="../../assets/css/profile.css">
   <link rel="stylesheet" href="../../assets/css/profile-light.css">
+  <link rel="stylesheet" href="../../assets/css/profile-ai-assistant.css">
   <link rel="stylesheet" href="../../assets/css/user-form.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -5784,6 +5787,8 @@ $displayAvatarResolved = $displayAvatarUrl;
           <div id="snapSocialMap" class="network-map-canvas-premium" role="region" aria-label="Interactive network map"></div>
         </section>
 
+        <?php include __DIR__ . '/partials/profile-ai-assistant.php'; ?>
+
         <!-- ── Content Grid ────────────────────────────── -->
         <section class="profile-grid" aria-label="Profile detail sections">
 
@@ -6346,6 +6351,21 @@ $displayAvatarResolved = $displayAvatarUrl;
     };
   </script>
   <script>
+    window.profileAiBootstrap = <?= json_encode([
+      'currentUserId' => (int) ($sessionUser['id'] ?? 0),
+      'currentUserName' => $displayName,
+      'currentUserRole' => $displayRoleNormalized,
+      'currentUserAvatar' => $displayAvatarResolved,
+      'provider' => $assistantBootstrap['provider'] ?? 'OpenRouter',
+      'model' => $assistantBootstrap['model'] ?? 'openai/gpt-5.2',
+      'realtime' => $assistantBootstrap['realtime'] ?? [],
+      'api' => $assistantBootstrap['api'] ?? [],
+      'features' => $assistantBootstrap['features'] ?? [],
+      'page' => 'profile',
+      'theme' => 'profile',
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+  </script>
+  <script>
     (function () {
       document.addEventListener('DOMContentLoaded', function () {
         const rail = document.getElementById('friendsRail');
@@ -6426,6 +6446,7 @@ $displayAvatarResolved = $displayAvatarUrl;
   <script src="../../assets/js/user.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="../../assets/js/profile.js"></script>
+  <script src="../../assets/js/profile-ai-assistant.js"></script>
 </body>
 </html>
 
