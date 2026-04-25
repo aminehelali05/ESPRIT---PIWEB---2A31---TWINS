@@ -55,6 +55,7 @@ if (isset($_GET['jam'])) {
 <link rel="stylesheet" href="../../assets/css/home.css">
 <link rel="stylesheet" href="../../assets/css/profile.css">
 <link rel="stylesheet" href="../../assets/css/profile-light.css">
+<link rel="stylesheet" href="../../assets/css/sidebar.css">
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
@@ -764,7 +765,7 @@ input[type="color"].ccol { padding: 2px; }
 @media(max-width:980px) {:root{--pw:260px;--tw:60px}.ss-cv{width:min(calc((100vh - 140px) * 9/16), 260px);height:min(calc(100vh - 140px), 462px)}}
 </style>
 </head>
-<body class="grid-dot-bg home-page-body">
+<body class="grid-dot-bg home-page-body with-global-left-sidebar">
 
 <div class="bg-blobs">
   <div class="blob blob-1"></div>
@@ -789,7 +790,9 @@ input[type="color"].ccol { padding: 2px; }
       </button>
       <div class="nav-profile">
         <button class="nav-profile-btn" aria-label="User menu">
-          <div class="nav-avatar"><?= htmlspecialchars($initials) ?></div>
+          <div class="nav-avatar">
+            <img src="<?= htmlspecialchars($avatarUrl) ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+          </div>
         </button>
         <div class="nav-dropdown">
           <div class="nav-dropdown-header">
@@ -806,36 +809,10 @@ input[type="color"].ccol { padding: 2px; }
 </nav>
 
 <!-- ── Main ──────────────────────────────────── -->
+<?php include __DIR__ . '/partials/global-sidebar.php'; ?>
+
 <main class="profile-main" id="profile-main-content" tabindex="-1">
   <div class="container profile-page-layout">
-
-    <!-- ░░░ SIDEBAR — PRESERVED EXACTLY ░░░ -->
-    <aside class="home-left glass-card" aria-label="Navigation" style="overflow-y:auto;">
-      <div class="left-profile">
-        <div class="left-avatar"><?= htmlspecialchars($initials) ?></div>
-        <div>
-          <h4><?= htmlspecialchars($displayName) ?></h4>
-          <p><?= htmlspecialchars($profLevel) ?></p>
-        </div>
-      </div>
-      <nav class="left-nav">
-        <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> Home Feed</a>
-        <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> Social</a>
-        <a href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> Profile</a>
-        <a href="messages.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7.5A5.5 5.5 0 0 0 14.5 2h-5A5.5 5.5 0 0 0 4 7.5v4A5.5 5.5 0 0 0 9.5 17H13l4 4v-4h.5A5.5 5.5 0 0 0 23 11.5v-4A5.5 5.5 0 0 0 20 7.5Z"/></svg> Messages</a>
-        <a href="JobOffer.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Job Offers</a>
-        <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg> Projects</a>
-        <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z"/></svg> Contracts</a>
-        <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Challenges</a>
-        <?php if ($isAdmin): ?>
-          <a href="../BackOffice/dashboardUser.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Dashboard</a>
-        <?php endif; ?>
-      </nav>
-      <div class="left-gamification">
-        <div class="mini-score"><span>Reputation</span><strong><?= $repScore ?></strong></div>
-        <div class="mini-score"><span>Daily Streak 🔥</span><strong><?= $streak ?> days</strong></div>
-      </div>
-    </aside>
 
     <!-- ░░░ STORY EDITOR ░░░ -->
     <section class="profile-content-area story-host">

@@ -1,195 +1,21 @@
 {
     "version": 1,
-    "updated_at": "2026-04-24T20:29:04+00:00",
+    "updated_at": "2026-04-25T12:30:47+00:00",
     "tasks": [
         {
-            "id": "task_20260424_200622_bfc3dbb91b",
+            "id": "task_20260425_123030_4f185d3156",
             "user_id": 1,
             "source": "whatsapp",
-            "message": "hi",
-            "goal": "Greet the user and offer next actions",
-            "assistant_message": "Hi! What would you like to do in Diversity.is—search for someone, update your profile, or send a message? Tell me what you want and any names/keywords.",
-            "status": "completed",
-            "priority": "normal",
-            "plan": {
-                "goal": "Greet the user and offer next actions",
-                "summary": "Say hello and ask what they’d like to do next, offering a few common options like searching for people, updating their profile, or sending a message.",
-                "assistant_message": "Hi! What would you like to do in Diversity.is—search for someone, update your profile, or send a message? Tell me what you want and any names/keywords.",
-                "voice_reply": "Hi. What would you like to do next—search for someone, update your profile, or send a message?",
-                "requires_browser": false,
-                "requires_whatsapp": true,
-                "priority": "normal",
-                "steps": []
-            },
-            "context": {
-                "user_id": 1,
-                "source": "whatsapp",
-                "page": "ai-agent",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_200618_98a87a1aa0",
-                        "command": "hi",
-                        "summary": "Say hello and offer a few common actions like searching for users, updating the profile, or sending a message.",
-                        "timestamp": "2026-04-24T20:06:18+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145832_9f9646a16f",
-                        "command": "What can you do?",
-                        "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
-                        "timestamp": "2026-04-24T14:58:32+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145829_8f8f466fa3",
-                        "command": "Search for users",
-                        "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
-                        "timestamp": "2026-04-24T14:58:29+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145819_b4bcdf8b41",
-                        "command": "Go to messages",
-                        "summary": "I’ll navigate from your profile to the Messages section so you can view and send chats.",
-                        "timestamp": "2026-04-24T14:58:19+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141719_c1c7e1a536",
-                        "command": "do it",
-                        "summary": "I have queued that request and will keep you updated.",
-                        "timestamp": "2026-04-24T14:17:19+00:00"
-                    }
-                ],
-                "theme": "ai-agent",
-                "model": "openai/gpt-5.2",
-                "voice_enabled": true,
-                "auto_mode": true,
-                "whatsapp_enabled": true,
-                "source_hint": "web"
-            },
-            "events": [
-                {
-                    "status": "completed",
-                    "action": "final",
-                    "message": "Task completed immediately.",
-                    "timestamp": "2026-04-24T20:06:22+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": {
-                "success": true,
-                "summary": "Hi! What would you like to do in Diversity.is—search for someone, update your profile, or send a message? Tell me what you want and any names/keywords."
-            },
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T20:06:22+00:00",
-            "updated_at": "2026-04-24T20:06:22+00:00",
-            "started_at": null,
-            "finished_at": "2026-04-24T20:06:22+00:00"
-        },
-        {
-            "id": "task_20260424_200618_98a87a1aa0",
-            "user_id": 1,
-            "source": "whatsapp",
-            "message": "hi",
-            "goal": "Greet the user and ask what they want to do next",
-            "assistant_message": "Hi! What would you like to do next—search for someone, update your profile, or send a message? If you tell me who and what to say, I can draft and send it.",
-            "status": "completed",
-            "priority": "normal",
-            "plan": {
-                "goal": "Greet the user and ask what they want to do next",
-                "summary": "Say hello and offer a few common actions like searching for users, updating the profile, or sending a message.",
-                "assistant_message": "Hi! What would you like to do next—search for someone, update your profile, or send a message? If you tell me who and what to say, I can draft and send it.",
-                "voice_reply": "Hi. What would you like to do next—search for someone, update your profile, or send a message?",
-                "requires_browser": false,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": []
-            },
-            "context": {
-                "user_id": 1,
-                "source": "whatsapp",
-                "page": "ai-agent",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_145832_9f9646a16f",
-                        "command": "What can you do?",
-                        "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
-                        "timestamp": "2026-04-24T14:58:32+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145829_8f8f466fa3",
-                        "command": "Search for users",
-                        "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
-                        "timestamp": "2026-04-24T14:58:29+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145819_b4bcdf8b41",
-                        "command": "Go to messages",
-                        "summary": "I’ll navigate from your profile to the Messages section so you can view and send chats.",
-                        "timestamp": "2026-04-24T14:58:19+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141719_c1c7e1a536",
-                        "command": "do it",
-                        "summary": "I have queued that request and will keep you updated.",
-                        "timestamp": "2026-04-24T14:17:19+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141625_56d4676944",
-                        "command": "do it now send it to omar hassan",
-                        "summary": "I will open the chat flow and prepare the message.",
-                        "timestamp": "2026-04-24T14:16:25+00:00"
-                    }
-                ],
-                "theme": "ai-agent",
-                "model": "openai/gpt-5.2",
-                "voice_enabled": true,
-                "auto_mode": true,
-                "whatsapp_enabled": true,
-                "source_hint": "web"
-            },
-            "events": [
-                {
-                    "status": "completed",
-                    "action": "final",
-                    "message": "Task completed immediately.",
-                    "timestamp": "2026-04-24T20:06:18+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": {
-                "success": true,
-                "summary": "Hi! What would you like to do next—search for someone, update your profile, or send a message? If you tell me who and what to say, I can draft and send it."
-            },
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T20:06:18+00:00",
-            "updated_at": "2026-04-24T20:06:18+00:00",
-            "started_at": null,
-            "finished_at": "2026-04-24T20:06:18+00:00"
-        },
-        {
-            "id": "task_20260424_145832_9f9646a16f",
-            "user_id": 1,
-            "source": "web",
             "message": "What can you do?",
-            "goal": "Explain assistant capabilities on the Diversity.is profile page",
-            "assistant_message": "I can help you do things in Diversity.is like: navigate to Messages, search for users by name/keyword, open a chat and draft/send a message, update parts of your profile (bio, links, photo), and guide you through common settings. What would you like to do next?",
+            "goal": "Explain what I can do in Diversity.is",
+            "assistant_message": "I can help you: (1) Search the directory (by name/keyword + optional filters like location/role), (2) View and update your profile (bio, skills, links, photo), (3) Find people and open their profiles, (4) Draft/send messages (and WhatsApp messages if enabled), and (5) Guide you through pages and actions in the app. What would you like to do right now?",
             "status": "completed",
             "priority": "normal",
             "plan": {
-                "goal": "Explain assistant capabilities on the Diversity.is profile page",
-                "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
-                "assistant_message": "I can help you do things in Diversity.is like: navigate to Messages, search for users by name/keyword, open a chat and draft/send a message, update parts of your profile (bio, links, photo), and guide you through common settings. What would you like to do next?",
-                "voice_reply": "I can help you navigate, search people, message someone, and update your profile. What would you like to do?",
+                "goal": "Explain what I can do in Diversity.is",
+                "summary": "I can help you navigate Diversity.is, manage your profile, search for people, and message users (including via WhatsApp if enabled). Tell me what you want to do and any details like a name, keyword, or message text.",
+                "assistant_message": "I can help you: (1) Search the directory (by name/keyword + optional filters like location/role), (2) View and update your profile (bio, skills, links, photo), (3) Find people and open their profiles, (4) Draft/send messages (and WhatsApp messages if enabled), and (5) Guide you through pages and actions in the app. What would you like to do right now?",
+                "voice_reply": "I can help you search people, update your profile, and send messages, including WhatsApp. What do you want to do now?",
                 "requires_browser": false,
                 "requires_whatsapp": false,
                 "priority": "normal",
@@ -197,55 +23,60 @@
             },
             "context": {
                 "user_id": 1,
-                "source": "web",
-                "page": "profile",
+                "source": "whatsapp",
+                "page": "ai-agent",
                 "app_url": "http://localhost:3000",
                 "history": [
+                    {
+                        "task_id": "task_20260425_122711_fabfb94a8c",
+                        "command": "Send message to Omar tell him \"I love You\"",
+                        "summary": "I will open Omar’s WhatsApp chat and send the exact message: \"I love You\".",
+                        "timestamp": "2026-04-25T12:27:11+00:00"
+                    },
+                    {
+                        "task_id": "task_20260425_122638_08f07f6de6",
+                        "command": "Hey Bro",
+                        "summary": "Acknowledge the greeting and ask what they’d like help with (search, profile, messaging, or navigation).",
+                        "timestamp": "2026-04-25T12:26:38+00:00"
+                    },
+                    {
+                        "task_id": "task_20260424_202904_28f5a20b14",
+                        "command": "Search for users",
+                        "summary": "I can search the directory, but I need a name, username, or keyword (and any filters like location or role) to run the search.",
+                        "timestamp": "2026-04-24T20:29:04+00:00"
+                    },
+                    {
+                        "task_id": "task_20260424_145832_9f9646a16f",
+                        "command": "What can you do?",
+                        "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
+                        "timestamp": "2026-04-24T14:58:32+00:00"
+                    },
                     {
                         "task_id": "task_20260424_145829_8f8f466fa3",
                         "command": "Search for users",
                         "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
                         "timestamp": "2026-04-24T14:58:29+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145819_b4bcdf8b41",
-                        "command": "Go to messages",
-                        "summary": "I’ll navigate from your profile to the Messages section so you can view and send chats.",
-                        "timestamp": "2026-04-24T14:58:19+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141719_c1c7e1a536",
-                        "command": "do it",
-                        "summary": "I have queued that request and will keep you updated.",
-                        "timestamp": "2026-04-24T14:17:19+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141625_56d4676944",
-                        "command": "do it now send it to omar hassan",
-                        "summary": "I will open the chat flow and prepare the message.",
-                        "timestamp": "2026-04-24T14:16:25+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141527_fcaf8055b2",
-                        "command": "friendly",
-                        "summary": "The user said “friendly,” likely indicating they want a friendly tone or a friendly message. Ask what they’d like to do on their profile page or who they want to message and what to say.",
-                        "timestamp": "2026-04-24T14:15:27+00:00"
                     }
                 ],
-                "theme": "profile"
+                "theme": "ai-agent",
+                "model": "openai/gpt-5.2",
+                "voice_enabled": true,
+                "auto_mode": true,
+                "whatsapp_enabled": true,
+                "source_hint": "web"
             },
             "events": [
                 {
                     "status": "completed",
                     "action": "final",
                     "message": "Task completed immediately.",
-                    "timestamp": "2026-04-24T14:58:32+00:00",
+                    "timestamp": "2026-04-25T12:30:30+00:00",
                     "duration_ms": 0
                 }
             ],
             "result": {
                 "success": true,
-                "summary": "I can help you do things in Diversity.is like: navigate to Messages, search for users by name/keyword, open a chat and draft/send a message, update parts of your profile (bio, links, photo), and guide you through common settings. What would you like to do next?"
+                "summary": "I can help you: (1) Search the directory (by name/keyword + optional filters like location/role), (2) View and update your profile (bio, skills, links, photo), (3) Find people and open their profiles, (4) Draft/send messages (and WhatsApp messages if enabled), and (5) Guide you through pages and actions in the app. What would you like to do right now?"
             },
             "error": null,
             "claimed_by": null,
@@ -253,112 +84,102 @@
                 "whatsapp_sent": false,
                 "web_spoken": false
             },
-            "created_at": "2026-04-24T14:58:32+00:00",
-            "updated_at": "2026-04-24T14:58:32+00:00",
+            "created_at": "2026-04-25T12:30:30+00:00",
+            "updated_at": "2026-04-25T12:30:30+00:00",
             "started_at": null,
-            "finished_at": "2026-04-24T14:58:32+00:00"
+            "finished_at": "2026-04-25T12:30:30+00:00"
         },
         {
-            "id": "task_20260424_145829_8f8f466fa3",
+            "id": "task_20260425_122711_fabfb94a8c",
             "user_id": 1,
-            "source": "web",
-            "message": "Search for users",
-            "goal": "Open user search and prepare to find a specific person",
-            "assistant_message": "Who would you like to search for (name, username, or keyword)? I’ll open the user search and wait for your query.",
+            "source": "whatsapp",
+            "message": "Send message to Omar tell him \"I love You\"",
+            "goal": "Send a WhatsApp message to Omar saying \"I love You\"",
+            "assistant_message": "Sending your message to Omar now.",
             "status": "queued",
             "priority": "normal",
             "plan": {
-                "goal": "Open user search and prepare to find a specific person",
-                "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
-                "assistant_message": "Who would you like to search for (name, username, or keyword)? I’ll open the user search and wait for your query.",
-                "voice_reply": "Tell me the name or username to search for.",
+                "goal": "Send a WhatsApp message to Omar saying \"I love You\"",
+                "summary": "I will open Omar’s WhatsApp chat and send the exact message: \"I love You\".",
+                "assistant_message": "Sending your message to Omar now.",
+                "voice_reply": "Okay. I’ll send it to Omar.",
                 "requires_browser": true,
-                "requires_whatsapp": false,
+                "requires_whatsapp": true,
                 "priority": "normal",
                 "steps": [
                     {
                         "id": "step_1",
-                        "action": "navigate",
-                        "target": "http://localhost:3000",
-                        "value": "",
+                        "action": "open_chat",
+                        "target": "whatsapp",
+                        "value": "Omar",
                         "selector": "",
-                        "notes": "Go to the app home/profile context to access global search.",
+                        "notes": "Open the WhatsApp conversation with Omar (search if needed).",
                         "status": "queued"
                     },
                     {
                         "id": "step_2",
-                        "action": "wait",
-                        "target": "page",
-                        "value": "1000",
+                        "action": "type",
+                        "target": "whatsapp_message_input",
+                        "value": "I love You",
                         "selector": "",
-                        "notes": "Allow UI to load.",
+                        "notes": "Type the message exactly as provided.",
                         "status": "queued"
                     },
                     {
                         "id": "step_3",
                         "action": "click",
-                        "target": "Search",
+                        "target": "whatsapp_send_button",
                         "value": "",
-                        "selector": "[data-testid='global-search'], button[aria-label*='Search'], a[aria-label*='Search']",
-                        "notes": "Open the user search UI (if present in header/nav).",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_4",
-                        "action": "focus",
-                        "target": "Search input",
-                        "value": "",
-                        "selector": "input[type='search'], input[placeholder*='Search'], [data-testid='user-search-input']",
-                        "notes": "Place cursor in the search field, ready for the query.",
+                        "selector": "",
+                        "notes": "Send the message.",
                         "status": "queued"
                     }
                 ]
             },
             "context": {
                 "user_id": 1,
-                "source": "web",
-                "page": "profile",
+                "source": "whatsapp",
+                "page": "ai-agent",
                 "app_url": "http://localhost:3000",
                 "history": [
                     {
-                        "task_id": "task_20260424_145819_b4bcdf8b41",
-                        "command": "Go to messages",
-                        "summary": "I’ll navigate from your profile to the Messages section so you can view and send chats.",
-                        "timestamp": "2026-04-24T14:58:19+00:00"
+                        "task_id": "task_20260425_122638_08f07f6de6",
+                        "command": "Hey Bro",
+                        "summary": "Acknowledge the greeting and ask what they’d like help with (search, profile, messaging, or navigation).",
+                        "timestamp": "2026-04-25T12:26:38+00:00"
                     },
                     {
-                        "task_id": "task_20260424_141719_c1c7e1a536",
-                        "command": "do it",
-                        "summary": "I have queued that request and will keep you updated.",
-                        "timestamp": "2026-04-24T14:17:19+00:00"
+                        "task_id": "task_20260424_202904_28f5a20b14",
+                        "command": "Search for users",
+                        "summary": "I can search the directory, but I need a name, username, or keyword (and any filters like location or role) to run the search.",
+                        "timestamp": "2026-04-24T20:29:04+00:00"
                     },
                     {
-                        "task_id": "task_20260424_141625_56d4676944",
-                        "command": "do it now send it to omar hassan",
-                        "summary": "I will open the chat flow and prepare the message.",
-                        "timestamp": "2026-04-24T14:16:25+00:00"
+                        "task_id": "task_20260424_145832_9f9646a16f",
+                        "command": "What can you do?",
+                        "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
+                        "timestamp": "2026-04-24T14:58:32+00:00"
                     },
                     {
-                        "task_id": "task_20260424_141527_fcaf8055b2",
-                        "command": "friendly",
-                        "summary": "The user said “friendly,” likely indicating they want a friendly tone or a friendly message. Ask what they’d like to do on their profile page or who they want to message and what to say.",
-                        "timestamp": "2026-04-24T14:15:27+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141501_aa84ba02bb",
-                        "command": "go and send msg to anyone",
-                        "summary": "I can send a message for you, but I need to know who you want to message and what you want to say. Tell me the recipient (name/username) and the message text.",
-                        "timestamp": "2026-04-24T14:15:01+00:00"
+                        "task_id": "task_20260424_145829_8f8f466fa3",
+                        "command": "Search for users",
+                        "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
+                        "timestamp": "2026-04-24T14:58:29+00:00"
                     }
                 ],
-                "theme": "profile"
+                "theme": "ai-agent",
+                "model": "openai/gpt-5.2",
+                "voice_enabled": true,
+                "auto_mode": true,
+                "whatsapp_enabled": true,
+                "source_hint": "web"
             },
             "events": [
                 {
                     "status": "queued",
                     "action": "queue",
                     "message": "Task queued for browser execution.",
-                    "timestamp": "2026-04-24T14:58:29+00:00",
+                    "timestamp": "2026-04-25T12:27:11+00:00",
                     "duration_ms": 0
                 }
             ],
@@ -369,510 +190,125 @@
                 "whatsapp_sent": false,
                 "web_spoken": false
             },
-            "created_at": "2026-04-24T14:58:29+00:00",
-            "updated_at": "2026-04-24T14:58:29+00:00",
+            "created_at": "2026-04-25T12:27:11+00:00",
+            "updated_at": "2026-04-25T12:27:11+00:00",
             "started_at": null,
             "finished_at": null
         },
         {
-            "id": "task_20260424_145819_b4bcdf8b41",
+            "id": "task_20260425_122638_08f07f6de6",
             "user_id": 1,
-            "source": "web",
+            "source": "whatsapp",
+            "message": "Hey Bro",
+            "goal": "Greet the user and clarify what they want to do",
+            "assistant_message": "Hey—how can I help today? You can tell me who you want to find, what you want to change on your profile, or who you want to message (and what to say).",
+            "status": "queued",
+            "priority": "normal",
+            "plan": {
+                "goal": "Greet the user and clarify what they want to do",
+                "summary": "Acknowledge the greeting and ask what they’d like help with (search, profile, messaging, or navigation).",
+                "assistant_message": "Hey—how can I help today? You can tell me who you want to find, what you want to change on your profile, or who you want to message (and what to say).",
+                "voice_reply": "Hey. What would you like to do—search someone, update your profile, or send a message?",
+                "requires_browser": true,
+                "requires_whatsapp": true,
+                "priority": "normal",
+                "steps": [
+                    {
+                        "id": "step_1",
+                        "action": "open_chat",
+                        "target": "whatsapp:user_id:1",
+                        "value": "",
+                        "selector": "",
+                        "notes": "Reply in the same WhatsApp thread.",
+                        "status": "queued"
+                    },
+                    {
+                        "id": "step_2",
+                        "action": "type",
+                        "target": "whatsapp:user_id:1",
+                        "value": "Hey—how can I help today? You can tell me who you want to find, what you want to change on your profile, or who you want to message (and what to say).",
+                        "selector": "",
+                        "notes": "",
+                        "status": "queued"
+                    },
+                    {
+                        "id": "step_3",
+                        "action": "press",
+                        "target": "send",
+                        "value": "",
+                        "selector": "",
+                        "notes": "Send the WhatsApp message.",
+                        "status": "queued"
+                    }
+                ]
+            },
+            "context": {
+                "user_id": 1,
+                "source": "whatsapp",
+                "page": "ai-agent",
+                "app_url": "http://localhost:3000",
+                "history": [
+                    {
+                        "task_id": "task_20260424_202904_28f5a20b14",
+                        "command": "Search for users",
+                        "summary": "I can search the directory, but I need a name, username, or keyword (and any filters like location or role) to run the search.",
+                        "timestamp": "2026-04-24T20:29:04+00:00"
+                    },
+                    {
+                        "task_id": "task_20260424_145832_9f9646a16f",
+                        "command": "What can you do?",
+                        "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
+                        "timestamp": "2026-04-24T14:58:32+00:00"
+                    },
+                    {
+                        "task_id": "task_20260424_145829_8f8f466fa3",
+                        "command": "Search for users",
+                        "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
+                        "timestamp": "2026-04-24T14:58:29+00:00"
+                    }
+                ],
+                "theme": "ai-agent",
+                "model": "openai/gpt-5.2",
+                "voice_enabled": true,
+                "auto_mode": true,
+                "whatsapp_enabled": true,
+                "source_hint": "web"
+            },
+            "events": [
+                {
+                    "status": "queued",
+                    "action": "queue",
+                    "message": "Task queued for browser execution.",
+                    "timestamp": "2026-04-25T12:26:38+00:00",
+                    "duration_ms": 0
+                }
+            ],
+            "result": null,
+            "error": null,
+            "claimed_by": null,
+            "notifications": {
+                "whatsapp_sent": false,
+                "web_spoken": false
+            },
+            "created_at": "2026-04-25T12:26:38+00:00",
+            "updated_at": "2026-04-25T12:26:38+00:00",
+            "started_at": null,
+            "finished_at": null
+        },
+        {
+            "id": "task_20260425_123047_4827c07f23",
+            "user_id": 1,
+            "source": "whatsapp",
             "message": "Go to messages",
-            "goal": "Open the Messages page",
+            "goal": "Open the Messages inbox",
             "assistant_message": "Opening your Messages now.",
             "status": "queued",
             "priority": "normal",
             "plan": {
-                "goal": "Open the Messages page",
-                "summary": "I’ll navigate from your profile to the Messages section so you can view and send chats.",
+                "goal": "Open the Messages inbox",
+                "summary": "I’ll take you to your Messages section so you can view and manage your conversations.",
                 "assistant_message": "Opening your Messages now.",
                 "voice_reply": "Opening Messages.",
-                "requires_browser": true,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": [
-                    {
-                        "id": "step_1",
-                        "action": "navigate",
-                        "target": "http://localhost:3000/messages",
-                        "value": "",
-                        "selector": "",
-                        "notes": "Directly open the Messages route from the app.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_2",
-                        "action": "wait",
-                        "target": "page",
-                        "value": "",
-                        "selector": "",
-                        "notes": "Wait for the Messages inbox to load.",
-                        "status": "queued"
-                    }
-                ]
-            },
-            "context": {
-                "user_id": 1,
-                "source": "web",
-                "page": "profile",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_141719_c1c7e1a536",
-                        "command": "do it",
-                        "summary": "I have queued that request and will keep you updated.",
-                        "timestamp": "2026-04-24T14:17:19+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141625_56d4676944",
-                        "command": "do it now send it to omar hassan",
-                        "summary": "I will open the chat flow and prepare the message.",
-                        "timestamp": "2026-04-24T14:16:25+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141527_fcaf8055b2",
-                        "command": "friendly",
-                        "summary": "The user said “friendly,” likely indicating they want a friendly tone or a friendly message. Ask what they’d like to do on their profile page or who they want to message and what to say.",
-                        "timestamp": "2026-04-24T14:15:27+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141501_aa84ba02bb",
-                        "command": "go and send msg to anyone",
-                        "summary": "I can send a message for you, but I need to know who you want to message and what you want to say. Tell me the recipient (name/username) and the message text.",
-                        "timestamp": "2026-04-24T14:15:01+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_140942_40e7e998ec",
-                        "command": "hi",
-                        "summary": "Say hello and ask what they want to do on their profile page.",
-                        "timestamp": "2026-04-24T14:09:42+00:00"
-                    }
-                ],
-                "theme": "profile"
-            },
-            "events": [
-                {
-                    "status": "queued",
-                    "action": "queue",
-                    "message": "Task queued for browser execution.",
-                    "timestamp": "2026-04-24T14:58:19+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": null,
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T14:58:19+00:00",
-            "updated_at": "2026-04-24T14:58:19+00:00",
-            "started_at": null,
-            "finished_at": null
-        },
-        {
-            "id": "task_20260424_141719_c1c7e1a536",
-            "user_id": 1,
-            "source": "web",
-            "message": "do it",
-            "goal": "do it",
-            "assistant_message": "I have queued that request and will keep you updated.",
-            "status": "completed",
-            "priority": "normal",
-            "plan": {
-                "goal": "do it",
-                "summary": "I have queued that request and will keep you updated.",
-                "assistant_message": "I have queued that request and will keep you updated.",
-                "voice_reply": "I have queued that request and will keep you updated.",
-                "requires_browser": false,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": []
-            },
-            "context": {
-                "user_id": 1,
-                "source": "web",
-                "page": "profile",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_141625_56d4676944",
-                        "command": "do it now send it to omar hassan",
-                        "summary": "I will open the chat flow and prepare the message.",
-                        "timestamp": "2026-04-24T14:16:25+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141527_fcaf8055b2",
-                        "command": "friendly",
-                        "summary": "The user said “friendly,” likely indicating they want a friendly tone or a friendly message. Ask what they’d like to do on their profile page or who they want to message and what to say.",
-                        "timestamp": "2026-04-24T14:15:27+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141501_aa84ba02bb",
-                        "command": "go and send msg to anyone",
-                        "summary": "I can send a message for you, but I need to know who you want to message and what you want to say. Tell me the recipient (name/username) and the message text.",
-                        "timestamp": "2026-04-24T14:15:01+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_140942_40e7e998ec",
-                        "command": "hi",
-                        "summary": "Say hello and ask what they want to do on their profile page.",
-                        "timestamp": "2026-04-24T14:09:42+00:00"
-                    }
-                ],
-                "model": "openai/gpt-5.2"
-            },
-            "events": [
-                {
-                    "status": "completed",
-                    "action": "final",
-                    "message": "Task completed immediately.",
-                    "timestamp": "2026-04-24T14:17:19+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": {
-                "success": true,
-                "summary": "I have queued that request and will keep you updated."
-            },
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T14:17:19+00:00",
-            "updated_at": "2026-04-24T14:17:19+00:00",
-            "started_at": null,
-            "finished_at": "2026-04-24T14:17:19+00:00"
-        },
-        {
-            "id": "task_20260424_141625_56d4676944",
-            "user_id": 1,
-            "source": "web",
-            "message": "do it now send it to omar hassan",
-            "goal": "do it now send it to omar hassan",
-            "assistant_message": "I will open the chat flow and prepare the message.",
-            "status": "queued",
-            "priority": "normal",
-            "plan": {
-                "goal": "do it now send it to omar hassan",
-                "summary": "I will open the chat flow and prepare the message.",
-                "assistant_message": "I will open the chat flow and prepare the message.",
-                "voice_reply": "I will open the chat flow and prepare the message.",
-                "requires_browser": true,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": [
-                    {
-                        "id": "step_1",
-                        "action": "navigate",
-                        "target": "messages.php",
-                        "value": "",
-                        "selector": "",
-                        "notes": "Open the messages workspace.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_2",
-                        "action": "open_chat",
-                        "target": "omar hassan",
-                        "value": "",
-                        "selector": "",
-                        "notes": "Select the intended conversation.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_3",
-                        "action": "type",
-                        "target": "message composer",
-                        "value": "do it now send it to omar hassan",
-                        "selector": "",
-                        "notes": "Populate the message composer.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_4",
-                        "action": "click",
-                        "target": "#sendMessageBtn",
-                        "value": "",
-                        "selector": "#sendMessageBtn",
-                        "notes": "Send the message.",
-                        "status": "queued"
-                    }
-                ]
-            },
-            "context": {
-                "user_id": 1,
-                "source": "web",
-                "page": "profile",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_141527_fcaf8055b2",
-                        "command": "friendly",
-                        "summary": "The user said “friendly,” likely indicating they want a friendly tone or a friendly message. Ask what they’d like to do on their profile page or who they want to message and what to say.",
-                        "timestamp": "2026-04-24T14:15:27+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_141501_aa84ba02bb",
-                        "command": "go and send msg to anyone",
-                        "summary": "I can send a message for you, but I need to know who you want to message and what you want to say. Tell me the recipient (name/username) and the message text.",
-                        "timestamp": "2026-04-24T14:15:01+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_140942_40e7e998ec",
-                        "command": "hi",
-                        "summary": "Say hello and ask what they want to do on their profile page.",
-                        "timestamp": "2026-04-24T14:09:42+00:00"
-                    }
-                ],
-                "model": "openai/gpt-5.2"
-            },
-            "events": [
-                {
-                    "status": "queued",
-                    "action": "queue",
-                    "message": "Task queued for browser execution.",
-                    "timestamp": "2026-04-24T14:16:25+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": null,
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T14:16:25+00:00",
-            "updated_at": "2026-04-24T14:16:25+00:00",
-            "started_at": null,
-            "finished_at": null
-        },
-        {
-            "id": "task_20260424_141527_fcaf8055b2",
-            "user_id": 1,
-            "source": "web",
-            "message": "friendly",
-            "goal": "Respond in a friendly tone and clarify what the user wants to do next",
-            "assistant_message": "Absolutely — I’ll keep it friendly. What would you like to do on your profile page? If you want to message someone, tell me who (name/username) and the message you want to send.",
-            "status": "completed",
-            "priority": "normal",
-            "plan": {
-                "goal": "Respond in a friendly tone and clarify what the user wants to do next",
-                "summary": "The user said “friendly,” likely indicating they want a friendly tone or a friendly message. Ask what they’d like to do on their profile page or who they want to message and what to say.",
-                "assistant_message": "Absolutely — I’ll keep it friendly. What would you like to do on your profile page? If you want to message someone, tell me who (name/username) and the message you want to send.",
-                "voice_reply": "Sure — I’ll keep it friendly. What would you like to do next?",
-                "requires_browser": false,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": []
-            },
-            "context": {
-                "user_id": 1,
-                "source": "web",
-                "page": "profile",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_141501_aa84ba02bb",
-                        "command": "go and send msg to anyone",
-                        "summary": "I can send a message for you, but I need to know who you want to message and what you want to say. Tell me the recipient (name/username) and the message text.",
-                        "timestamp": "2026-04-24T14:15:01+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_140942_40e7e998ec",
-                        "command": "hi",
-                        "summary": "Say hello and ask what they want to do on their profile page.",
-                        "timestamp": "2026-04-24T14:09:42+00:00"
-                    }
-                ],
-                "model": "openai/gpt-5.2"
-            },
-            "events": [
-                {
-                    "status": "completed",
-                    "action": "final",
-                    "message": "Task completed immediately.",
-                    "timestamp": "2026-04-24T14:15:27+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": {
-                "success": true,
-                "summary": "Absolutely — I’ll keep it friendly. What would you like to do on your profile page? If you want to message someone, tell me who (name/username) and the message you want to send."
-            },
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T14:15:27+00:00",
-            "updated_at": "2026-04-24T14:15:27+00:00",
-            "started_at": null,
-            "finished_at": "2026-04-24T14:15:27+00:00"
-        },
-        {
-            "id": "task_20260424_141501_aa84ba02bb",
-            "user_id": 1,
-            "source": "web",
-            "message": "go and send msg to anyone",
-            "goal": "Send a message to a specific person from your Diversity.is profile",
-            "assistant_message": "Who should I message (name/username), and what should the message say? If you want, tell me the tone (professional/friendly) and whether this is a new chat or an existing conversation.",
-            "status": "queued",
-            "priority": "normal",
-            "plan": {
-                "goal": "Send a message to a specific person from your Diversity.is profile",
-                "summary": "I can send a message for you, but I need to know who you want to message and what you want to say. Tell me the recipient (name/username) and the message text.",
-                "assistant_message": "Who should I message (name/username), and what should the message say? If you want, tell me the tone (professional/friendly) and whether this is a new chat or an existing conversation.",
-                "voice_reply": "Who should I message, and what would you like me to say?",
-                "requires_browser": true,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": [
-                    {
-                        "id": "step_1",
-                        "action": "navigate",
-                        "target": "messages.php",
-                        "value": "",
-                        "selector": "",
-                        "notes": "Open the messages workspace.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_2",
-                        "action": "open_chat",
-                        "target": "anyone",
-                        "value": "",
-                        "selector": "",
-                        "notes": "Select the intended conversation.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_3",
-                        "action": "type",
-                        "target": "message composer",
-                        "value": "go and send msg to anyone",
-                        "selector": "",
-                        "notes": "Populate the message composer.",
-                        "status": "queued"
-                    },
-                    {
-                        "id": "step_4",
-                        "action": "click",
-                        "target": "#sendMessageBtn",
-                        "value": "",
-                        "selector": "#sendMessageBtn",
-                        "notes": "Send the message.",
-                        "status": "queued"
-                    }
-                ]
-            },
-            "context": {
-                "user_id": 1,
-                "source": "web",
-                "page": "profile",
-                "app_url": "http://localhost:3000",
-                "history": [
-                    {
-                        "task_id": "task_20260424_140942_40e7e998ec",
-                        "command": "hi",
-                        "summary": "Say hello and ask what they want to do on their profile page.",
-                        "timestamp": "2026-04-24T14:09:42+00:00"
-                    }
-                ],
-                "model": "openai/gpt-5.2"
-            },
-            "events": [
-                {
-                    "status": "queued",
-                    "action": "queue",
-                    "message": "Task queued for browser execution.",
-                    "timestamp": "2026-04-24T14:15:01+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": null,
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T14:15:01+00:00",
-            "updated_at": "2026-04-24T14:15:01+00:00",
-            "started_at": null,
-            "finished_at": null
-        },
-        {
-            "id": "task_20260424_140942_40e7e998ec",
-            "user_id": 1,
-            "source": "web",
-            "message": "hi",
-            "goal": "Greet the user and offer help with their Diversity.is profile",
-            "assistant_message": "Hi! What would you like to update or do on your profile (e.g., bio, skills, preferences, or visibility)?",
-            "status": "completed",
-            "priority": "normal",
-            "plan": {
-                "goal": "Greet the user and offer help with their Diversity.is profile",
-                "summary": "Say hello and ask what they want to do on their profile page.",
-                "assistant_message": "Hi! What would you like to update or do on your profile (e.g., bio, skills, preferences, or visibility)?",
-                "voice_reply": "Hi. What would you like to update on your profile?",
-                "requires_browser": false,
-                "requires_whatsapp": false,
-                "priority": "normal",
-                "steps": []
-            },
-            "context": {
-                "user_id": 1,
-                "source": "web",
-                "page": "profile",
-                "app_url": "http://localhost:3000",
-                "history": [],
-                "model": "openai/gpt-5.2"
-            },
-            "events": [
-                {
-                    "status": "completed",
-                    "action": "final",
-                    "message": "Task completed immediately.",
-                    "timestamp": "2026-04-24T14:09:42+00:00",
-                    "duration_ms": 0
-                }
-            ],
-            "result": {
-                "success": true,
-                "summary": "Hi! What would you like to update or do on your profile (e.g., bio, skills, preferences, or visibility)?"
-            },
-            "error": null,
-            "claimed_by": null,
-            "notifications": {
-                "whatsapp_sent": false,
-                "web_spoken": false
-            },
-            "created_at": "2026-04-24T14:09:42+00:00",
-            "updated_at": "2026-04-24T14:09:42+00:00",
-            "started_at": null,
-            "finished_at": "2026-04-24T14:09:42+00:00"
-        },
-        {
-            "id": "task_20260424_202904_28f5a20b14",
-            "user_id": 1,
-            "source": "whatsapp",
-            "message": "Search for users",
-            "goal": "Search for users in Diversity.is",
-            "assistant_message": "Who would you like to search for? Send a name, username, or keyword (optionally: location, company, role, or interests). I’ll open the search field and run it.",
-            "status": "queued",
-            "priority": "normal",
-            "plan": {
-                "goal": "Search for users in Diversity.is",
-                "summary": "I can search the directory, but I need a name, username, or keyword (and any filters like location or role) to run the search.",
-                "assistant_message": "Who would you like to search for? Send a name, username, or keyword (optionally: location, company, role, or interests). I’ll open the search field and run it.",
-                "voice_reply": "Tell me the name, username, or keyword to search, and any filters like location or role.",
                 "requires_browser": true,
                 "requires_whatsapp": false,
                 "steps": [
@@ -882,25 +318,25 @@
                         "target": "http://localhost:3000",
                         "value": "",
                         "selector": "",
-                        "notes": "Open the Diversity.is app",
+                        "notes": "Load the Diversity.is web app.",
                         "status": "queued"
                     },
                     {
                         "id": "step_2",
                         "action": "click",
-                        "target": "Global search / People search",
+                        "target": "Messages",
                         "value": "",
-                        "selector": "[data-testid='nav-search'], a[href*='search'], a[href*='people']",
-                        "notes": "Go to the user search area (best match selector)",
+                        "selector": "[data-testid=\"nav-messages\"], a[href*=\"/messages\"], nav a:has-text(\"Messages\")",
+                        "notes": "Open the Messages inbox from the main navigation.",
                         "status": "queued"
                     },
                     {
                         "id": "step_3",
-                        "action": "focus",
-                        "target": "User search input",
+                        "action": "wait",
+                        "target": "Messages page",
                         "value": "",
-                        "selector": "[data-testid='user-search-input'], input[type='search'], input[placeholder*='Search']",
-                        "notes": "Place cursor in the search field, ready for the query",
+                        "selector": "[data-testid=\"messages-page\"], [data-testid=\"inbox\"], main:has-text(\"Messages\")",
+                        "notes": "Wait for the inbox to finish loading.",
                         "status": "queued"
                     }
                 ]
@@ -912,34 +348,34 @@
                 "app_url": "http://localhost:3000",
                 "history": [
                     {
-                        "task_id": "task_20260424_200622_bfc3dbb91b",
-                        "command": "hi",
-                        "summary": "Say hello and ask what they’d like to do next, offering a few common options like searching for people, updating their profile, or sending a message.",
-                        "timestamp": "2026-04-24T20:06:22+00:00"
+                        "task_id": "task_20260425_123030_4f185d3156",
+                        "command": "What can you do?",
+                        "summary": "I can help you navigate Diversity.is, manage your profile, search for people, and message users (including via WhatsApp if enabled). Tell me what you want to do and any details like a name, keyword, or message text.",
+                        "timestamp": "2026-04-25T12:30:30+00:00"
                     },
                     {
-                        "task_id": "task_20260424_200618_98a87a1aa0",
-                        "command": "hi",
-                        "summary": "Say hello and offer a few common actions like searching for users, updating the profile, or sending a message.",
-                        "timestamp": "2026-04-24T20:06:18+00:00"
+                        "task_id": "task_20260425_122711_fabfb94a8c",
+                        "command": "Send message to Omar tell him \"I love You\"",
+                        "summary": "I will open Omar’s WhatsApp chat and send the exact message: \"I love You\".",
+                        "timestamp": "2026-04-25T12:27:11+00:00"
+                    },
+                    {
+                        "task_id": "task_20260425_122638_08f07f6de6",
+                        "command": "Hey Bro",
+                        "summary": "Acknowledge the greeting and ask what they’d like help with (search, profile, messaging, or navigation).",
+                        "timestamp": "2026-04-25T12:26:38+00:00"
+                    },
+                    {
+                        "task_id": "task_20260424_202904_28f5a20b14",
+                        "command": "Search for users",
+                        "summary": "I can search the directory, but I need a name, username, or keyword (and any filters like location or role) to run the search.",
+                        "timestamp": "2026-04-24T20:29:04+00:00"
                     },
                     {
                         "task_id": "task_20260424_145832_9f9646a16f",
                         "command": "What can you do?",
                         "summary": "I can help you navigate the app, manage your profile, search for people, and send messages. Tell me what you want to do and, if relevant, who you want to contact and what you want to say.",
                         "timestamp": "2026-04-24T14:58:32+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145829_8f8f466fa3",
-                        "command": "Search for users",
-                        "summary": "I can search for users, but I need a name, username, or keyword to search for. I’ll open the search field and get it ready.",
-                        "timestamp": "2026-04-24T14:58:29+00:00"
-                    },
-                    {
-                        "task_id": "task_20260424_145819_b4bcdf8b41",
-                        "command": "Go to messages",
-                        "summary": "I’ll navigate from your profile to the Messages section so you can view and send chats.",
-                        "timestamp": "2026-04-24T14:58:19+00:00"
                     }
                 ],
                 "theme": "ai-agent",
@@ -954,7 +390,7 @@
                     "status": "queued",
                     "action": "queue",
                     "message": "Task queued for browser execution.",
-                    "timestamp": "2026-04-24T20:29:04+00:00",
+                    "timestamp": "2026-04-25T12:30:47+00:00",
                     "duration_ms": 0
                 }
             ],
@@ -965,8 +401,8 @@
                 "whatsapp_sent": false,
                 "web_spoken": false
             },
-            "created_at": "2026-04-24T20:29:04+00:00",
-            "updated_at": "2026-04-24T20:29:04+00:00",
+            "created_at": "2026-04-25T12:30:47+00:00",
+            "updated_at": "2026-04-25T12:30:47+00:00",
             "started_at": null,
             "finished_at": null
         }

@@ -397,6 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
   injectSvgGradients();
   initMouseEffects();
   initCard3DEffects();
+  initGlobalWakeWord();
 
   // Theme toggle buttons
   document.querySelectorAll('.theme-toggle').forEach(btn => {
@@ -410,3 +411,83 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) { /* ignore */ }
   }
 });
+
+// ============================================================
+// GLOBAL WAKE WORD — "Hey Bro" (works on ALL pages)
+// Redirects to ai-agent.php?autostart=1 when triggered.
+// On the AI Agent page itself, ai-agent.js takes over instead.
+// ============================================================
+function initGlobalWakeWord() {
+  // Skip on AI Agent page — ai-agent.js manages its own monitor
+  if (document.body.classList.contains('ai-agent-page')) return;
+
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  if (!SpeechRec) return;
+
+  const voiceEnabled = localStorage.getItem('div-ai-voice-enabled') !== '0';
+  if (!voiceEnabled) return;
+
+  const WAKE_WORD = 'hey bro';
+  let monitor = null;
+  let triggered = false;
+
+  const startMonitor = () => {
+    if (monitor || triggered) return;
+    const rec = new SpeechRec();
+    rec.lang           = 'en-US';
+    rec.continuous     = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event) => {
+      if (triggered) return;
+      const idx    = event.resultIndex;
+      const result = event.results[idx];
+      if (!result) return;
+      const text = String(result[0]?.transcript || '').toLowerCase().trim();
+
+      if (text.includes(WAKE_WORD)) {
+        triggered = true;
+        try { rec.onend = null; rec.abort(); } catch {}
+        monitor = null;
+
+        // Brief TTS acknowledgement
+        if (typeof window.speechSynthesis !== 'undefined') {
+          const utt = new SpeechSynthesisUtterance("Hey, I'm listening!");
+          utt.lang = 'en-US';
+          utt.rate = 1.05;
+          window.speechSynthesis.speak(utt);
+        }
+
+        // Determine path depth to ai-agent.php
+        const path = window.location.pathname;
+        const depth = (path.match(/\//g) || []).length;
+        const relPath = depth <= 2
+          ? 'Views/FrontOffice/ai-agent.php?autostart=1'
+          : 'ai-agent.php?autostart=1';
+
+        setTimeout(() => {
+          window.location.href = relPath;
+        }, 500);
+      }
+    };
+
+    rec.onend = () => {
+      monitor = null;
+      if (!triggered) setTimeout(startMonitor, 1500);
+    };
+
+    rec.onerror = (e) => {
+      monitor = null;
+      const errType = String(e?.error || '');
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(errType)) return;
+      if (!triggered) setTimeout(startMonitor, 3000);
+    };
+
+    monitor = rec;
+    try { rec.start(); } catch { monitor = null; }
+  };
+
+  // Small delay to let the page settle before opening mic
+  setTimeout(startMonitor, 1200);
+}

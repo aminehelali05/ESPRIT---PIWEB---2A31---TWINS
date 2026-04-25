@@ -11,6 +11,12 @@ $sidebarLastName = trim((string) ($sidebarUser['last_name'] ?? 'User'));
 $sidebarDisplayName = trim($sidebarFirstName . ' ' . $sidebarLastName);
 $sidebarDisplayName = $sidebarDisplayName !== '' ? $sidebarDisplayName : 'Guest User';
 $sidebarInitials = strtoupper(substr($sidebarFirstName ?: 'G', 0, 1) . substr($sidebarLastName ?: 'U', 0, 1));
+$sidebarEmail = trim((string) ($sidebarUser['email'] ?? ''));
+$sidebarAvatarUrl = (string) ($sidebarUser['avatar_url'] ?? '');
+if (!$sidebarAvatarUrl) {
+    $seed = rawurlencode($sidebarFirstName . '-' . $sidebarLastName . '-' . $sidebarEmail);
+    $sidebarAvatarUrl = "https://api.dicebear.com/9.x/adventurer/svg?seed={$seed}";
+}
 $sidebarLevel = trim((string) ($sidebarLevel ?? ''));
 $sidebarLevel = $sidebarLevel !== '' ? $sidebarLevel : 'Level 12';
 $sidebarReputation = (int) ($sidebarReputation ?? 84);
@@ -92,7 +98,9 @@ $sidebarItems = [
 ?>
 <aside class="<?= htmlspecialchars($sidebarClass) ?>" data-sidebar-mode="<?= htmlspecialchars($sidebarMode) ?>" aria-label="<?= htmlspecialchars($sidebarLabel) ?>" id="globalSidebar">
     <div class="left-profile">
-        <div class="left-avatar"><?= htmlspecialchars($sidebarInitials) ?></div>
+        <div class="left-avatar">
+            <img src="<?= htmlspecialchars($sidebarAvatarUrl) ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+        </div>
         <div>
             <h4><?= htmlspecialchars($sidebarDisplayName) ?></h4>
             <p><?= htmlspecialchars($sidebarLevel) ?></p>
