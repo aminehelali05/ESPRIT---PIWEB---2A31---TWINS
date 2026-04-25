@@ -1,13 +1,85 @@
+/* ============================================================
+   AI AGENT PAGE — Premium Futuristic Design
+   Deep blue/purple gradient • Animated particles • Multi-layer orb
+   Glass panels • Neon accents • Floating interface
+   ============================================================ */
+
+/* --- Page Background --- */
 .ai-agent-page {
+  position: relative;
+  overflow-x: hidden;
   color: var(--color-text-primary);
   background:
-    radial-gradient(circle at top, rgba(var(--color-accent-rgb), 0.12), transparent 36%),
-    radial-gradient(circle at 82% 14%, rgba(var(--color-accent-secondary-rgb), 0.09), transparent 28%),
-    linear-gradient(180deg, var(--color-bg), var(--color-bg-alt));
+    radial-gradient(ellipse at 30% 0%, rgba(59, 130, 246, 0.18), transparent 50%),
+    radial-gradient(ellipse at 70% 10%, rgba(124, 58, 237, 0.14), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.08), transparent 50%),
+    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-alt) 100%);
 }
 
+/* --- Ambient Background Layer --- */
+.ai-agent-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ai-agent-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  animation: ai-agent-blob-float 20s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.ai-agent-blob.blob-one {
+  top: 8%;
+  left: -6%;
+  width: 28rem;
+  height: 28rem;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.35), rgba(99, 102, 241, 0.12) 45%, transparent 70%);
+}
+
+.ai-agent-blob.blob-two {
+  top: 14%;
+  right: -8%;
+  width: 32rem;
+  height: 32rem;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.3), rgba(168, 85, 247, 0.08) 50%, transparent 72%);
+  animation-duration: 24s;
+  animation-direction: reverse;
+}
+
+.ai-agent-blob.blob-three {
+  left: 20%;
+  bottom: -15%;
+  width: 34rem;
+  height: 34rem;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.2), rgba(6, 182, 212, 0.06) 45%, transparent 70%);
+  animation-duration: 28s;
+}
+
+/* Animated light streaks */
+.ai-agent-particles {
+  position: absolute;
+  inset: 0;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(96, 165, 250, 0.22) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(168, 85, 247, 0.15) 0 0.8px, transparent 1.2px);
+  background-size: 80px 80px, 120px 120px, 160px 160px;
+  background-position: 0 0, 30px 20px, 60px 40px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+  animation: ai-agent-particles-drift 32s linear infinite;
+}
+
+/* --- Main Layout --- */
 .ai-agent-main {
-  padding: 100px 0 6rem;
+  padding: 110px 0 6.5rem;
   position: relative;
   z-index: 1;
 }
@@ -16,12 +88,15 @@
   display: grid;
   gap: var(--sp-6);
   max-width: 1360px;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-layout .global-left-sidebar {
   top: 88px;
 }
 
+/* --- Workspace Grid --- */
 .ai-agent-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
@@ -29,6 +104,7 @@
   align-items: start;
 }
 
+/* --- Glass Panels (Stage, Settings, History) --- */
 .ai-agent-stage,
 .ai-agent-settings,
 .ai-agent-history {
@@ -37,13 +113,16 @@
   border-radius: 28px;
   border: 1px solid rgba(var(--color-accent-rgb), 0.1);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(248, 250, 252, 0.56)),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.72), rgba(248, 250, 252, 0.45)),
     var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(145%);
-  -webkit-backdrop-filter: blur(24px) saturate(145%);
-  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  box-shadow:
+    var(--shadow-card),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
+/* Subtle gradient overlay for glass panels */
 .ai-agent-stage::before,
 .ai-agent-settings::before,
 .ai-agent-history::before {
@@ -51,34 +130,39 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.04), transparent 35%),
-    linear-gradient(315deg, rgba(var(--color-accent-secondary-rgb), 0.035), transparent 30%);
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.04), transparent 40%),
+    linear-gradient(315deg, rgba(var(--color-accent-secondary-rgb), 0.03), transparent 35%);
   pointer-events: none;
+  z-index: 0;
 }
 
+/* --- Stage (Main Orb Area) --- */
 .ai-agent-stage {
-  min-height: 760px;
-  padding: clamp(1.5rem, 3vw, 2.4rem);
+  min-height: 820px;
+  padding: clamp(2rem, 4vw, 3rem);
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 1.3rem;
+  gap: 1.6rem;
   text-align: center;
   isolation: isolate;
 }
 
+/* Radial light behind stage */
 .ai-agent-stage::after {
   content: "";
   position: absolute;
-  inset: auto -12% -18% auto;
-  width: 340px;
-  height: 340px;
+  inset: auto -15% -20% auto;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(var(--color-accent-rgb), 0.12), transparent 66%);
-  filter: blur(18px);
+  background: radial-gradient(circle, rgba(var(--color-accent-rgb), 0.16), rgba(var(--color-accent-secondary-rgb), 0.06) 40%, transparent 68%);
+  filter: blur(30px);
   pointer-events: none;
+  z-index: 0;
 }
 
+/* --- Stage Header --- */
 .ai-agent-stage-head {
   width: 100%;
   display: flex;
@@ -86,6 +170,8 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-head-actions {
@@ -94,31 +180,39 @@
   gap: 10px;
 }
 
+/* --- Pill & Icon Buttons --- */
 .ai-agent-pill,
 .ai-agent-history-toggle,
 .ai-agent-settings-toggle,
 .ai-agent-voice-btn,
 .ai-agent-send-btn {
-  border: 1px solid rgba(var(--color-accent-rgb), 0.14);
-  background: rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
   box-shadow:
-    0 10px 24px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 8px 20px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    transform 200ms var(--ease-smooth),
+    box-shadow 200ms var(--ease-smooth),
+    border-color 200ms var(--ease-smooth),
+    background 200ms var(--ease-smooth);
 }
 
 .ai-agent-pill {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 0.6rem 0.95rem;
+  padding: 0.6rem 1rem;
   border-radius: 999px;
   color: var(--color-text-primary);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-pill-dot,
@@ -126,14 +220,15 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary));
-  box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0.3);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
 }
 
 .ai-agent-pill-dot {
-  animation: ai-agent-pulse 2.8s ease-in-out infinite;
+  animation: ai-agent-pulse 2.5s ease-in-out infinite;
 }
 
+/* Icon toggle buttons */
 .ai-agent-history-toggle,
 .ai-agent-settings-toggle,
 .ai-agent-voice-btn {
@@ -145,7 +240,6 @@
   justify-content: center;
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
 .ai-agent-history-toggle:hover,
@@ -153,22 +247,28 @@
 .ai-agent-voice-btn:hover,
 .ai-agent-send-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px rgba(var(--color-accent-rgb), 0.18);
-  border-color: rgba(var(--color-accent-rgb), 0.28);
+  box-shadow:
+    0 12px 28px rgba(var(--color-accent-rgb), 0.16),
+    0 0 16px rgba(var(--color-accent-rgb), 0.06);
+  border-color: rgba(var(--color-accent-rgb), 0.24);
+  background: rgba(255, 255, 255, 0.2);
 }
 
+/* --- Hero Copy --- */
 .ai-agent-hero-copy {
   display: grid;
   justify-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   max-width: 780px;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-kicker,
 .ai-settings-label {
   margin: 0;
   color: var(--color-text-secondary);
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -176,17 +276,21 @@
 
 .ai-agent-hero-copy h1 {
   margin: 0;
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-size: clamp(2.2rem, 5vw, 4rem);
   line-height: 0.95;
-  letter-spacing: -0.07em;
+  letter-spacing: -0.06em;
   font-weight: 800;
+  background: linear-gradient(135deg, var(--color-text-primary) 30%, var(--color-accent) 70%, var(--color-accent-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .ai-agent-description {
   margin: 0;
   max-width: 58ch;
   color: var(--color-text-secondary);
-  font-size: clamp(1rem, 1.3vw, 1.08rem);
+  font-size: clamp(0.95rem, 1.3vw, 1.06rem);
   line-height: 1.65;
 }
 
@@ -194,13 +298,15 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 0.45rem 0.85rem;
+  padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  background: rgba(var(--color-accent-rgb), 0.08);
-  border: 1px solid rgba(var(--color-accent-rgb), 0.14);
+  background: rgba(var(--color-accent-rgb), 0.07);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
   color: var(--color-text-primary);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 700;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-status-dot {
@@ -209,17 +315,22 @@
   animation: ai-agent-status 1.8s ease-in-out infinite;
 }
 
+/* ============================================================
+   ORB — Multi-layer Premium Design
+   ============================================================ */
 .ai-agent-orb-stack {
   display: grid;
   justify-items: center;
-  gap: 0.85rem;
+  gap: 1rem;
   width: 100%;
-  padding: clamp(0.65rem, 1.8vw, 1rem) 0 0.2rem;
+  padding: clamp(0.8rem, 2vw, 1.2rem) 0 0.3rem;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-orb {
   position: relative;
-  width: clamp(180px, 26vw, 250px);
+  width: clamp(190px, 26vw, 260px);
   aspect-ratio: 1;
   border: 0;
   background: transparent;
@@ -229,11 +340,41 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Outer radial glow — multi-color */
+.ai-agent-orb::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 50%),
+    radial-gradient(circle at 30% 30%, rgba(124, 58, 237, 0.12), transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(34, 211, 238, 0.1), transparent 50%);
+  filter: blur(18px);
+  opacity: 0.85;
+  animation: ai-agent-breathe 6s ease-in-out infinite;
+}
+
+/* Inner highlight */
+.ai-agent-orb::after {
+  content: "";
+  position: absolute;
+  inset: 20%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.2), transparent 28%),
+    radial-gradient(circle at 50% 50%, rgba(var(--color-accent-secondary-rgb), 0.06), transparent 60%);
+  opacity: 0.9;
+  filter: blur(3px);
+  pointer-events: none;
+}
+
 .ai-agent-orb:focus-visible {
   box-shadow: 0 0 0 5px rgba(var(--color-accent-rgb), 0.18);
   border-radius: 50%;
 }
 
+/* Orbit rings */
 .ai-agent-orb-ring,
 .ai-agent-orb-core {
   position: absolute;
@@ -242,115 +383,199 @@
 }
 
 .ai-agent-orb-ring {
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: radial-gradient(circle, rgba(var(--color-accent-secondary-rgb), 0.06), transparent 68%);
-  animation: ai-agent-rotate 18s linear infinite;
+  border: 1.5px solid rgba(var(--color-accent-rgb), 0.1);
+  background: radial-gradient(circle, rgba(var(--color-accent-secondary-rgb), 0.04), transparent 60%);
+  animation: ai-agent-rotate 16s linear infinite;
+}
+
+/* Dots on rings for depth */
+.ai-agent-orb .ring-one::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(var(--color-accent-rgb), 0.35);
+  box-shadow: 0 0 8px rgba(var(--color-accent-rgb), 0.3);
 }
 
 .ai-agent-orb .ring-two {
-  inset: 16px;
-  animation-duration: 24s;
+  inset: 18px;
+  border-color: rgba(var(--color-accent-secondary-rgb), 0.1);
+  animation-duration: 22s;
   animation-direction: reverse;
 }
 
-.ai-agent-orb .ring-three {
-  inset: 34px;
-  animation-duration: 30s;
+.ai-agent-orb .ring-two::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  right: 30%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(var(--color-accent-secondary-rgb), 0.4);
+  box-shadow: 0 0 6px rgba(var(--color-accent-secondary-rgb), 0.3);
 }
 
+.ai-agent-orb .ring-three {
+  inset: 38px;
+  border-color: rgba(124, 58, 237, 0.08);
+  animation-duration: 28s;
+}
+
+/* Core orb — deep gradient with specular highlight */
 .ai-agent-orb-core {
-  inset: 52px;
+  inset: 54px;
   display: grid;
   place-items: center;
   color: #fff;
   background:
-    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.35), transparent 26%),
-    radial-gradient(circle at 50% 50%, rgba(var(--color-accent-rgb), 0.82), rgba(var(--color-accent-rgb), 0.92) 60%, rgba(15, 23, 42, 0.95) 100%);
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.3), transparent 28%),
+    radial-gradient(circle at 65% 75%, rgba(var(--color-accent-secondary-rgb), 0.15), transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.85) 0%, rgba(99, 102, 241, 0.9) 40%, rgba(124, 58, 237, 0.95) 70%, rgba(15, 23, 42, 0.98) 100%);
   box-shadow:
-    0 24px 60px rgba(var(--color-accent-rgb), 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+    0 0 40px rgba(59, 130, 246, 0.2),
+    0 24px 60px rgba(99, 102, 241, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 240ms var(--ease-smooth), box-shadow 240ms var(--ease-smooth);
 }
 
+/* Specular highlight on core */
+.ai-agent-orb-core::before {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 35% 25%, rgba(255, 255, 255, 0.35), transparent 50%),
+    radial-gradient(ellipse at 65% 70%, rgba(34, 211, 238, 0.1), transparent 40%);
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* --- Orb State Transitions --- */
 .ai-agent-workspace[data-agent-state="listening"] .ai-agent-orb-core {
-  transform: scale(1.05);
+  transform: scale(1.06);
   box-shadow:
-    0 28px 70px rgba(var(--color-accent-rgb), 0.34),
-    0 0 0 18px rgba(var(--color-accent-rgb), 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    0 0 50px rgba(59, 130, 246, 0.3),
+    0 28px 70px rgba(99, 102, 241, 0.3),
+    0 0 0 20px rgba(59, 130, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .ai-agent-workspace[data-agent-state="processing"] .ai-agent-orb-core {
-  transform: scale(1.02);
+  transform: scale(1.03);
   box-shadow:
-    0 26px 68px rgba(var(--color-accent-rgb), 0.26),
+    0 0 44px rgba(124, 58, 237, 0.25),
+    0 26px 68px rgba(99, 102, 241, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .ai-agent-workspace[data-agent-state="executing"] .ai-agent-orb-core {
-  transform: scale(1.03);
+  transform: scale(1.04);
   box-shadow:
-    0 30px 80px rgba(var(--color-accent-rgb), 0.3),
-    0 0 0 22px rgba(var(--color-accent-secondary-rgb), 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    0 0 56px rgba(34, 211, 238, 0.2),
+    0 30px 80px rgba(99, 102, 241, 0.26),
+    0 0 0 24px rgba(34, 211, 238, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .ai-agent-workspace[data-agent-state="done"] .ai-agent-orb-core {
   transform: scale(1.01);
   box-shadow:
-    0 24px 64px rgba(var(--color-accent-secondary-rgb), 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 0 32px rgba(5, 150, 105, 0.18),
+    0 24px 64px rgba(var(--color-accent-secondary-rgb), 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .ai-agent-workspace[data-agent-state="error"] .ai-agent-orb-core {
   box-shadow:
-    0 24px 64px rgba(239, 68, 68, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 0 40px rgba(239, 68, 68, 0.2),
+    0 24px 64px rgba(239, 68, 68, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
+/* Active state ring speed boost */
 .ai-agent-workspace[data-agent-state="listening"] .ai-agent-pill-dot,
 .ai-agent-workspace[data-agent-state="processing"] .ai-agent-pill-dot,
 .ai-agent-workspace[data-agent-state="executing"] .ai-agent-pill-dot {
-  animation-duration: 1.4s;
+  animation-duration: 1.2s;
 }
 
+/* Active state outer glow intensify */
+.ai-agent-workspace[data-agent-state="listening"] .ai-agent-orb::before,
+.ai-agent-workspace[data-agent-state="processing"] .ai-agent-orb::before,
+.ai-agent-workspace[data-agent-state="executing"] .ai-agent-orb::before {
+  opacity: 1;
+  animation-duration: 4s;
+}
+
+/* Active state ring pulse */
+.ai-agent-workspace[data-agent-state="listening"] .ai-agent-orb-ring,
+.ai-agent-workspace[data-agent-state="executing"] .ai-agent-orb-ring {
+  border-color: rgba(var(--color-accent-rgb), 0.2);
+}
+
+/* Orb hover */
 .ai-agent-orb:hover .ai-agent-orb-core {
-  transform: scale(1.03);
+  transform: scale(1.04);
   box-shadow:
-    0 32px 70px rgba(var(--color-accent-rgb), 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    0 0 48px rgba(59, 130, 246, 0.25),
+    0 32px 70px rgba(99, 102, 241, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
+/* --- State Text --- */
 .ai-agent-state-text {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-text-primary);
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-step-text {
   font-size: 0.8rem;
   color: var(--color-text-secondary);
+  position: relative;
+  z-index: 1;
 }
 
+/* --- Input Row --- */
 .ai-agent-input-row {
   width: min(100%, 760px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 10px;
   padding: 10px;
-  border-radius: 24px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(255, 255, 255, 0.55);
+  border-radius: 22px;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.1);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
   box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 1;
+  transition: border-color 200ms var(--ease-smooth), box-shadow 200ms var(--ease-smooth);
+}
+
+.ai-agent-input-row:focus-within {
+  border-color: rgba(var(--color-accent-rgb), 0.22);
+  box-shadow: 0 8px 28px rgba(var(--color-accent-rgb), 0.1);
 }
 
 .ai-agent-input {
-  min-height: 54px;
+  min-height: 52px;
   padding: 0 1rem;
-  border-radius: 18px;
+  border-radius: 16px;
   background: transparent;
   border: 1px solid transparent;
   color: var(--color-text-primary);
+  font-weight: var(--fw-medium);
 }
 
 .ai-agent-input::placeholder {
@@ -359,43 +584,56 @@
 
 .ai-agent-send-btn {
   min-width: 96px;
-  padding: 0 1rem;
-  border-radius: 16px;
+  padding: 0 1.1rem;
+  border-radius: 14px;
   color: var(--color-text-primary);
   font-weight: 700;
+  cursor: pointer;
 }
 
+/* --- Quick Command Cards --- */
 .ai-agent-shortcuts {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 0.2rem;
+  margin-top: 0.3rem;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-agent-card {
   display: grid;
   gap: 6px;
-  min-height: 128px;
-  padding: 14px 14px 16px;
+  min-height: 130px;
+  padding: 16px 15px 18px;
   border-radius: 20px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.08);
+  background: rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
   text-align: left;
   color: var(--color-text-primary);
   box-shadow: var(--shadow-xs);
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  cursor: pointer;
+  transition:
+    transform 200ms var(--ease-smooth),
+    border-color 200ms var(--ease-smooth),
+    box-shadow 200ms var(--ease-smooth),
+    background 200ms var(--ease-smooth);
 }
 
 .ai-agent-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(var(--color-accent-rgb), 0.26);
-  box-shadow: 0 18px 40px rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(255, 255, 255, 0.68);
+  transform: translateY(-5px);
+  border-color: rgba(var(--color-accent-rgb), 0.22);
+  box-shadow:
+    0 16px 36px rgba(var(--color-accent-rgb), 0.1),
+    0 0 14px rgba(var(--color-accent-rgb), 0.04);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .ai-agent-card-title {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -403,14 +641,33 @@
 }
 
 .ai-agent-card-desc {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.4;
 }
 
+/* icon inside card titles */
+.ai-agent-card-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.ai-agent-card-icon.nav-icon { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+.ai-agent-card-icon.search-icon { background: rgba(14, 165, 233, 0.12); color: #0ea5e9; }
+.ai-agent-card-icon.info-icon { background: rgba(5, 150, 105, 0.12); color: #059669; }
+.ai-agent-card-icon.control-icon { background: rgba(225, 29, 72, 0.12); color: #e11d48; }
+
+/* ============================================================
+   SETTINGS PANEL — Glass Design
+   ============================================================ */
 .ai-agent-settings {
   display: grid;
-  gap: 1rem;
+  gap: 1.1rem;
   padding: 1.5rem;
   position: sticky;
   top: 88px;
@@ -428,7 +685,7 @@
 .ai-settings-head h2,
 .ai-history-head h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   letter-spacing: -0.03em;
 }
 
@@ -437,10 +694,10 @@
   align-items: center;
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
-  background: rgba(var(--color-accent-rgb), 0.1);
-  border: 1px solid rgba(var(--color-accent-rgb), 0.18);
+  background: rgba(var(--color-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.15);
   color: var(--color-accent);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -458,7 +715,7 @@
 }
 
 .ai-settings-field span {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -466,12 +723,19 @@
 }
 
 .ai-settings-field select {
-  min-height: 50px;
+  min-height: 48px;
   padding: 0 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(255, 255, 255, 0.45);
+  border-radius: 14px;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.1);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: var(--color-text-primary);
+  transition: border-color 200ms var(--ease-smooth);
+}
+
+.ai-settings-field select:focus {
+  border-color: rgba(var(--color-accent-rgb), 0.28);
 }
 
 .ai-settings-hint,
@@ -479,7 +743,7 @@
 .ai-history-empty,
 .ai-history-item-summary {
   color: var(--color-text-secondary);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   line-height: 1.6;
 }
 
@@ -487,10 +751,18 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(255, 255, 255, 0.46);
+  border-radius: 16px;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.08);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
+  transition: background 200ms var(--ease-smooth), border-color 200ms var(--ease-smooth);
+}
+
+.ai-toggle-row:hover {
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(var(--color-accent-rgb), 0.16);
 }
 
 .ai-toggle-row input {
@@ -502,24 +774,27 @@
 
 .ai-toggle-row strong {
   display: block;
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: var(--color-text-primary);
 }
 
 .ai-toggle-row small {
   display: block;
   color: var(--color-text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   line-height: 1.45;
 }
 
 .ai-settings-note {
   padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(var(--color-accent-rgb), 0.06);
+  border-radius: 16px;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.1);
+  background: rgba(var(--color-accent-rgb), 0.05);
 }
 
+/* ============================================================
+   HISTORY PANEL
+   ============================================================ */
 .ai-agent-history {
   grid-column: 1 / -1;
   display: grid;
@@ -536,9 +811,11 @@
   display: grid;
   gap: 8px;
   padding: 14px 15px;
-  border-radius: 18px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
-  background: rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(var(--color-accent-rgb), 0.08);
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .ai-history-item-head {
@@ -550,13 +827,13 @@
 }
 
 .ai-history-item-title {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
 .ai-history-item-meta {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--color-text-secondary);
 }
 
@@ -565,15 +842,16 @@
   align-items: center;
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
-  border: 1px solid rgba(var(--color-accent-rgb), 0.14);
-  background: rgba(var(--color-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--color-accent-rgb), 0.12);
+  background: rgba(var(--color-accent-rgb), 0.07);
   color: var(--color-accent);
-  font-size: 0.67rem;
+  font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
+/* Settings closed state */
 .ai-agent-workspace[data-settings-open="false"] {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -582,28 +860,67 @@
   display: none;
 }
 
+/* ============================================================
+   DARK MODE — Deep Navy with Neon Highlights
+   ============================================================ */
 [data-theme="dark"] .ai-agent-page {
   background:
-    radial-gradient(circle at top, rgba(var(--color-accent-rgb), 0.16), transparent 34%),
-    radial-gradient(circle at 82% 14%, rgba(var(--color-accent-secondary-rgb), 0.12), transparent 30%),
-    linear-gradient(180deg, var(--color-bg), #050816);
+    radial-gradient(ellipse at 30% 0%, rgba(59, 130, 246, 0.22), transparent 48%),
+    radial-gradient(ellipse at 70% 10%, rgba(124, 58, 237, 0.18), transparent 42%),
+    radial-gradient(circle at 50% 80%, rgba(34, 211, 238, 0.08), transparent 45%),
+    linear-gradient(180deg, #050816 0%, #0a0f1e 50%, #060a14 100%);
+}
+
+[data-theme="dark"] .ai-agent-blob {
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .ai-agent-particles {
+  opacity: 0.18;
 }
 
 [data-theme="dark"] .ai-agent-stage,
 [data-theme="dark"] .ai-agent-settings,
-[data-theme="dark"] .ai-agent-history,
-[data-theme="dark"] .ai-agent-input-row,
-[data-theme="dark"] .ai-agent-card,
-[data-theme="dark"] .ai-toggle-row,
-[data-theme="dark"] .ai-agent-card,
-[data-theme="dark"] .ai-history-item {
+[data-theme="dark"] .ai-agent-history {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
-    rgba(14, 18, 30, 0.82);
-  border-color: rgba(255, 255, 255, 0.08);
+    linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    rgba(8, 12, 24, 0.85);
+  border-color: rgba(255, 255, 255, 0.06);
   box-shadow:
-    0 22px 56px rgba(2, 6, 23, 0.34),
+    0 24px 60px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .ai-agent-input-row {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .ai-agent-card {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .ai-agent-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(99, 102, 241, 0.18);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.3),
+    0 0 16px rgba(99, 102, 241, 0.06);
+}
+
+[data-theme="dark"] .ai-toggle-row,
+[data-theme="dark"] .ai-history-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .ai-toggle-row:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .ai-agent-pill,
@@ -612,41 +929,75 @@
 [data-theme="dark"] .ai-agent-voice-btn,
 [data-theme="dark"] .ai-agent-send-btn,
 [data-theme="dark"] .ai-settings-field select {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme="dark"] .ai-agent-card:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.07);
 }
 
 [data-theme="dark"] .ai-agent-orb-ring {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="dark"] .ai-agent-orb-core {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.25), transparent 28%),
+    radial-gradient(circle at 65% 75%, rgba(34, 211, 238, 0.12), transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.9) 0%, rgba(124, 58, 237, 0.92) 40%, rgba(59, 130, 246, 0.88) 70%, rgba(5, 8, 22, 0.98) 100%);
   box-shadow:
-    0 28px 80px rgba(var(--color-accent-rgb), 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 0 50px rgba(99, 102, 241, 0.25),
+    0 28px 80px rgba(99, 102, 241, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Neon ring glow in dark mode */
+[data-theme="dark"] .ai-agent-orb .ring-one::after {
+  background: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+}
+
+[data-theme="dark"] .ai-agent-orb .ring-two::after {
+  background: rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+}
+
+[data-theme="dark"] .ai-agent-hero-copy h1 {
+  background: linear-gradient(135deg, #f0f4ff 20%, #818cf8 55%, #22d3ee 85%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 [data-theme="dark"] .ai-settings-note {
-  background: rgba(var(--color-accent-rgb), 0.1);
+  background: rgba(var(--color-accent-rgb), 0.08);
 }
 
 [data-theme="dark"] .ai-history-state {
-  background: rgba(var(--color-accent-rgb), 0.12);
+  background: rgba(var(--color-accent-rgb), 0.1);
 }
 
+[data-theme="dark"] .ai-agent-status-line {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.15);
+}
+
+[data-theme="dark"] .ai-agent-pill-dot,
+[data-theme="dark"] .ai-agent-status-dot {
+  background: linear-gradient(135deg, #818cf8, #22d3ee);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
 @keyframes ai-agent-pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0.28); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 16px rgba(var(--color-accent-rgb), 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0.35); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(var(--color-accent-rgb), 0); }
   100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0); }
 }
 
 @keyframes ai-agent-status {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.18); }
+  50% { transform: scale(1.2); }
 }
 
 @keyframes ai-agent-rotate {
@@ -654,6 +1005,26 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes ai-agent-blob-float {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(8px, -14px, 0) scale(1.04); }
+  66% { transform: translate3d(-6px, 8px, 0) scale(1.06); }
+  100% { transform: translate3d(4px, 12px, 0) scale(1.08); }
+}
+
+@keyframes ai-agent-particles-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-20px, -50px, 0); }
+}
+
+@keyframes ai-agent-breathe {
+  0%, 100% { transform: scale(0.96); opacity: 0.7; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 1180px) {
   .ai-agent-workspace {
     grid-template-columns: minmax(0, 1fr);
@@ -677,8 +1048,8 @@
 
   .ai-agent-stage {
     min-height: auto;
-    padding: 1.3rem;
-    border-radius: 24px;
+    padding: 1.5rem;
+    border-radius: 22px;
   }
 
   .ai-agent-stage-head {
@@ -707,6 +1078,6 @@
   .ai-agent-settings,
   .ai-agent-history {
     padding: 1.2rem;
-    border-radius: 24px;
+    border-radius: 22px;
   }
 }

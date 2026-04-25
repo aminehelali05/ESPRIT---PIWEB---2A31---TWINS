@@ -21,8 +21,12 @@ $isAdminSidebar = strtolower(trim($displayEmail)) === 'admin@diversity.is';
 $navInitials = strtoupper(substr($firstName, 0, 1) . substr($lastName !== '' ? $lastName : 'M', 0, 1));
 
 $db = config::getConnexion();
+$userController = class_exists(UserController::class) ? new UserController() : null;
 $homeUserId = (int) ($currentUser['id'] ?? 0);
-$homeSummary = $userController->getProfileExportSummary($homeUserId);
+$homeSummary = [];
+if ($userController instanceof UserController && $homeUserId > 0 && method_exists($userController, 'getProfileExportSummary')) {
+    $homeSummary = $userController->getProfileExportSummary($homeUserId);
+}
 $homePersonalStats = is_array($homeSummary['stats'] ?? null) ? (array) $homeSummary['stats'] : [];
 $homeActivitySummary = is_array($homeSummary['activity'] ?? null) ? (array) $homeSummary['activity'] : [];
 

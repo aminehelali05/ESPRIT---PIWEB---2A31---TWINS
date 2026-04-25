@@ -4475,7 +4475,6 @@ $displayAvatarResolved = $displayAvatarUrl;
   <link rel="stylesheet" href="../../assets/css/profile.css">
   <link rel="stylesheet" href="../../assets/css/profile-light.css">
   <link rel="stylesheet" href="../../assets/css/sidebar.css">
-  <link rel="stylesheet" href="../../assets/css/profile-ai-assistant.css">
   <link rel="stylesheet" href="../../assets/css/user-form.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -5788,8 +5787,6 @@ $displayAvatarResolved = $displayAvatarUrl;
           <div id="snapSocialMap" class="network-map-canvas-premium" role="region" aria-label="Interactive network map"></div>
         </section>
 
-        <?php include __DIR__ . '/partials/profile-ai-assistant.php'; ?>
-
         <!-- ── Content Grid ────────────────────────────── -->
         <section class="profile-grid" aria-label="Profile detail sections">
 
@@ -6442,7 +6439,6 @@ $displayAvatarResolved = $displayAvatarUrl;
   <script src="../../assets/js/user.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="../../assets/js/profile.js"></script>
-  <script src="../../assets/js/profile-ai-assistant.js"></script>
 </body>
 </html>
 

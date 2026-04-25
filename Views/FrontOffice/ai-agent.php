@@ -53,7 +53,6 @@ $modelOptions = array_values(array_unique(array_filter([
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../assets/css/global.css">
-  <link rel="stylesheet" href="../../assets/css/home.css">
   <link rel="stylesheet" href="../../assets/css/sidebar.css">
   <link rel="stylesheet" href="../../assets/css/ai-agent.css">
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -106,7 +105,7 @@ $modelOptions = array_values(array_unique(array_filter([
     <div class="container ai-agent-layout">
       <?php include __DIR__ . '/partials/global-sidebar.php'; ?>
 
-      <section class="ai-agent-workspace" data-agent-shell data-agent-state="idle" data-settings-open="true">
+      <section class="ai-agent-workspace" data-agent-shell data-agent-state="idle" data-settings-open="false">
         <article class="ai-agent-stage glass-card fade-in-section" aria-label="AI agent control center">
           <div class="ai-agent-stage-head">
           <div class="ai-agent-pill" aria-hidden="true">
@@ -115,18 +114,18 @@ $modelOptions = array_values(array_unique(array_filter([
           </div>
           <div class="ai-agent-head-actions">
             <button class="ai-agent-history-toggle" type="button" data-agent-history-toggle aria-controls="aiAgentHistoryPanel" aria-expanded="false" aria-label="Toggle command history">
-              <i data-lucide="history" class="w-4 h-4"></i>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
             </button>
             <button class="ai-agent-settings-toggle" type="button" data-agent-settings-toggle aria-label="Toggle settings panel">
-              <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></svg>
             </button>
           </div>
         </div>
 
           <div class="ai-agent-hero-copy">
             <p class="ai-agent-kicker">AI Assistant</p>
-            <h1>Autonomous Profile Ops</h1>
-            <p class="ai-agent-description">Voice, WhatsApp, and browser tasks powered by OpenRouter.</p>
+            <h1>Hands-Free Navigation</h1>
+            <p class="ai-agent-description">Just say <strong>"Hey Peace"</strong> or tap the orb below to control the interface with your voice.</p>
             <div class="ai-agent-status-line">
               <span class="ai-agent-status-dot" data-agent-status-dot></span>
               <span data-agent-status-text>Online</span>
@@ -139,45 +138,57 @@ $modelOptions = array_values(array_unique(array_filter([
               <span class="ai-agent-orb-ring ring-two"></span>
               <span class="ai-agent-orb-ring ring-three"></span>
               <span class="ai-agent-orb-core">
-                <i data-lucide="mic" class="w-9 h-9"></i>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
               </span>
             </button>
-            <div class="ai-agent-state-text" data-agent-state-text>Click to start</div>
-            <div class="ai-agent-step-text" data-agent-step>Ready</div>
+            <div class="ai-agent-state-text" data-agent-state-text>Listening...</div>
+            <div class="ai-agent-step-text" data-agent-step>Click to start</div>
           </div>
 
           <div class="ai-agent-input-row" aria-label="Command input">
             <input class="ai-agent-input" type="text" placeholder="Type a command or speak..." data-agent-input>
             <button class="ai-agent-send-btn" type="button" data-agent-send>Send</button>
             <button class="ai-agent-voice-btn" type="button" data-agent-voice-toggle aria-label="Start voice input">
-              <i data-lucide="mic" class="w-4 h-4"></i>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             </button>
           </div>
 
           <div class="ai-agent-shortcuts" aria-label="Quick commands">
             <button class="ai-agent-card" type="button" data-agent-command="Go to messages">
+              <span class="ai-agent-card-icon nav-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </span>
               <span class="ai-agent-card-title">Navigation</span>
-              <span class="ai-agent-card-desc">Go to messages</span>
-              <span class="ai-agent-card-desc">Open profile</span>
-              <span class="ai-agent-card-desc">Go back</span>
+              <span class="ai-agent-card-desc">"Go to messages"</span>
+              <span class="ai-agent-card-desc">"Open profile"</span>
+              <span class="ai-agent-card-desc">"Go back"</span>
             </button>
-            <button class="ai-agent-card" type="button" data-agent-command="Search for users">
+            <button class="ai-agent-card" type="button" data-agent-command="Search for peace">
+              <span class="ai-agent-card-icon search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
               <span class="ai-agent-card-title">Search</span>
-              <span class="ai-agent-card-desc">Search for users</span>
-              <span class="ai-agent-card-desc">Find topics</span>
-              <span class="ai-agent-card-desc">Show results</span>
+              <span class="ai-agent-card-desc">"Search for peace"</span>
+              <span class="ai-agent-card-desc">"Find [topic]"</span>
+              <span class="ai-agent-card-desc">"Show results"</span>
             </button>
             <button class="ai-agent-card" type="button" data-agent-command="What can you do?">
+              <span class="ai-agent-card-icon info-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </span>
               <span class="ai-agent-card-title">Information</span>
-              <span class="ai-agent-card-desc">What time is it?</span>
-              <span class="ai-agent-card-desc">What can you do?</span>
-              <span class="ai-agent-card-desc">Help</span>
+              <span class="ai-agent-card-desc">"What time is it?"</span>
+              <span class="ai-agent-card-desc">"What can you do?"</span>
+              <span class="ai-agent-card-desc">"Help"</span>
             </button>
             <button class="ai-agent-card" type="button" data-agent-command="Stop listening">
+              <span class="ai-agent-card-icon control-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 0 1 20.77 15"/><path d="M6.16 6.16a9 9 0 1 0 12.68 12.68"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+              </span>
               <span class="ai-agent-card-title">Controls</span>
-              <span class="ai-agent-card-desc">Stop listening</span>
-              <span class="ai-agent-card-desc">Deactivate</span>
-              <span class="ai-agent-card-desc">Cancel</span>
+              <span class="ai-agent-card-desc">"Stop listening"</span>
+              <span class="ai-agent-card-desc">"Deactivate"</span>
+              <span class="ai-agent-card-desc">"Cancel"</span>
             </button>
           </div>
         </article>

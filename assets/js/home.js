@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const fabMenu          = document.getElementById('fabMenu');
   const toastStack       = document.getElementById('homeToastStack');
   const feedList         = document.getElementById('feedList');
-  const activityCard     = document.querySelector('.activity-highlight');
   const quickPublishBtn  = document.getElementById('quickPublishBtn');
   const openComposerBtn  = document.getElementById('openComposerBtn');
   const composerInput    = document.querySelector('.composer-input');

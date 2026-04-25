@@ -1,9 +1,45 @@
 <?php
+
 class config
 {
     private static $pdo = null;
     private static array $settings = [];
     private static bool $environmentLoaded = false;
+
+    private static function stringify($value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '0';
+        }
+
+        if (is_scalar($value)) {
+            return trim((string) $value);
+        }
+
+        $json = json_encode($value);
+        return $json !== false ? $json : '';
+    }
+
+    private static function seedEnvironment(array $settings): void
+    {
+        foreach ($settings as $key => $value) {
+            if (!is_string($key) || $key === '') {
+                continue;
+            }
+
+            $stringValue = self::stringify($value);
+            if (getenv($key) === false || getenv($key) === '') {
+                putenv($key . '=' . $stringValue);
+            }
+
+            $_ENV[$key] = $stringValue;
+            $_SERVER[$key] = $stringValue;
+        }
+    }
 
     private static function loadEnvironmentSettings(): array
     {
@@ -13,74 +49,26 @@ class config
 
         self::$environmentLoaded = true;
 
-        $envPath = __DIR__ . '/.env';
-        if (!is_file($envPath)) {
+        $phpConfigPath = __DIR__ . '/.env.php';
+        if (!is_file($phpConfigPath)) {
             return [];
         }
 
-        $autoloadPath = __DIR__ . '/vendor/autoload.php';
-        if (is_file($autoloadPath)) {
-            try {
-                require_once $autoloadPath;
-                if (class_exists(\Dotenv\Dotenv::class)) {
-                    $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
-                    $dotenv->safeLoad();
-                }
-            } catch (Throwable $e) {
-                // Fall back to the lightweight parser below.
-            }
-        }
-
-        $rawLines = file($envPath, FILE_IGNORE_NEW_LINES);
-        if ($rawLines === false) {
+        $loaded = include $phpConfigPath;
+        if (!is_array($loaded)) {
             return [];
         }
 
         $settings = [];
-        foreach ($rawLines as $rawLine) {
-            $line = trim((string) $rawLine);
-            if ($line === '' || str_starts_with($line, '#') || str_starts_with($line, ';')) {
+        foreach ($loaded as $key => $value) {
+            if (!is_string($key) || $key === '') {
                 continue;
             }
-
-            if (str_starts_with($line, 'export ')) {
-                $line = trim(substr($line, 7));
-            }
-
-            $separator = strpos($line, '=');
-            if ($separator === false) {
-                continue;
-            }
-
-            $key = trim(substr($line, 0, $separator));
-            if ($key === '') {
-                continue;
-            }
-
-            $value = trim(substr($line, $separator + 1));
-            if ($value !== '') {
-                $firstChar = $value[0];
-                $lastChar = substr($value, -1);
-                if (($firstChar === '"' && $lastChar === '"') || ($firstChar === "'" && $lastChar === "'")) {
-                    $value = substr($value, 1, -1);
-                    if ($firstChar === '"') {
-                        $value = stripcslashes($value);
-                    }
-                }
-            }
-
-            $existing = getenv($key);
-            if ($existing === false || $existing === '') {
-                putenv($key . '=' . $value);
-                $existing = $value;
-            }
-
-            $_ENV[$key] = $existing;
-            $_SERVER[$key] = $existing;
-            $settings[$key] = $existing;
+            $settings[$key] = $value;
         }
 
-        return is_array($settings) ? $settings : [];
+        self::seedEnvironment($settings);
+        return $settings;
     }
 
     public static function get(string $key, $default = null)
@@ -105,20 +93,22 @@ class config
             $password = (string) self::get('DB_PASS', self::get('DB_PASSWORD', ''));
             $dbname = (string) self::get('DB_NAME', 'projet');
             $charset = (string) self::get('DB_CHARSET', 'utf8mb4');
+
             try {
-                self::$pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=$charset",
+                self::$pdo = new PDO(
+                    "mysql:host={$servername};dbname={$dbname};charset={$charset}",
                     $username,
                     $password,
                     [
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                     ]
                 );
-                
             } catch (Exception $e) {
                 die('Erreur : ' . $e->getMessage());
             }
         }
+
         return self::$pdo;
     }
 
@@ -138,4 +128,5 @@ class config
         return $scheme . '://' . $host . $basePath;
     }
 }
+
 config::getConnexion();
