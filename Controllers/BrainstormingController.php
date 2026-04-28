@@ -29,9 +29,9 @@ class BrainstormingController
             $errors[] = "Description must be at least 20 characters.";
         }
 
-        // Letter requirement (No pure numeric entries)
-        if (!preg_match('/[a-zA-Z]/', $title)) {
-            $errors[] = "Title must contain at least some letters (cannot be only numbers).";
+        // Letter requirement (At least 5 alphabetic letters)
+        if (preg_match_all('/[a-zA-Z]/', $title) < 5) {
+            $errors[] = "Title must contain at least 5 distinct letters.";
         }
         if (!preg_match('/[a-zA-Z]/', $desc)) {
             $errors[] = "Description must contain at least some letters.";
@@ -65,6 +65,9 @@ class BrainstormingController
 
         // 2. Check for 6+ consecutive consonants
         if (preg_match('/[^aeiouyAEIOUY\s\d\W]{6,}/', $text)) return true;
+
+        // 3. Check for 5+ consecutive digits (e.g., 65466)
+        if (preg_match('/[0-9]{5,}/', $text)) return true;
 
         return false;
     }
@@ -100,9 +103,9 @@ class BrainstormingController
     public function addBrainstorming(Brainstorming $b)
     {
         $sql = "INSERT INTO brainstormings 
-                    (user_id, title, description, status) 
+                    (user_id, title, description, topic, status) 
                 VALUES 
-                    (:user_id, :title, :description, :status)";
+                    (:user_id, :title, :description, :topic, :status)";
         
         try {
             $q = $this->db->prepare($sql);
@@ -110,6 +113,7 @@ class BrainstormingController
                 'user_id'     => $b->getUserId(),
                 'title'       => $b->getTitle(),
                 'description' => $b->getDescription(),
+                'topic'       => $b->getTopic() ?? 'General',
                 'status'      => $b->getStatus() ?? 'EN_ATTENTE'
             ]);
             return $this->db->lastInsertId();
@@ -124,6 +128,7 @@ class BrainstormingController
         $sql = "UPDATE brainstormings SET 
                     title       = :title,
                     description = :description,
+                    topic       = :topic,
                     status      = :status
                 WHERE id = :id";
         
@@ -132,6 +137,7 @@ class BrainstormingController
             $q->execute([
                 'title'       => $b->getTitle(),
                 'description' => $b->getDescription(),
+                'topic'       => $b->getTopic(),
                 'status'      => $b->getStatus(),
                 'id'          => $id
             ]);
@@ -155,7 +161,7 @@ class BrainstormingController
 
     // ── QUERIES ───────────────────────────────────────────────────────────
 
-    public function listBrainstormings($search = '', $filters = [])
+    public function listBrainstormings($search = '', $filters = [], $sort = 'newest', $limit = null, $offset = null)
     {
         $sql = "SELECT b.*, u.first_name, u.last_name 
                 FROM brainstormings b 
@@ -174,11 +180,38 @@ class BrainstormingController
             $params['status'] = $filters['status'];
         }
 
+        if (!empty($filters['not_status'])) {
+            $conditions[] = "b.status != :not_status";
+            $params['not_status'] = $filters['not_status'];
+        }
+
         if (!empty($conditions)) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
 
-        $sql .= " ORDER BY b.created_at DESC";
+        // --- DYNAMIC SORTING ---
+        switch ($sort) {
+            case 'oldest':
+                $sql .= " ORDER BY b.created_at ASC";
+                break;
+            case 'title_az':
+                $sql .= " ORDER BY b.title ASC";
+                break;
+            case 'title_za':
+                $sql .= " ORDER BY b.title DESC";
+                break;
+            case 'newest':
+            default:
+                $sql .= " ORDER BY b.created_at DESC";
+                break;
+        }
+
+        if ($limit !== null) {
+            $sql .= " LIMIT " . (int)$limit;
+            if ($offset !== null) {
+                $sql .= " OFFSET " . (int)$offset;
+            }
+        }
 
         try {
             $q = $this->db->prepare($sql);
@@ -187,6 +220,42 @@ class BrainstormingController
         } catch (Exception $e) {
             error_log('BrainstormingController::listBrainstormings — ' . $e->getMessage());
             return [];
+        }
+    }
+
+    public function countBrainstormings($search = '', $filters = [])
+    {
+        $sql = "SELECT COUNT(*) FROM brainstormings b";
+        
+        $conditions = [];
+        $params = [];
+
+        if (!empty($search)) {
+            $conditions[] = "(b.title LIKE :search OR b.description LIKE :search)";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        if (!empty($filters['status'])) {
+            $conditions[] = "b.status = :status";
+            $params['status'] = $filters['status'];
+        }
+
+        if (!empty($filters['not_status'])) {
+            $conditions[] = "b.status != :not_status";
+            $params['not_status'] = $filters['not_status'];
+        }
+
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(' AND ', $conditions);
+        }
+
+        try {
+            $q = $this->db->prepare($sql);
+            $q->execute($params);
+            return (int)$q->fetchColumn();
+        } catch (Exception $e) {
+            error_log('BrainstormingController::countBrainstormings — ' . $e->getMessage());
+            return 0;
         }
     }
 
@@ -222,6 +291,7 @@ class BrainstormingController
             $row['user_id'],
             $row['title'],
             $row['description'],
+            $row['topic'] ?? 'General',
             $row['status']
         );
         $b->setId($row['id']);
