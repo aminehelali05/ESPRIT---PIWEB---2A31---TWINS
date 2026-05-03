@@ -7,20 +7,20 @@ class Idea
     private $user_id;
     private $title;
     private $content;
-    private $idea_type;
+    private $type;
     private $status;
     private $created_at;
     private $updated_at;
 
     public function __construct(
-        $brainstorming_id = null, $user_id = null, $title = null, $content = null, $status = 'PROPOSED', $idea_type = 'Feature'
+        $brainstorming_id = null, $user_id = null, $title = null, $content = null, $status = 'PROPOSED', $type = 'Standard'
     ) {
         $this->brainstorming_id = $brainstorming_id;
         $this->user_id = $user_id;
         $this->title = $title;
         $this->content = $content;
+        $this->type = $type;
         $this->status = $status;
-        $this->idea_type = $idea_type;
     }
 
     // --- GETTERS ---
@@ -29,7 +29,7 @@ class Idea
     public function getUserId() { return $this->user_id; }
     public function getTitle() { return $this->title; }
     public function getContent() { return $this->content; }
-    public function getIdeaType() { return $this->idea_type; }
+    public function getType() { return $this->type; }
     public function getStatus() { return $this->status; }
     public function getCreatedAt() { return $this->created_at; }
     public function getUpdatedAt() { return $this->updated_at; }
@@ -40,7 +40,7 @@ class Idea
     public function setUserId($v) { $this->user_id = $v; }
     public function setTitle($v) { $this->title = $v; }
     public function setContent($v) { $this->content = $v; }
-    public function setIdeaType($v) { $this->idea_type = $v; }
+    public function setType($v) { $this->type = $v; }
     public function setStatus($v) { $this->status = $v; }
     public function setCreatedAt($v) { $this->created_at = $v; }
     public function setUpdatedAt($v) { $this->updated_at = $v; }

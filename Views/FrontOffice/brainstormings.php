@@ -15,14 +15,14 @@ $isAdminSidebar = UserController::isAdmin();
 
 $brainstormingController = new BrainstormingController();
 $search = $_GET['search'] ?? '';
-$sort = $_GET['sort'] ?? 'newest';
+$sort = $_GET['sort'] ?? 'date_desc';
 $filters = [
     'status' => 'ACCEPTE' // Users only see accepted brainstormings
 ];
-$brainstormings = $brainstormingController->listBrainstormings($search, $filters, $sort);
+$brainstormings = $brainstormingController->listBrainstormings($search, $filters, null, null, $sort);
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,216 +30,101 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/projects.css">
   <link rel="stylesheet" href="../../assets/css/user-form.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-  <style>
-      body {
-          background: #f1f5f9;
-      }
-      .profile-main {
-          background: #f1f5f9;
-      }
-      .profile-content-area {
-          background: #ffffff;
-          border-radius: 30px;
-          padding: 40px;
-          margin-top: 20px;
-          box-shadow: 0 10px 50px rgba(0, 0, 0, 0.04);
-          min-height: 80vh;
-      }
-      .section-header {
-          margin-bottom: 40px;
-          border-bottom: 1px solid #f1f5f9;
-          padding-bottom: 30px;
-      }
-      .brainstorm-accordion {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
+      .brainstorming-modal-container {
+          background: rgba(248, 250, 252, 0.95);
+          backdrop-filter: blur(12px);
+          border-radius: 24px;
+          padding: 80px;
+          box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.1);
+          margin-top: 30px;
       }
       .brainstorm-card {
-          animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
-          background: linear-gradient(to right, #fcfdfe, #f8fafc);
-          border-radius: 20px;
-          border: 1px solid #eef2f6;
-          border-left: 5px solid var(--color-accent);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           overflow: hidden;
-          cursor: pointer;
           position: relative;
       }
       .brainstorm-card::before {
           content: '';
           position: absolute;
-          top: 0;
           left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(45deg, transparent, rgba(var(--color-accent-rgb), 0.03), transparent);
-          transform: translateX(-100%);
-          transition: transform 0.6s;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: linear-gradient(180deg, #a855f7 0%, #3b82f6 100%);
+          opacity: 0;
+          transition: opacity 0.4s ease;
       }
       .brainstorm-card:hover {
-          transform: translateX(5px);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-          border-color: rgba(var(--color-accent-rgb), 0.2);
-          background: #ffffff;
+          transform: translateY(-4px);
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          border-color: #cbd5e1;
       }
       .brainstorm-card:hover::before {
-          transform: translateX(100%);
+          opacity: 1;
       }
-      .card-header {
-          padding: 24px 30px;
+      .bc-header {
+          padding: 24px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          z-index: 2;
-          position: relative;
+          cursor: pointer;
+          background: #ffffff;
+          transition: background 0.3s ease;
       }
-      .header-content {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          flex: 1;
+      .bc-header:hover {
+          background: #f8fafc;
       }
-      .card-title {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #334155;
+      .bc-header h3 {
           margin: 0;
-          transition: all 0.3s;
-      }
-      .header-tag {
-          font-size: 0.65rem;
+          color: #0f172a;
+          font-size: 1.25rem;
           font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          padding: 4px 10px;
-          border-radius: 8px;
-          background: rgba(var(--color-accent-rgb), 0.08);
-          color: var(--color-accent);
-          white-space: nowrap;
+          letter-spacing: -0.01em;
+          transition: color 0.3s ease;
       }
-      .toggle-icon-wrapper {
+      .brainstorm-card:hover .bc-header h3 {
+          color: #7c3aed;
+      }
+      .bc-icon-wrapper {
           width: 32px;
           height: 32px;
+          border-radius: 50%;
+          background: #f1f5f9;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 50%;
-          background: #f1f5f9;
-          transition: all 0.4s;
-      }
-      .toggle-icon {
-          width: 16px;
-          height: 16px;
+          transition: all 0.3s ease;
           color: #64748b;
-          transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-      .card-body {
-          max-height: 0;
-          opacity: 0;
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-          padding: 0 30px;
-          background: #ffffff;
-          transform: translateY(-10px);
+      .brainstorm-card:hover .bc-icon-wrapper {
+          background: #ede9fe;
+          color: #7c3aed;
       }
-      .brainstorm-card.expanded {
-          border-color: var(--color-accent);
-          box-shadow: 0 20px 40px rgba(var(--color-accent-rgb), 0.12);
-          margin: 8px 0;
-          transform: scale(1.01);
-          background: #ffffff;
-      }
-      .brainstorm-card.expanded .card-title {
-          color: var(--color-accent);
-          font-size: 1.2rem;
-      }
-      .brainstorm-card.expanded .toggle-icon-wrapper {
-          background: var(--color-accent);
-      }
-      .brainstorm-card.expanded .toggle-icon {
-          transform: rotate(180deg);
-          color: #ffffff;
-      }
-      .brainstorm-card.expanded .card-body {
-          max-height: 600px;
-          opacity: 1;
-          padding: 10px 30px 40px 30px;
-          border-top: 1px dashed #e2e8f0;
-          transform: translateY(0);
-      }
-      @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-      }
-      .brainstorm-card:nth-child(1) { animation-delay: 0.1s; }
-      .brainstorm-card:nth-child(2) { animation-delay: 0.15s; }
-      .brainstorm-card:nth-child(3) { animation-delay: 0.2s; }
-      .brainstorm-card:nth-child(4) { animation-delay: 0.25s; }
-      .brainstorm-card:nth-child(5) { animation-delay: 0.3s; }
-
-      .card-desc {
-          color: #475569;
-          font-size: 1.05rem;
-          line-height: 1.8;
-          margin-bottom: 30px;
-          padding: 10px 0;
-      }
-      .card-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 25px;
-          border-top: 1px solid #f1f5f9;
-      }
-      .meta-group {
-          display: flex;
-          gap: 24px;
-      }
-      .meta-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #94a3b8;
-          font-size: 0.85rem;
-      }
-      .contribute-btn {
-          background: var(--color-accent);
+      .btn-contribute {
+          display: block;
+          width: 100%;
+          text-align: center;
+          background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
           color: white;
-          padding: 14px 32px;
-          border-radius: 16px;
-          font-weight: 600;
+          padding: 12px;
+          border-radius: 10px;
           text-decoration: none;
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          box-shadow: 0 8px 20px rgba(var(--color-accent-rgb), 0.3);
+          font-weight: 600;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px -3px rgba(168, 85, 247, 0.4);
       }
-      .contribute-btn:hover {
-          transform: scale(1.05) translateY(-2px);
-          box-shadow: 0 12px 30px rgba(var(--color-accent-rgb), 0.4);
-      }
-      .premium-toolbar {
-          background: #f8fafc !important;
-          border: 1px solid #e2e8f0 !important;
-          box-shadow: none !important;
-          border-radius: 18px !important;
-          margin-bottom: 30px !important;
-      }
-      .glass-input {
-          background: #ffffff !important;
-          border: 1px solid #e2e8f0 !important;
-          color: #1e293b !important;
-          border-radius: 14px !important;
-      }
-      .btn-primary {
-          background: var(--color-accent) !important;
-          border: none !important;
-          border-radius: 14px !important;
-          font-weight: 600 !important;
+      .btn-contribute:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px -3px rgba(168, 85, 247, 0.6);
+          filter: brightness(1.1);
       }
   </style>
 </head>
@@ -291,27 +176,19 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
           <p class="text-body-lg">Join active brainstorming sessions and contribute your creative ideas.</p>
         </div>
 
-        <div class="projects-toolbar premium-toolbar">
-          <form action="" method="GET" class="toolbar-filters" style="display: flex; gap: 12px; flex: 1;">
-            <div style="position: relative; flex: 1;">
-                <i data-lucide="search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: rgba(255,255,255,0.4);"></i>
-                <input type="text" name="search" placeholder="Search sessions..." value="<?= htmlspecialchars($search) ?>" class="glass-input" style="padding-left: 38px; width: 100%;">
-            </div>
-            
-            <div style="position: relative; width: 180px;">
-                <i data-lucide="filter" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: rgba(255,255,255,0.4);"></i>
-                <select name="sort" class="glass-input" style="padding-left: 38px; width: 100%; cursor: pointer;" onchange="this.form.submit()">
-                    <option value="newest" <?= $sort == 'newest' ? 'selected' : '' ?>>Newest First</option>
-                    <option value="oldest" <?= $sort == 'oldest' ? 'selected' : '' ?>>Oldest First</option>
-                    <option value="title_az" <?= $sort == 'title_az' ? 'selected' : '' ?>>Title A-Z</option>
-                    <option value="title_za" <?= $sort == 'title_za' ? 'selected' : '' ?>>Title Z-A</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-secondary" style="padding: 0 20px;">Search</button>
+        <div class="brainstorming-modal-container">
+        <div class="projects-toolbar" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+          <form action="" method="GET" class="toolbar-filters" style="display: flex; gap: 10px; flex-wrap: wrap; flex: 1;">
+            <input type="text" name="search" placeholder="Search sessions..." value="<?= htmlspecialchars($search) ?>" class="glass-input" style="background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; flex: 1; min-width: 200px; padding: 7px 12px; border-radius: 8px; font-size: 0.9rem;">
+            <select name="sort" class="glass-input" style="padding: 7px 12px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #1e293b; font-weight: 500; font-size: 0.9rem;">
+                <option value="date_desc" <?= $sort == 'date_desc' ? 'selected' : '' ?>>Newest First</option>
+                <option value="date_asc" <?= $sort == 'date_asc' ? 'selected' : '' ?>>Oldest First</option>
+                <option value="title_asc" <?= $sort == 'title_asc' ? 'selected' : '' ?>>Title A-Z</option>
+                <option value="title_desc" <?= $sort == 'title_desc' ? 'selected' : '' ?>>Title Z-A</option>
+            </select>
+            <button type="submit" class="btn btn-secondary btn-sm" style="background: #e2e8f0; color: #1e293b; font-weight: 600; padding: 7px 15px; border-radius: 8px; font-size: 0.85rem;">Search</button>
           </form>
-          <button type="button" class="btn btn-primary" id="openLaunchModalBtn" style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-            <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i> Launch Session
-          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="openLaunchModalBtn" style="background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); color: white; border: none; padding: 7px 18px; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 15px -3px rgba(168, 85, 247, 0.4); transition: transform 0.2s ease; font-size: 0.85rem;">+ Launch Session</button>
         </div>
 
         <?php if (isset($_SESSION['flash_error'])): ?>
@@ -325,48 +202,34 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
             </div>
         <?php endif; ?>
 
-        <div class="brainstorm-accordion">
+        <div style="display: flex; flex-direction: column; gap: 15px;">
           <?php foreach ($brainstormings as $b): ?>
-          <div class="brainstorm-card" onclick="this.classList.toggle('expanded')">
-            <div class="card-header">
-              <div class="header-content">
-                <span class="header-tag"><?= htmlspecialchars($b['topic'] ?? 'General') ?></span>
-                <h3 class="card-title"><?= htmlspecialchars($b['title']) ?></h3>
-              </div>
-              <div class="toggle-icon-wrapper">
-                <i data-lucide="chevron-down" class="toggle-icon"></i>
-              </div>
-            </div>
-            <div class="card-body">
-              <p class="card-desc"><?= htmlspecialchars($b['description']) ?></p>
-              
-              <div class="card-footer">
-                <div class="meta-group">
-                  <div class="meta-item">
-                    <i data-lucide="user" style="width: 14px;"></i>
-                    <span>By <?= htmlspecialchars($b['first_name']) ?></span>
-                  </div>
-                  <div class="meta-item">
-                    <i data-lucide="clock" style="width: 14px;"></i>
-                    <span><?= date('M d, Y', strtotime($b['created_at'])) ?></span>
-                  </div>
+          <div class="brainstorm-card">
+            <div class="bc-header">
+                <h3><?= htmlspecialchars($b['title']) ?></h3>
+                <div class="bc-icon-wrapper">
+                    <i data-lucide="chevron-down" style="color: inherit; transition: transform 0.3s ease;"></i>
                 </div>
-                
-                <a href="brainstorming_details.php?id=<?= $b['id'] ?>" class="contribute-btn" onclick="event.stopPropagation()">
-                  <span>Contribute Now</span>
-                  <i data-lucide="arrow-right" style="width: 18px;"></i>
-                </a>
-              </div>
+            </div>
+            <div class="bc-body" style="display: none; padding: 0 24px 24px 24px; background: #ffffff; border-top: 1px solid #f1f5f9;">
+                <p class="text-small project-desc" style="color: #475569; margin-top: 15px; margin-bottom: 20px; line-height: 1.7; font-size: 0.95rem;"><?= htmlspecialchars(substr($b['description'], 0, 120)) ?>...</p>
+                <div class="project-meta" style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+                  <span class="text-small" style="background: #f1f5f9; color: #475569; padding: 6px 12px; border-radius: 12px; font-weight: 600; font-size: 0.8rem; display: flex; align-items: center;"><i data-lucide="tag" style="width: 14px; height: 14px; margin-right: 6px;"></i><?= htmlspecialchars($b['topic'] ?? 'General') ?></span>
+                  <span class="text-small" style="color: #64748b; font-size: 0.85rem; display: flex; align-items: center;"><i data-lucide="user" style="width: 16px; margin-right: 6px;"></i> By <?= htmlspecialchars($b['first_name']) ?></span>
+                  <span class="text-small" style="color: #64748b; font-size: 0.85rem; display: flex; align-items: center;"><i data-lucide="clock" style="width: 16px; margin-right: 6px;"></i> <?= date('M d', strtotime($b['created_at'])) ?></span>
+                </div>
+                <div style="margin-top: 15px;">
+                    <a href="brainstorming_details.php?id=<?= $b['id'] ?>" class="btn-contribute">View & Contribute</a>
+                </div>
             </div>
           </div>
           <?php endforeach; ?>
-          
           <?php if (empty($brainstormings)): ?>
-            <div class="glass-card" style="padding: 60px; text-align: center; background: white; border-radius: 16px;">
-                <i data-lucide="lightbulb-off" style="width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 15px;"></i>
-                <p class="text-body-lg" style="color: #64748b;">No active brainstorming sessions found.</p>
+            <div style="padding: 40px; text-align: center; color: #64748b; background: #ffffff; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                <p class="text-body-lg" style="margin: 0;">No active brainstorming sessions found.</p>
             </div>
           <?php endif; ?>
+        </div>
         </div>
       </section>
     </div>
@@ -393,7 +256,7 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
               <input class="uf-input" id="formTitle" name="title" type="text" placeholder="What are we brainstorming about?" required>
             </div>
 
-            <div class="uf-group uf-span-2">
+            <div class="uf-group uf-span-1">
               <label class="uf-label" for="formTopic">Category & Topic</label>
               <select class="uf-input uf-select" id="formTopic" name="topic" required>
                 <option value="">Select a category...</option>
@@ -404,11 +267,25 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
                 <option value="Other">Other</option>
               </select>
             </div>
+
+            <div class="uf-group uf-span-1">
+              <label class="uf-label" for="formType">Session Type</label>
+              <select class="uf-input uf-select" id="formType" name="type" required>
+                <option value="Technical">Technical</option>
+                <option value="Creative">Creative</option>
+                <option value="Strategic">Strategic</option>
+                <option value="General" selected>General</option>
+              </select>
+            </div>
             
-            <div style="display: flex; justify-content: flex-end; width: 100%; margin-bottom: -10px; position: relative; z-index: 50;" class="uf-span-2">
-                <button type="button" id="aiSuggestBtn" style="font-size: 0.75rem; background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); color: white; border: none; padding: 6px 15px; border-radius: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4); pointer-events: auto;">
-                    ✨ AI Write For Me
-                </button>
+            <div class="uf-group uf-span-2" style="background: rgba(139, 92, 246, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed #a855f7;">
+              <label class="uf-label" style="color: #7c3aed;">✨ AI Assistant</label>
+              <div style="display: flex; gap: 10px;">
+                  <input type="text" id="aiPromptInput" class="uf-input" placeholder="What should the AI write about? e.g. Renewable energy solutions" style="flex: 1; padding: 10px; border-radius: 8px;">
+                  <button type="button" id="aiSuggestBtn" style="background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(168, 85, 247, 0.4); white-space: nowrap; transition: all 0.2s ease;">
+                      Generate
+                  </button>
+              </div>
             </div>
 
             <div class="uf-group uf-span-2 is-textarea">
@@ -460,9 +337,24 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
         });
     });
 
+    // Handle accordion toggle for brainstorm cards
+    document.querySelectorAll('.bc-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const body = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+    });
+
     // Magic AI Implementation
     const aiBtn = document.getElementById('aiSuggestBtn');
-    const titleInput = document.getElementById('formTitle');
+    const promptInput = document.getElementById('aiPromptInput');
     const descInput = document.getElementById('formDescription');
 
     if(aiBtn) {
@@ -483,24 +375,11 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
         };
 
         aiBtn.addEventListener('click', async () => {
-            const topic = titleInput.value.trim();
+            const promptText = promptInput.value.trim();
 
-            // First: validate the title using the existing engine
-            if (window.BrainstormingValidation) {
-                const isTitleValid = window.BrainstormingValidation.validateField(titleInput, false);
-                if (!isTitleValid) {
-                    // Show title's error message in the description area instead of alert()
-                    const titleError = titleInput.closest('.uf-group')?.querySelector('.field-error')?.textContent
-                                       || 'Please fix the Session Title before using AI.';
-                    showDescError('⚠️ Fix the title first: ' + titleError);
-                    titleInput.focus();
-                    return;
-                }
-            }
-
-            if (!topic) {
-                showDescError('⚠️ Please enter a Session Title so the AI knows what to write about.');
-                titleInput.focus();
+            if (!promptText) {
+                alert('Please enter a prompt so the AI knows what to write about.');
+                promptInput.focus();
                 return;
             }
             
@@ -511,23 +390,26 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
             aiBtn.disabled = true;
 
             try {
-                // Local Smart Generator (100% Reliable, 0 API constraints)
-                await new Promise(resolve => setTimeout(resolve, 600)); // Fake realistic thinking time
-
-                const cleanTopic = topic.charAt(0).toLowerCase() + topic.slice(1);
-                const templates = [
-                    "This session is dedicated to exploring innovative solutions around " + cleanTopic + ". We aim to gather out-of-the-box ideas, discuss potential roadblocks, and identify actionable solutions to drive this initiative forward.",
-                    "Join us to rethink our approach to " + cleanTopic + ". We are looking for creative contributions, fresh perspectives, and collaborative strategies to maximize our impact in this area.",
-                    "A collaborative brainstorming session to map out the challenges and opportunities surrounding " + cleanTopic + ". Let's generate disruptive concepts and build a strong foundation for success.",
-                    "We're opening the floor to tackle " + cleanTopic + ". Bring your most ambitious ideas as we aim to redesign our methodology, overcome current limitations, and achieve breakthrough results."
-                ];
+                const response = await fetch('../../index.php?action=generate_ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText, context: 'Brainstorming Session Description' })
+                });
                 
-                const aiText = templates[Math.floor(Math.random() * templates.length)];
-                descInput.value = aiText;
-                descInput.parentElement.classList.add('has-value');
+                const data = await response.json();
                 
+                if (data.success) {
+                    descInput.value = data.text;
+                    descInput.parentElement.classList.add('has-value');
+                    descInput.style.borderColor = ''; // clear error
+                    // trigger validation re-check if needed
+                    descInput.dispatchEvent(new Event('input', { bubbles: true }));
+                } else {
+                    showDescError('⚠️ AI Generation failed: ' + (data.error || 'Unknown error'));
+                }
             } catch(e) {
-                alert("AI generation failed. Check your network.");
+                console.error(e);
+                showDescError('⚠️ AI generation failed. Check your network.');
             } finally {
                 aiBtn.innerHTML = originalText;
                 aiBtn.style.opacity = '1';
@@ -536,6 +418,31 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
             }
         });
     }
+
+    // SweetAlert Confirmation for Session Launch
+    document.getElementById('brainstormingForm')?.addEventListener('submit', function(e) {
+        if (e.defaultPrevented) return;
+        if (this.dataset.confirmed === 'true') return;
+
+        e.preventDefault();
+        Swal.fire({
+            title: 'Launch Session?',
+            text: "Your session will be submitted for validation. Once approved, others can contribute!",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: '✅ Submit for Validation',
+            cancelButtonText: 'Not yet',
+            confirmButtonColor: '#8b5cf6',
+            cancelButtonColor: '#475569',
+            background: '#ffffff',
+            color: '#1e293b'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.dataset.confirmed = 'true';
+                this.submit();
+            }
+        });
+    });
   </script>
 </body>
 </html>

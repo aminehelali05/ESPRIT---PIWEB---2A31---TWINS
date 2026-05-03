@@ -8,12 +8,14 @@ include_once(__DIR__ . '/Controllers/EventController.php');
 include_once(__DIR__ . '/Controllers/ResourceController.php');
 include_once(__DIR__ . '/Controllers/BrainstormingController.php');
 include_once(__DIR__ . '/Controllers/IdeaController.php');
+include_once(__DIR__ . '/Controllers/AiController.php');
 
 $authController = new UserController();
 $eventController = new EventController();
 $resourceController = new ResourceController();
 $brainstormingController = new BrainstormingController();
 $ideaController = new IdeaController();
+$aiController = new AiController();
 
 $action = $_GET['action'] ?? null;
 $page = $_GET['page'] ?? null;
@@ -350,13 +352,12 @@ if ($action === 'add_idea' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!UserController::isAuthenticated()) { header('Location: Views/FrontOffice/auth.php'); exit; }
     
     $bid = $_POST['brainstorming_id'] ?? null;
-    $title = $_POST['title'] ?? '';
+    $title = $_POST['title'] ?? 'Untitled Idea';
     $content = $_POST['content'] ?? '';
-    $type = $_POST['type'] ?? 'Feature';
+    $type = $_POST['type'] ?? 'Standard';
     
-    // Server-side validation (No HTML5 bubble)
-    if (empty($title) || empty($content)) {
-        $_SESSION['flash_error'] = 'All fields are required.';
+    if (empty($content)) {
+        $_SESSION['flash_error'] = 'Idea content cannot be empty.';
         header('Location: Views/FrontOffice/brainstorming_details.php?id=' . $bid);
         exit;
     }
@@ -367,32 +368,6 @@ if ($action === 'add_idea' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['flash_success'] = 'Idea posted successfully.';
     } else {
         $_SESSION['flash_error'] = 'Failed to post idea.';
-    }
-    header('Location: Views/FrontOffice/brainstorming_details.php?id=' . $bid);
-    exit;
-}
-
-if ($action === 'update_idea' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!UserController::isAuthenticated()) { header('Location: Views/FrontOffice/auth.php'); exit; }
-    $id = $_POST['id'] ?? null;
-    $bid = $_POST['brainstorming_id'] ?? null;
-
-    if (empty($_POST['title']) || empty($_POST['content'])) {
-        $_SESSION['flash_error'] = 'All fields are required.';
-        header('Location: Views/FrontOffice/idea_edit.php?id=' . $id);
-        exit;
-    }
-
-    $existing = $ideaController->getIdeaById($id);
-    if ($existing && ($existing->getUserId() == UserController::currentUser()['id'] || UserController::isAdmin())) {
-        $existing->setTitle($_POST['title']);
-        $existing->setContent($_POST['content']);
-        $existing->setIdeaType($_POST['type'] ?? $existing->getIdeaType());
-        if (UserController::isAdmin()) {
-            $existing->setStatus($_POST['status'] ?? $existing->getStatus());
-        }
-        $ideaController->updateIdea($existing, $id);
-        $_SESSION['flash_success'] = 'Idea updated successfully.';
     }
     header('Location: Views/FrontOffice/brainstorming_details.php?id=' . $bid);
     exit;
@@ -437,6 +412,17 @@ if ($action === 'delete_idea' && isset($_GET['id'])) {
     exit;
 }
 
+if ($action === 'generate_ai' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    $input = json_decode(file_get_contents('php://input'), true);
+    $prompt = $input['prompt'] ?? '';
+    $context = $input['context'] ?? 'Brainstorming Description';
+    
+    $result = $aiController->generateContent($prompt, $context);
+    echo json_encode($result);
+    exit;
+}
+
 if ($page === 'dashboard') {
     header('Location: Views/BackOffice/dashboard.php');
     exit;
@@ -464,19 +450,6 @@ if ($page === 'resources') {
 
 if ($page === 'brainstormings') {
     header('Location: Views/FrontOffice/brainstormings.php');
-    exit;
-}
-
-if ($action === 'delete_idea_fo' && isset($_GET['id'])) {
-    if (!UserController::isAuthenticated()) { header('Location: Views/FrontOffice/auth.php'); exit; }
-    $id = $_GET['id'];
-    $bid = $_GET['bid'] ?? null;
-    $idea = $ideaController->getIdeaById($id);
-    if ($idea && ($idea->getUserId() == UserController::currentUser()['id'] || UserController::isAdmin())) {
-        $ideaController->deleteIdea($id);
-        $_SESSION['flash_success'] = 'Idea deleted.';
-    }
-    header('Location: Views/FrontOffice/brainstorming_details.php?id=' . $bid);
     exit;
 }
 

@@ -1,5 +1,5 @@
 <?php
-include_once(__DIR__ . '/../config.php');
+include_once(__DIR__ . '/../Core/config.php');
 include_once(__DIR__ . '/../Models/Idea.php');
 
 class IdeaController
@@ -13,7 +13,7 @@ class IdeaController
 
     public function addIdea(Idea $i)
     {
-        $sql = "INSERT INTO ideas (brainstorming_id, user_id, title, content, idea_type, status) VALUES (:bid, :uid, :title, :content, :type, :status)";
+        $sql = "INSERT INTO ideas (brainstorming_id, user_id, title, content, type, status) VALUES (:bid, :uid, :title, :content, :type, :status)";
         try {
             $q = $this->db->prepare($sql);
             return $q->execute([
@@ -21,7 +21,7 @@ class IdeaController
                 'uid'     => $i->getUserId(),
                 'title'   => $i->getTitle() ?? 'Untitled Idea',
                 'content' => $i->getContent(),
-                'type'    => $i->getIdeaType() ?? 'Feature',
+                'type'    => $i->getType() ?? 'Standard',
                 'status'  => $i->getStatus() ?? 'PROPOSED'
             ]);
         } catch (Exception $e) {
@@ -30,7 +30,7 @@ class IdeaController
         }
     }
 
-    public function listIdeasByBrainstorming($bid, $currentUserId = null)
+    public function listIdeasByBrainstorming($bid, $currentUserId = null, $search = '', $sort = 'score_desc')
     {
         $sql = "SELECT i.*, u.first_name, u.last_name, u.avatar_url, u.karma,
                        MAX(CASE WHEN v.user_id = :uid THEN v.vote_type ELSE 0 END) as user_vote,
@@ -39,12 +39,36 @@ class IdeaController
                 FROM ideas i 
                 JOIN users u ON i.user_id = u.id 
                 LEFT JOIN idea_votes v ON i.id = v.idea_id
-                WHERE i.brainstorming_id = :bid 
-                GROUP BY i.id
-                ORDER BY i.score DESC, i.created_at ASC";
+                WHERE i.brainstorming_id = :bid ";
+        
+        $params = ['bid' => $bid, 'uid' => $currentUserId ?? 0];
+
+        if (!empty($search)) {
+            $sql .= " AND (i.title LIKE :search OR i.content LIKE :search) ";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $sql .= " GROUP BY i.id ";
+
+        switch ($sort) {
+            case 'score_asc':
+                $sql .= " ORDER BY i.score ASC, i.created_at DESC";
+                break;
+            case 'date_asc':
+                $sql .= " ORDER BY i.created_at ASC";
+                break;
+            case 'date_desc':
+                $sql .= " ORDER BY i.created_at DESC";
+                break;
+            case 'score_desc':
+            default:
+                $sql .= " ORDER BY i.score DESC, i.created_at ASC";
+                break;
+        }
+
         try {
             $q = $this->db->prepare($sql);
-            $q->execute(['bid' => $bid, 'uid' => $currentUserId ?? 0]);
+            $q->execute($params);
             return $q->fetchAll();
         } catch (Exception $e) {
             return [];
@@ -81,7 +105,7 @@ class IdeaController
         }
     }
 
-    public function listAllIdeas($search = '', $sort = 'date_desc', $minScore = '')
+    public function listAllIdeas($search = '', $sort = 'date_desc', $minScore = '', $brainstormingId = null)
     {
         $sql = "SELECT i.*, u.first_name, u.last_name, b.title as brainstorming_title
                 FROM ideas i
@@ -94,6 +118,11 @@ class IdeaController
         if ($minScore !== '') {
             $sql .= " AND i.score >= :minScore";
             $params['minScore'] = (int)$minScore;
+        }
+
+        if ($brainstormingId) {
+            $sql .= " AND i.brainstorming_id = :bid";
+            $params['bid'] = $brainstormingId;
         }
 
         switch ($sort) {
@@ -128,41 +157,6 @@ class IdeaController
             return $q->execute(['id' => $id]);
         } catch (Exception $e) {
             return false;
-        }
-    }
-
-    public function updateIdea(Idea $i, $id)
-    {
-        $sql = "UPDATE ideas SET title = :title, content = :content, idea_type = :type, status = :status WHERE id = :id";
-        try {
-            $q = $this->db->prepare($sql);
-            return $q->execute([
-                'title'   => $i->getTitle(),
-                'content' => $i->getContent(),
-                'type'    => $i->getIdeaType(),
-                'status'  => $i->getStatus(),
-                'id'      => $id
-            ]);
-        } catch (Exception $e) {
-            error_log('IdeaController::updateIdea — ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function getIdeaById($id)
-    {
-        try {
-            $q = $this->db->prepare("SELECT * FROM ideas WHERE id = ?");
-            $q->execute([$id]);
-            $res = $q->fetch();
-            if ($res) {
-                $idea = new Idea($res['brainstorming_id'], $res['user_id'], $res['title'], $res['content'], $res['status'], $res['idea_type']);
-                $idea->setId($res['id']);
-                return $idea;
-            }
-            return null;
-        } catch (Exception $e) {
-            return null;
         }
     }
 

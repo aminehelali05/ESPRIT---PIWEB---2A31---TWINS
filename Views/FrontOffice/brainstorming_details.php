@@ -28,7 +28,9 @@ $sidebarInitials = strtoupper(substr($sidebarUser['first_name'] ?? 'G', 0, 1) . 
 $isOwner = !empty($sidebarUser) && $sidebarUser['id'] == $session->getUserId();
 $isAdmin = UserController::isAdmin();
 
-$ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? null);
+$search = $_GET['search'] ?? '';
+$sort = $_GET['sort'] ?? 'score_desc';
+$ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? null, $search, $sort);
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
@@ -101,58 +103,54 @@ $ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? n
           <p class="text-body-lg" style="white-space: pre-wrap;"><?= htmlspecialchars($session->getDescription()) ?></p>
         </div>
 
-        <div class="section-header" style="text-align: left;">
-            <h2 class="text-h2">Contributions <span style="color:#a78bfa;">(<?= count($ideas) ?>)</span></h2>
+        <div class="section-header" style="text-align: left; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <h2 class="text-h2" style="margin: 0;">Contributions <span style="color:#a78bfa;">(<?= count($ideas) ?>)</span></h2>
+            <form action="" method="GET" style="display: flex; gap: 10px;">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($bid) ?>">
+                <input type="text" name="search" placeholder="Search ideas..." value="<?= htmlspecialchars($search) ?>" class="glass-input" style="padding: 6px 12px; border-radius: 8px;">
+                <select name="sort" class="glass-input" style="padding: 6px 12px; border-radius: 8px;">
+                    <option value="score_desc" <?= $sort == 'score_desc' ? 'selected' : '' ?>>Highest Score</option>
+                    <option value="score_asc" <?= $sort == 'score_asc' ? 'selected' : '' ?>>Lowest Score</option>
+                    <option value="date_desc" <?= $sort == 'date_desc' ? 'selected' : '' ?>>Newest First</option>
+                    <option value="date_asc" <?= $sort == 'date_asc' ? 'selected' : '' ?>>Oldest First</option>
+                </select>
+                <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+            </form>
         </div>
 
         <div class="ideas-list">
             <?php foreach ($ideas as $idea): ?>
             <div class="glass-card idea-card" style="display: flex; gap: 16px;">
-                <div class="idea-vote-column" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; min-width: 45px;">
-                    <button class="vote-btn <?php echo ($idea['user_vote'] == 1) ? 'voted-up' : ''; ?>" data-idea="<?= $idea['id'] ?>" data-vote="1" style="background: none; border: none; cursor: pointer; color: <?= ($idea['user_vote'] == 1) ? '#f97316' : '#94a3b8' ?>; padding: 2px; transition: transform 0.2s;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                <div class="idea-vote-column" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px; min-width: 40px;">
+                    <button class="vote-btn <?php echo ($idea['user_vote'] == 1) ? 'voted-up' : ''; ?>" data-idea="<?= $idea['id'] ?>" data-vote="1" style="background: none; border: none; cursor: pointer; color: <?= ($idea['user_vote'] == 1) ? '#f97316' : '#94a3b8' ?>; padding: 4px; transition: transform 0.2s;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
                     </button>
-                    <span id="score-<?= $idea['id'] ?>" style="font-weight: 700; color: #1e293b; font-size: 1rem;"><?= (int)$idea['upvotes'] - (int)$idea['downvotes'] ?></span>
-                    <button class="vote-btn <?php echo ($idea['user_vote'] == -1) ? 'voted-down' : ''; ?>" data-idea="<?= $idea['id'] ?>" data-vote="-1" style="background: none; border: none; cursor: pointer; color: <?= ($idea['user_vote'] == -1) ? '#3b82f6' : '#94a3b8' ?>; padding: 2px; transition: transform 0.2s;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                    <span id="score-<?= $idea['id'] ?>" style="font-weight: bold; font-size: 1.1rem; color: #e2e8f0;"><?= (int)$idea['score'] ?></span>
+                    <button class="vote-btn <?php echo ($idea['user_vote'] == -1) ? 'voted-down' : ''; ?>" data-idea="<?= $idea['id'] ?>" data-vote="-1" style="background: none; border: none; cursor: pointer; color: <?= ($idea['user_vote'] == -1) ? '#3b82f6' : '#94a3b8' ?>; padding: 4px; transition: transform 0.2s;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
                     </button>
                 </div>
                 
                 <div class="idea-content-column" style="flex: 1;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div class="creator-avatar" style="width: 24px; height: 24px; font-size: 10px;">
-                                    <?= strtoupper(substr($idea['first_name'],0,1) . substr($idea['last_name'],0,1)) ?>
-                                </div>
-                                <small style="color:#94a3b8;">
-                                    <strong><?= htmlspecialchars($idea['first_name'] . ' ' . $idea['last_name']) ?></strong> 
-                                    <span style="color: #f59e0b; font-weight: 600;" title="User Karma">★ <?= (int)$idea['karma'] ?></span>
-                                    • <?= date('M d, H:i', strtotime($idea['created_at'])) ?>
-                                </small>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="creator-avatar" style="width: 24px; height: 24px; font-size: 10px;">
+                                <?= strtoupper(substr($idea['first_name'],0,1) . substr($idea['last_name'],0,1)) ?>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="status-badge" style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 2px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase;">
-                                    <?= htmlspecialchars($idea['status'] ?? 'PROPOSED') ?>
-                                </span>
-                                <?php if(!empty($idea['idea_type'])): ?>
-                                <span class="status-badge" style="font-size: 0.65rem; background: rgba(139, 92, 246, 0.1); color: #a78bfa; padding: 2px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase;">
-                                    <?= htmlspecialchars($idea['idea_type']) ?>
-                                </span>
-                                <?php endif; ?>
-                                
-                                <?php if (($sidebarUser['id'] ?? null) == $idea['user_id'] || $isAdmin): ?>
-                                    <div style="display: flex; gap: 10px; align-items: center;">
-                                        <a href="idea_edit.php?id=<?= $idea['id'] ?>" style="color: var(--color-accent); transition: opacity 0.2s;" title="Edit Idea">
-                                            <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
-                                        </a>
-                                        <a href="../../index.php?action=delete_idea_fo&id=<?= $idea['id'] ?>&bid=<?= $bid ?>" style="color: #e11d48; transition: opacity 0.2s;" title="Delete Idea" onclick="return confirm('Delete this idea?')">
-                                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                            <small style="color:#94a3b8;">
+                                <strong><?= htmlspecialchars($idea['first_name'] . ' ' . $idea['last_name']) ?></strong> 
+                                <span style="color: #f59e0b; font-weight: 600;" title="User Karma">★ <?= (int)$idea['karma'] ?></span>
+                                • <?= date('M d, H:i', strtotime($idea['created_at'])) ?>
+                            </small>
                         </div>
-                    <h3 style="margin: 0 0 8px; font-size: 1.15rem; color: #0f172a; letter-spacing: -0.01em;"><?= htmlspecialchars($idea['title'] ?? 'Untitled Idea') ?></h3>
+                        <span class="status-badge" style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 2px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase;">
+                            <?= htmlspecialchars($idea['status'] ?? 'PROPOSED') ?>
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h3 style="margin: 0 0 8px; font-size: 1.15rem; color: #0f172a; letter-spacing: -0.01em;"><?= htmlspecialchars($idea['title'] ?? 'Untitled Idea') ?></h3>
+                        <span style="font-size: 0.65rem; background: rgba(139, 92, 246, 0.1); color: #7c3aed; padding: 2px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase;"><?= htmlspecialchars($idea['type'] ?? 'Standard') ?></span>
+                    </div>
                     <p style="margin: 0; color: #475569; line-height: 1.6; padding-bottom: 12px;"><?= htmlspecialchars($idea['content']) ?></p>
                     
                     <?php 
@@ -161,11 +159,11 @@ $ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? n
                         $tt = $up + $down;
                         $rt = $tt > 0 ? ($up / $tt) * 100 : 50;
                     ?>
-                    <div style="width: 100%; height: 6px; background: #fee2e2; border-radius: 4px; overflow: hidden; display: flex; margin-bottom: 4px;" title="Live Approval Ratio">
+                    <div style="width: 100%; height: 4px; background: #ef4444; border-radius: 4px; overflow: hidden; display: flex; margin-bottom: 4px;" title="Live Approval Ratio">
                         <div id="ratio-<?= $idea['id'] ?>" style="width: <?= $rt ?>%; height: 100%; background: #10b981; transition: width 0.4s ease-in-out;"></div>
                     </div>
-                    <div style="display: flex; justify-content: flex-end;">
-                        <small id="percentage-<?= $idea['id'] ?>" style="font-size: 0.75rem; color: #64748b; font-weight: 600;"><?= round($rt) ?>% Approval</small>
+                    <div style="text-align: right; font-size: 0.75rem; color: #94a3b8; font-weight: 600;">
+                        <span id="pct-<?= $idea['id'] ?>"><?= round($rt) ?></span>% Approval
                     </div>
                 </div>
             </div>
@@ -177,34 +175,34 @@ $ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? n
 
         <div class="glass-card" style="padding: 30px; margin-top: 40px;">
             <h3 style="margin-bottom: 20px;">Add your <span style="color:#a78bfa;">Idea</span></h3>
-            <form id="ideaForm" action="../../index.php?action=add_idea" method="POST">
+            <form id="ideaForm" action="../../index.php?action=add_idea" method="POST" novalidate>
                 <input type="hidden" name="brainstorming_id" value="<?= $bid ?>">
+                <div style="margin-bottom: 12px;">
+                    <input type="text" name="title" id="ideaTitle" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;" placeholder="Titre de votre idée claire et concise..." required>
+                    <div id="ideaTitleError" style="color: #ef4444; font-size: 0.85rem; margin-top: 4px; display: none;"></div>
+                </div>
                 
-                <div style="position: relative; margin-bottom: 20px;">
-                    <i data-lucide="type" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8;"></i>
-                    <input type="text" name="title" id="ideaTitle" class="glass-input" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 12px;" placeholder="Titre de votre idée claire et concise...">
-                    <div id="error-ideaTitle" style="color: #e11d48; font-size: 0.75rem; margin-top: 5px; display: none;">Title is required.</div>
+                <select name="type" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 12px;" required>
+                    <option value="Standard">Standard</option>
+                    <option value="Feature Request">Feature Request</option>
+                    <option value="Enhancement">Enhancement</option>
+                    <option value="Bug Fix">Bug Fix</option>
+                </select>
+
+                <div style="background: rgba(139, 92, 246, 0.1); padding: 15px; border-radius: 12px; border: 1px dashed #a855f7; margin-bottom: 12px;">
+                    <label style="color: #a78bfa; margin-bottom: 8px; display: block; font-weight: 600; font-size: 0.85rem;">✨ AI Idea Generator</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="aiIdeaPrompt" class="glass-input" placeholder="What is your idea about? e.g. Add dark mode" style="flex: 1; padding: 10px; border-radius: 8px;">
+                        <button type="button" id="aiGenerateIdeaBtn" style="background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: all 0.2s ease;">
+                            Generate
+                        </button>
+                    </div>
                 </div>
 
-                <div style="position: relative; margin-bottom: 20px;">
-                    <i data-lucide="tag" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; color: #94a3b8;"></i>
-                    <select name="type" id="ideaType" class="glass-input" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 12px; appearance: none; cursor: pointer;">
-                        <option value="" disabled selected>Sélectionnez le type d'idée...</option>
-                        <option value="Feature">Feature (Nouvelle fonctionnalité)</option>
-                        <option value="Amélioration">Amélioration (Optimisation)</option>
-                        <option value="Bug">Correction (Bug/Problème)</option>
-                        <option value="Recherche">Recherche (Exploration)</option>
-                    </select>
-                    <i data-lucide="chevron-down" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 16px; color: #94a3b8; pointer-events: none;"></i>
-                    <div id="error-ideaType" style="color: #e11d48; font-size: 0.75rem; margin-top: 5px; display: none;">Please select a type.</div>
+                <div style="margin-bottom: 20px;">
+                    <textarea name="content" id="formContent" rows="4" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;" placeholder="Détaillez le fonctionnement de votre contribution ici..." required></textarea>
+                    <div id="ideaContentError" style="color: #ef4444; font-size: 0.85rem; margin-top: 4px; display: none;"></div>
                 </div>
-
-                <div style="position: relative; margin-bottom: 20px;">
-                    <i data-lucide="align-left" style="position: absolute; left: 12px; top: 15px; width: 18px; color: #94a3b8;"></i>
-                    <textarea name="content" id="ideaContent" rows="4" class="glass-input" style="width: 100%; padding: 12px 12px 12px 40px; border-radius: 12px;" placeholder="Détaillez le fonctionnement de votre contribution ici..."></textarea>
-                    <div id="error-ideaContent" style="color: #e11d48; font-size: 0.75rem; margin-top: 5px; display: none;">Description is required.</div>
-                </div>
-
                 <button type="submit" class="btn btn-primary">Post Contribution</button>
             </form>
         </div>
@@ -236,12 +234,10 @@ $ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? n
                     const rt = tt > 0 ? (parseInt(result.stats.upvotes) / tt) * 100 : 50;
                     const rBar = document.getElementById(`ratio-${btn.dataset.idea}`);
                     if(rBar) rBar.style.width = rt + '%';
-
+                    const pctEl = document.getElementById(`pct-${btn.dataset.idea}`);
+                    if(pctEl) pctEl.innerText = Math.round(rt);
                     const scoreEl = document.getElementById(`score-${btn.dataset.idea}`);
-                    if(scoreEl) scoreEl.innerText = parseInt(result.stats.upvotes) - parseInt(result.stats.downvotes);
-                    
-                    const percEl = document.getElementById(`percentage-${btn.dataset.idea}`);
-                    if(percEl) percEl.innerText = Math.round(rt) + '% Approval';
+                    if(scoreEl) scoreEl.innerText = result.stats.score;
 
                     const isUp = btn.dataset.vote === "1";
                     if (btn.classList.contains(isUp ? 'voted-up' : 'voted-down')) {
@@ -278,53 +274,124 @@ $ideas = $ideaController->listIdeasByBrainstorming($bid, $sidebarUser['id'] ?? n
                     const tt = parseInt(stat.upvotes) + parseInt(stat.downvotes);
                     const rt = tt > 0 ? (parseInt(stat.upvotes) / tt) * 100 : 50;
                     rEl.style.width = rt + '%';
-
-                    const sEl = document.getElementById(`score-${stat.id}`);
-                    if (sEl) sEl.innerText = parseInt(stat.upvotes) - parseInt(stat.downvotes);
-                    
-                    const pEl = document.getElementById(`percentage-${stat.id}`);
-                    if (pEl) pEl.innerText = Math.round(rt) + '% Approval';
+                    const pctEl = document.getElementById(`pct-${stat.id}`);
+                    if(pctEl) pctEl.innerText = Math.round(rt);
+                    const scoreEl = document.getElementById(`score-${stat.id}`);
+                    if(scoreEl) scoreEl.innerText = stat.score;
                 }
             });
         } catch(e) {}
-    // Manual Validation for Contribution Form (No HTML5 bubbles)
-    document.getElementById('ideaForm').addEventListener('submit', function(e) {
-        let isValid = true;
-        const title = document.getElementById('ideaTitle');
-        const type = document.getElementById('ideaType');
-        const content = document.getElementById('ideaContent');
+    }, 2500);
 
-        if (title.value.trim() === "") {
-            document.getElementById('error-ideaTitle').style.display = 'block';
-            title.style.borderColor = '#e11d48';
-            isValid = false;
-        } else {
-            document.getElementById('error-ideaTitle').style.display = 'none';
-            title.style.borderColor = '';
-        }
+    // AI Idea Generation
+    const aiIdeaBtn = document.getElementById('aiGenerateIdeaBtn');
+    const aiIdeaPrompt = document.getElementById('aiIdeaPrompt');
+    const ideaContentInput = document.getElementById('formContent');
 
-        if (type.value === "") {
-            document.getElementById('error-ideaType').style.display = 'block';
-            type.style.borderColor = '#e11d48';
-            isValid = false;
-        } else {
-            document.getElementById('error-ideaType').style.display = 'none';
-            type.style.borderColor = '';
-        }
+    if (aiIdeaBtn) {
+        aiIdeaBtn.addEventListener('click', async () => {
+            const promptText = aiIdeaPrompt.value.trim();
 
-        if (content.value.trim() === "") {
-            document.getElementById('error-ideaContent').style.display = 'block';
-            content.style.borderColor = '#e11d48';
-            isValid = false;
-        } else {
-            document.getElementById('error-ideaContent').style.display = 'none';
-            content.style.borderColor = '';
-        }
+            if (!promptText) {
+                alert('Please enter a prompt describing your idea.');
+                aiIdeaPrompt.focus();
+                return;
+            }
+            
+            const originalText = aiIdeaBtn.innerHTML;
+            aiIdeaBtn.innerHTML = '✨ Generating...';
+            aiIdeaBtn.style.opacity = '0.6';
+            aiIdeaBtn.style.cursor = 'wait';
+            aiIdeaBtn.disabled = true;
 
-        if (!isValid) {
+            try {
+                const response = await fetch('../../index.php?action=generate_ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText, context: 'Idea Contribution' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    ideaContentInput.value = data.text;
+                } else {
+                    alert('⚠️ AI Generation failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch(e) {
+                console.error(e);
+                alert('⚠️ AI generation failed. Check your network.');
+            } finally {
+                aiIdeaBtn.innerHTML = originalText;
+                aiIdeaBtn.style.opacity = '1';
+                aiIdeaBtn.style.cursor = 'pointer';
+                aiIdeaBtn.disabled = false;
+            }
+        });
+    }
+
+    // Idea Form Validation
+    const ideaForm = document.getElementById('ideaForm');
+    const titleInput = document.getElementById('ideaTitle');
+    const contentInput = document.getElementById('formContent');
+    const titleError = document.getElementById('ideaTitleError');
+    const contentError = document.getElementById('ideaContentError');
+
+    if (ideaForm) {
+        ideaForm.addEventListener('submit', function(e) {
+            if (this.dataset.confirmed === 'true') return;
+
+            let isValid = true;
+            
+            // Reset errors
+            titleError.style.display = 'none';
+            contentError.style.display = 'none';
+            titleInput.style.borderColor = '';
+            contentInput.style.borderColor = '';
+
+            const titleVal = titleInput.value.trim();
+            const contentVal = contentInput.value.trim();
+
+            if (titleVal.length < 5) {
+                titleError.textContent = 'Le titre doit comporter au moins 5 caractères.';
+                titleError.style.display = 'block';
+                titleInput.style.borderColor = '#ef4444';
+                isValid = false;
+            }
+
+            if (contentVal.length < 15) {
+                contentError.textContent = 'La description de l\'idée doit comporter au moins 15 caractères.';
+                contentError.style.display = 'block';
+                contentInput.style.borderColor = '#ef4444';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                return;
+            }
+
+            // If valid, show SweetAlert
             e.preventDefault();
-        }
-    });
+            Swal.fire({
+                title: 'Post Contribution?',
+                text: "Your creative idea will be shared with the community for voting.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '🚀 Post Idea!',
+                cancelButtonText: 'Wait, let me rethink',
+                confirmButtonColor: '#8b5cf6',
+                cancelButtonColor: '#475569',
+                background: '#1e293b',
+                color: '#f8fafc'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.dataset.confirmed = 'true';
+                    this.submit();
+                }
+            });
+        });
+    }
   </script>
 </body>
 </html>

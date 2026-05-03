@@ -1,5 +1,5 @@
 <?php
-include_once(__DIR__ . '/../config.php');
+include_once(__DIR__ . '/../Core/config.php');
 include_once(__DIR__ . '/../Models/Brainstorming.php');
 
 class BrainstormingController
@@ -103,9 +103,9 @@ class BrainstormingController
     public function addBrainstorming(Brainstorming $b)
     {
         $sql = "INSERT INTO brainstormings 
-                    (user_id, title, description, topic, status) 
+                    (user_id, title, description, topic, type, status) 
                 VALUES 
-                    (:user_id, :title, :description, :topic, :status)";
+                    (:user_id, :title, :description, :topic, :type, :status)";
         
         try {
             $q = $this->db->prepare($sql);
@@ -114,6 +114,7 @@ class BrainstormingController
                 'title'       => $b->getTitle(),
                 'description' => $b->getDescription(),
                 'topic'       => $b->getTopic() ?? 'General',
+                'type'        => $b->getType() ?? 'Standard',
                 'status'      => $b->getStatus() ?? 'EN_ATTENTE'
             ]);
             return $this->db->lastInsertId();
@@ -129,6 +130,7 @@ class BrainstormingController
                     title       = :title,
                     description = :description,
                     topic       = :topic,
+                    type        = :type,
                     status      = :status
                 WHERE id = :id";
         
@@ -138,6 +140,7 @@ class BrainstormingController
                 'title'       => $b->getTitle(),
                 'description' => $b->getDescription(),
                 'topic'       => $b->getTopic(),
+                'type'        => $b->getType() ?? 'Standard',
                 'status'      => $b->getStatus(),
                 'id'          => $id
             ]);
@@ -161,7 +164,7 @@ class BrainstormingController
 
     // ── QUERIES ───────────────────────────────────────────────────────────
 
-    public function listBrainstormings($search = '', $filters = [], $sort = 'newest', $limit = null, $offset = null)
+    public function listBrainstormings($search = '', $filters = [], $limit = null, $offset = null, $sort = 'date_desc')
     {
         $sql = "SELECT b.*, u.first_name, u.last_name 
                 FROM brainstormings b 
@@ -180,27 +183,21 @@ class BrainstormingController
             $params['status'] = $filters['status'];
         }
 
-        if (!empty($filters['not_status'])) {
-            $conditions[] = "b.status != :not_status";
-            $params['not_status'] = $filters['not_status'];
-        }
-
         if (!empty($conditions)) {
             $sql .= " WHERE " . implode(' AND ', $conditions);
         }
 
-        // --- DYNAMIC SORTING ---
         switch ($sort) {
-            case 'oldest':
+            case 'date_asc':
                 $sql .= " ORDER BY b.created_at ASC";
                 break;
-            case 'title_az':
+            case 'title_asc':
                 $sql .= " ORDER BY b.title ASC";
                 break;
-            case 'title_za':
+            case 'title_desc':
                 $sql .= " ORDER BY b.title DESC";
                 break;
-            case 'newest':
+            case 'date_desc':
             default:
                 $sql .= " ORDER BY b.created_at DESC";
                 break;
@@ -238,11 +235,6 @@ class BrainstormingController
         if (!empty($filters['status'])) {
             $conditions[] = "b.status = :status";
             $params['status'] = $filters['status'];
-        }
-
-        if (!empty($filters['not_status'])) {
-            $conditions[] = "b.status != :not_status";
-            $params['not_status'] = $filters['not_status'];
         }
 
         if (!empty($conditions)) {
