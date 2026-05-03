@@ -267,10 +267,20 @@ class EventController
             $q = $this->db->prepare("SELECT * FROM events WHERE id = :id");
             $q->execute(['id' => $id]);
             $row = $q->fetch();
-            if ($row) {
-                return $this->hydrateEvent($row);
+            if (!$row) return null;
+            
+            $event = $this->hydrateEvent($row);
+            
+            // Auto-generate QR if missing for accepted events
+            if ($event->getStatus() === 'ACCEPTE' && !$event->getQrCode()) {
+                $this->generateAndStoreQrCode($id);
+                // Re-hydrate to get the QR code
+                $q->execute(['id' => $id]);
+                $row = $q->fetch();
+                $event = $this->hydrateEvent($row);
             }
-            return null;
+            
+            return $event;
         } catch (Exception $e) {
             return null;
         }
@@ -337,7 +347,8 @@ class EventController
     public function toggleFavorite($user_id, $event_id)
     {
         try {
-            $check = $this->db->prepare("SELECT id FROM favoris WHERE user_id = :uid AND evenement_id = :eid");
+            $eventColumn = $this->getFavoriteEventColumn();
+            $check = $this->db->prepare("SELECT id FROM favoris WHERE user_id = :uid AND {$eventColumn} = :eid");
             $check->execute(['uid' => $user_id, 'eid' => $event_id]);
             $fav = $check->fetch();
             
@@ -346,19 +357,22 @@ class EventController
                 $q->execute(['id' => $fav['id']]);
                 return ['status' => 'removed'];
             } else {
-                $q = $this->db->prepare("INSERT INTO favoris (user_id, evenement_id) VALUES (:uid, :eid)");
+                $q = $this->db->prepare("INSERT INTO favoris (user_id, {$eventColumn}) VALUES (:uid, :eid)");
                 $q->execute(['uid' => $user_id, 'eid' => $event_id]);
                 return ['status' => 'added'];
             }
-        } catch (Exception $e) { return ['success' => false, 'message' => $e->getMessage()]; }
+        } catch (Exception $e) { 
+            return ['success' => false, 'message' => $e->getMessage()]; 
+        }
     }
 
     public function listFavorites($user_id)
     {
         try {
+            $eventColumn = $this->getFavoriteEventColumn();
             $sql = "SELECT e.*, u.first_name, u.last_name 
                     FROM favoris f 
-                    JOIN events e ON f.evenement_id = e.id 
+                    JOIN events e ON f.{$eventColumn} = e.id 
                     JOIN users u ON e.user_id = u.id 
                     WHERE f.user_id = :uid";
             $q = $this->db->prepare($sql);
@@ -369,11 +383,26 @@ class EventController
 
     public function isFavorite($user_id, $event_id)
     {
+        if (!$user_id) return false;
         try {
-            $q = $this->db->prepare("SELECT id FROM favoris WHERE user_id = :uid AND evenement_id = :eid");
+            $eventColumn = $this->getFavoriteEventColumn();
+            $q = $this->db->prepare("SELECT id FROM favoris WHERE user_id = :uid AND {$eventColumn} = :eid");
             $q->execute(['uid' => $user_id, 'eid' => $event_id]);
             return (bool)$q->fetch();
         } catch (Exception $e) { return false; }
+    }
+
+    private function getFavoriteEventColumn()
+    {
+        try {
+            $q = $this->db->query("SHOW COLUMNS FROM favoris LIKE 'event_id'");
+            if ($q && $q->fetch()) {
+                return 'event_id';
+            }
+        } catch (Exception $e) {
+        }
+
+        return 'evenement_id';
     }
 
     public function generateAndStoreQrCode($id)

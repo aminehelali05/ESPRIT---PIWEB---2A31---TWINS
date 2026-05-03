@@ -15,9 +15,7 @@
     };
 
     const showInlineError = (field, message) => {
-        field.style.borderColor = 'rgba(225, 29, 72, 0.55)';
-        
-        const group = field.closest('.uf-group') || field.parentElement;
+        const group = field.closest('.uf-group') || field.closest('.res-field') || field.closest('.activity-slot') || field.closest('.rule-input-row') || field.parentElement;
         group.classList.add('has-error');
 
         let errorSpan = group.querySelector('.field-error');
@@ -30,8 +28,7 @@
     };
 
     const clearInlineError = (field) => {
-        field.style.borderColor = '';
-        const group = field.closest('.uf-group') || field.parentElement;
+        const group = field.closest('.uf-group') || field.closest('.res-field') || field.closest('.activity-slot') || field.closest('.rule-input-row') || field.parentElement;
         group.classList.remove('has-error');
 
         const errorSpan = group.querySelector('.field-error');

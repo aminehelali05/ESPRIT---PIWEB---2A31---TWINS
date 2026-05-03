@@ -9,7 +9,8 @@ if (!UserController::isAdmin()) {
 }
 
 $resourceController = new ResourceController();
-$resources = $resourceController->listResources();
+$search = $_GET['search'] ?? null;
+$resources = $resourceController->listResources(null, null, $search);
 
 $editRes = null;
 if (isset($_GET['edit_id'])) {
@@ -82,6 +83,7 @@ if (isset($_GET['edit_id'])) {
         .res-field {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
         .res-field-full {
             grid-column: 1 / -1;
@@ -135,6 +137,17 @@ if (isset($_GET['edit_id'])) {
             color: #059669;
         }
         
+        /* Validation Overrides */
+        .res-field.has-error .res-input {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.02);
+        }
+        .res-field .field-error {
+            font-size: 0.72rem;
+            color: #ef4444;
+            margin-top: 4px;
+            font-weight: 500;
+        }
         .ai-generator-box {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
             border: 1px dashed var(--b-accent);
@@ -171,6 +184,15 @@ if (isset($_GET['edit_id'])) {
                 <div class="page-title">
                     <h1>Resource <span style="color: var(--b-accent);">Control</span></h1>
                     <p>Manage planning, rules, and material resources.</p>
+                </div>
+                <div class="header-actions">
+                    <form action="resources_admin.php" method="GET" class="search-bar">
+                        <i data-lucide="search"></i>
+                        <input type="text" name="search" placeholder="Search resources..." value="<?= htmlspecialchars($search ?? '') ?>">
+                        <?php if ($search): ?>
+                            <a href="resources_admin.php" style="color: var(--b-text-light);"><i data-lucide="x" style="width: 14px;"></i></a>
+                        <?php endif; ?>
+                    </form>
                 </div>
             </header>
 
@@ -242,8 +264,16 @@ if (isset($_GET['edit_id'])) {
             <!-- Resource Library -->
             <section class="card animate-enter" style="animation-delay: 0.1s;">
                 <div class="section-head">
-                    <h2><i data-lucide="archive" style="color: var(--b-accent); vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;"></i> Library Overview</h2>
-                    <span class="dm-kpi"><?= count($resources) ?> Resources</span>
+                    <h2>
+                        <i data-lucide="archive" style="color: var(--b-accent); vertical-align: middle; margin-right: 8px; width: 20px; height: 20px;"></i> 
+                        <?= $search ? 'Search Results' : 'Library Overview' ?>
+                    </h2>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <?php if ($search): ?>
+                            <a href="resources_admin.php" class="text-small" style="color: var(--b-accent); font-weight: 600;">Clear search</a>
+                        <?php endif; ?>
+                        <span class="dm-kpi"><?= count($resources) ?> Resources</span>
+                    </div>
                 </div>
 
                 <div class="table-container">
@@ -366,6 +396,66 @@ if (isset($_GET['edit_id'])) {
             }
         });
 
+        // --- Inline Validation Helpers ---
+        function showInlineError(field, message) {
+            const parent = field.parentElement;
+            parent.classList.add('has-error');
+            
+            let errorSpan = parent.querySelector('.field-error');
+            if (!errorSpan) {
+                errorSpan = document.createElement('span');
+                errorSpan.className = 'field-error';
+                parent.appendChild(errorSpan);
+            }
+            errorSpan.textContent = message;
+        }
+
+        function clearInlineError(field) {
+            const parent = field.parentElement;
+            parent.classList.remove('has-error');
+            const errorSpan = parent.querySelector('.field-error');
+            if (errorSpan) errorSpan.remove();
+        }
+
+        // Validate on submit
+        const resourceForm = document.getElementById('resourceAdminForm');
+        if (resourceForm) {
+            resourceForm.addEventListener('submit', function(e) {
+                let hasError = false;
+                const titleInput = this.querySelector('input[name="title"]');
+                const descInput = this.querySelector('textarea[name="description"]');
+                const typeInput = this.querySelector('select[name="type"]');
+
+                [titleInput, descInput, typeInput].forEach(clearInlineError);
+
+                if (titleInput.value.trim().length < 5) {
+                    showInlineError(titleInput, "Title must be at least 5 characters.");
+                    hasError = true;
+                }
+                if (descInput.value.trim().length < 20) {
+                    showInlineError(descInput, "Description must be at least 20 characters.");
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    e.preventDefault();
+                    Swal.fire({ icon: 'error', title: 'Form Error', text: 'Please fix the errors before submitting.', background: '#ffffff', color: '#0f172a' });
+                }
+            });
+
+            // Live validation
+            resourceForm.querySelectorAll('input, textarea, select').forEach(el => {
+                el.addEventListener('blur', () => {
+                    if (el.name === 'title' && el.value.trim().length > 0 && el.value.trim().length < 5) {
+                        showInlineError(el, "Too short.");
+                    } else if (el.name === 'description' && el.value.trim().length > 0 && el.value.trim().length < 20) {
+                        showInlineError(el, "Too short.");
+                    } else {
+                        clearInlineError(el);
+                    }
+                });
+            });
+        }
         function confirmDeleteRes(id) {
             Swal.fire({
                 title: 'Delete this resource?',

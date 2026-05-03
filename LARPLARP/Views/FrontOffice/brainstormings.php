@@ -81,7 +81,7 @@ $brainstormings = $brainstormingController->listBrainstormings($search, $filters
           <a href="social.php"><i data-lucide="users"></i><span>Social Feed</span></a>
           <a class="active" href="brainstormings.php"><i data-lucide="lightbulb"></i><span>Brainstorming</span></a>
           <a href="events.php"><i data-lucide="calendar"></i><span>Events</span></a>
-          <a href="resources.php"><i data-lucide="library"></i><span>Resources</span></a>
+
           <a href="profile.php"><i data-lucide="user"></i><span>Profile</span></a>
         </nav>
       </aside>

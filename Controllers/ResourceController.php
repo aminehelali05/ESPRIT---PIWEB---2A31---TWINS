@@ -150,7 +150,7 @@ class ResourceController
 
     // ── QUERIES ───────────────────────────────────────────────────────────
 
-    public function listResources($type = null, $event_id = null)
+    public function listResources($type = null, $event_id = null, $search = null)
     {
         $sql = "SELECT * FROM resources WHERE 1=1";
         $params = [];
@@ -162,6 +162,10 @@ class ResourceController
         if ($event_id) {
             $sql .= " AND event_id = :event_id";
             $params['event_id'] = $event_id;
+        }
+        if ($search) {
+            $sql .= " AND (title LIKE :search OR description LIKE :search)";
+            $params['search'] = '%' . $search . '%';
         }
 
         $sql .= " ORDER BY created_at DESC";

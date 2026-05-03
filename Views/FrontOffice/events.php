@@ -534,21 +534,29 @@ $events = $eventController->listEvents($search, $filters);
     async function toggleFav(btn) {
         const id = btn.dataset.id;
         try {
-            const formData = new FormData();
-            formData.append('event_id', id);
+            const params = new URLSearchParams();
+            params.append('event_id', id);
+            
             const resp = await fetch('../../index.php?action=toggle_favorite', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
             });
             const res = await resp.json();
+            
             if (res.status === 'added') {
                 btn.classList.add('active');
                 Swal.fire({ icon: 'success', title: 'Added to favorites!', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
-            } else {
+            } else if (res.status === 'removed') {
                 btn.classList.remove('active');
                 Swal.fire({ icon: 'info', title: 'Removed from favorites.', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Status: ' + (res.status || 'unknown'), text: res.message || 'Could not update favorites.', confirmButtonColor: '#ef4444' });
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Favorite error:', e);
+            Swal.fire({ icon: 'error', title: 'Network Error', text: 'Please check your connection.', confirmButtonColor: '#ef4444' });
+        }
     }
 
     document.querySelectorAll('.uf-input').forEach(input => {

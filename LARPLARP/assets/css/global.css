@@ -1639,3 +1639,31 @@ body.with-global-left-sidebar .navbar {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   VALIDATION STYLES — Global "Red Line" Feedback
+   ============================================================ */
+.has-error .form-input,
+.has-error .glass-input,
+.has-error .res-input,
+.has-error .wiz-input,
+.wiz-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.field-error {
+  display: block !important;
+  color: #ef4444 !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  margin-top: 5px !important;
+  line-height: 1.4 !important;
+  animation: errorFadeIn 0.2s ease;
+  width: 100%;
+}
+
+@keyframes errorFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
