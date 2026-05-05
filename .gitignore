@@ -1,7 +1,12 @@
-# Ignore Projet-2A folder  
-/Projet-2A/  
-/vendor/
-/composer.lock
-/config.local.php
+node_modules/
+vendor/
+storage/
+libraries/
+*.log
 .env
-.env.*
+dist/
+build/
+.cache/
+.wwebjs_auth/
+.wwebjs_cache/
+*.tmp
