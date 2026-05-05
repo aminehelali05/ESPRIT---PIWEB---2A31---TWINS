@@ -16,21 +16,44 @@ export class AssistantRealtimeHub {
       return this;
     }
 
-    this.server = new WebSocketServer({
-      port: this.port,
-      host: this.host,
-      path: this.path,
-    });
+    this.server = await new Promise((resolve, reject) => {
+      const server = new WebSocketServer({
+        port: this.port,
+        host: this.host,
+        path: this.path,
+      });
 
-    this.server.on('connection', (socket) => {
-      try {
-        socket.send(JSON.stringify({
-          type: 'ready',
-          timestamp: nowIso(),
-          message: 'Assistant realtime hub connected.',
-        }));
-      } catch (_error) {
-      }
+      const cleanup = () => {
+        server.off('listening', onListening);
+        server.off('error', onError);
+      };
+
+      const onListening = () => {
+        cleanup();
+        server.on('connection', (socket) => {
+          try {
+            socket.send(JSON.stringify({
+              type: 'ready',
+              timestamp: nowIso(),
+              message: 'Assistant realtime hub connected.',
+            }));
+          } catch (_error) {
+          }
+        });
+        resolve(server);
+      };
+
+      const onError = (error) => {
+        cleanup();
+        try {
+          server.close();
+        } catch (_closeError) {
+        }
+        reject(error);
+      };
+
+      server.once('listening', onListening);
+      server.once('error', onError);
     });
 
     return this;
@@ -65,4 +88,3 @@ export class AssistantRealtimeHub {
     });
   }
 }
-
