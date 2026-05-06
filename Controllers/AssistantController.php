@@ -50,6 +50,9 @@ class AssistantController
                 'voice_feedback' => true,
                 'whatsapp' => true,
                 'browser_execution' => true,
+                'multi_step_planning' => true,
+                'context_memory' => true,
+                'dom_execution' => true,
                 'live_polling' => true,
             ],
         ];
@@ -873,10 +876,59 @@ PROMPT;
     private function fallbackPlan(string $message, array $context): array
     {
         $normalized = $this->normalizeCommandText($message);
+        $source = strtolower(trim((string) ($context['source'] ?? 'web')));
+        $history = is_array($context['history'] ?? null) ? $context['history'] : [];
+        $lastTaskSummary = '';
+        foreach (array_reverse($history) as $item) {
+            $candidate = trim((string) ($item['summary'] ?? $item['command'] ?? ''));
+            if ($candidate !== '') {
+                $lastTaskSummary = $candidate;
+                break;
+            }
+        }
+
+        $genericFollowUp = preg_match('/^(do the task|do it|continue|go ahead|same|that|this|hedha|chniya|temchy|jarabtha|\?|\.+)$/i', $normalized) === 1;
         $steps = [];
         $assistantMessage = 'I have queued that request and will keep you updated.';
         $requiresBrowser = false;
         $requiresWhatsApp = false;
+
+        if (preg_match('/^(do the task|do it|continue|go ahead|same|that|this|hedha|chniya|temchy|jarabtha|\?|\.+)$/i', $normalized) === 1) {
+            $genericFollowUp = true;
+        }
+
+        if ($source === 'whatsapp' && $normalized !== '' && ($genericFollowUp || $lastTaskSummary !== '')) {
+            $requiresBrowser = true;
+            $assistantMessage = $lastTaskSummary !== ''
+                ? 'I will continue the last task you gave me and update you.'
+                : 'I will open the agent flow and prepare the task.';
+            $target = $this->resolvePageTargetFromMessage($lastTaskSummary !== '' ? $lastTaskSummary : $message);
+            if ($target === '') {
+                $target = 'Views/FrontOffice/ai-agent.php';
+            }
+            $steps = [
+                [
+                    'action' => 'navigate',
+                    'target' => $target,
+                    'notes' => 'Open the agent page or the last requested page.',
+                ],
+            ];
+            if ($lastTaskSummary !== '') {
+                $steps[] = [
+                    'action' => 'type',
+                    'target' => 'command input',
+                    'value' => $lastTaskSummary,
+                    'notes' => 'Reuse the last meaningful task description.',
+                ];
+            } else {
+                $steps[] = [
+                    'action' => 'type',
+                    'target' => 'command input',
+                    'value' => $message,
+                    'notes' => 'Use the WhatsApp message as the initial task description.',
+                ];
+            }
+        }
 
         if (preg_match('/\b(send|message|chat|reply)\b/', $normalized)) {
             $requiresBrowser = true;
@@ -907,6 +959,17 @@ PROMPT;
                     'notes' => 'Send the message.',
                 ],
             ];
+            if (preg_match('/\b(and|then|after that)\b.*\b(open|go to|navigate|visit)\b|\b(open|go to|navigate|visit)\b.*\b(profile|page|screen)\b/', $normalized)) {
+                $followUpTarget = $this->resolvePageTargetFromMessage($message);
+                if ($followUpTarget === '') {
+                    $followUpTarget = 'Views/FrontOffice/profile.php';
+                }
+                $steps[] = [
+                    'action' => 'navigate',
+                    'target' => $followUpTarget,
+                    'notes' => 'Continue to the follow-up page requested by the user.',
+                ];
+            }
         } elseif (preg_match('/\b(open|go to|navigate|visit)\b/', $normalized)) {
             $requiresBrowser = true;
             $assistantMessage = 'I will navigate to the requested page.';
@@ -919,6 +982,26 @@ PROMPT;
                     'action' => 'navigate',
                     'target' => $target !== '' ? $target : 'profile.php',
                     'notes' => 'Open the requested page.',
+                ],
+            ];
+        } elseif ($source === 'whatsapp') {
+            $requiresBrowser = true;
+            $assistantMessage = 'I will open the agent page and process your request.';
+            $target = $this->resolvePageTargetFromMessage($message);
+            if ($target === '') {
+                $target = 'Views/FrontOffice/ai-agent.php';
+            }
+            $steps = [
+                [
+                    'action' => 'navigate',
+                    'target' => $target,
+                    'notes' => 'Open the most relevant agent page for the WhatsApp request.',
+                ],
+                [
+                    'action' => 'type',
+                    'target' => 'command input',
+                    'value' => $message,
+                    'notes' => 'Send the WhatsApp request text into the agent task flow.',
                 ],
             ];
         }
@@ -957,6 +1040,14 @@ PROMPT;
 
         if (preg_match('/\b(messages?|inbox|chat|conversation|thread|threads)\b/', $normalized)) {
             return 'Views/FrontOffice/messages.php';
+        }
+
+        if (preg_match('/\b(live|stream|broadcast|go live|livestream|live studio)\b/', $normalized)) {
+            return 'Views/FrontOffice/live.php';
+        }
+
+        if (preg_match('/\b(job offer|job offers|joboffer|freelance offer|freelance job)\b/', $normalized)) {
+            return 'Views/FrontOffice/jobOffer.php';
         }
 
         if (preg_match('/\b(agent|assistant|ai|voice)\b/', $normalized)) {

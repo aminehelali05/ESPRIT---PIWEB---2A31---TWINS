@@ -11,7 +11,6 @@ class RulesController
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? config::getConnexion();
-        $this->ensureSchema();
         $this->backfillLegacyRules();
     }
 
@@ -27,26 +26,8 @@ class RulesController
 
     private function ensureSchema(): void
     {
-        try {
-            $this->pdo->exec('CREATE TABLE IF NOT EXISTS rules (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                contract_id INT NOT NULL,
-                rule_type VARCHAR(40) NOT NULL DEFAULT "scope",
-                title VARCHAR(160) NOT NULL,
-                description TEXT NOT NULL,
-                due_date DATE NULL,
-                penalty TEXT NULL,
-                sort_order INT NOT NULL DEFAULT 0,
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                KEY idx_rules_contract_id (contract_id),
-                KEY idx_rules_type (rule_type),
-                KEY idx_rules_due_date (due_date),
-                CONSTRAINT fk_rules_contract FOREIGN KEY (contract_id) REFERENCES contracts(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci');
-        } catch (Throwable $exception) {
-            error_log('RulesController::ensureSchema - ' . $exception->getMessage());
-        }
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
     }
 
     private function normalizeDate(?string $value): ?string
@@ -84,7 +65,7 @@ class RulesController
         ];
 
         $type = $legacyMap[$type] ?? $type;
-        return in_array($type, self::RULE_TYPES, true) ? $type : 'other';
+        return $type !== '' ? $type : 'other';
     }
 
     private function normalizeRulePayload(array $payload, int $index = 0): array

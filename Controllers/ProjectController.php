@@ -2,11 +2,13 @@
 
 include_once(__DIR__ . '/../config.php');
 include_once(__DIR__ . '/TaskController.php');
+include_once(__DIR__ . '/../services/OpenRouterService.php');
 
 class ProjectController
 {
     private PDO $pdo;
     private TaskController $taskController;
+    private OpenRouterService $openRouterService;
     private const PROJECT_STATUSES = ['planning', 'active', 'completed', 'on_hold', 'archived'];
     private const PROJECT_VISIBILITIES = ['team', 'public', 'private'];
 
@@ -14,6 +16,216 @@ class ProjectController
     {
         $this->pdo = $pdo ?? config::getConnexion();
         $this->taskController = new TaskController($this->pdo);
+        $this->openRouterService = new OpenRouterService($this->pdo);
+    }
+
+    private function ensureAiFeatureSchema(): void
+    {
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
+    }
+
+    // Store a project mail and optionally send to members (owner + provided member ids)
+    public function sendProjectMail(int $projectId, int $senderId, string $subject, string $body, array $memberIds = [], bool $isDigest = false, string $digestFrequency = 'daily'): bool
+    {
+        $project = $this->findById($projectId);
+        if (!$project) {
+            throw new RuntimeException('Project not found');
+        }
+
+        $stmt = $this->pdo->prepare('INSERT INTO project_mail (project_id, sender_id, subject, body, is_digest, digest_frequency, created_at) VALUES (:project_id, :sender_id, :subject, :body, :is_digest, :digest_frequency, NOW())');
+        $stmt->execute([
+            'project_id' => $projectId,
+            'sender_id' => $senderId,
+            'subject' => trim($subject),
+            'body' => trim($body),
+            'is_digest' => $isDigest ? 1 : 0,
+            'digest_frequency' => in_array($digestFrequency, ['daily','weekly','none'], true) ? $digestFrequency : 'daily',
+        ]);
+        $mailId = (int) $this->pdo->lastInsertId();
+
+        // store an internal message linked to this project
+        try {
+            $msg = $this->pdo->prepare('INSERT INTO messages (sender_id, content, created_at, entity_type, entity_id) VALUES (:sender_id, :content, NOW(), :etype, :eid)');
+            $msg->execute([
+                'sender_id' => $senderId,
+                'content' => $body,
+                'etype' => 'project',
+                'eid' => $projectId,
+            ]);
+        } catch (Throwable $e) {
+            // ignore
+        }
+
+        // send email to owner and provided members (best-effort)
+        $recipients = [];
+        if ((int)$project['owner_id'] > 0) {
+            $owner = $this->pdo->prepare('SELECT email FROM users WHERE id = :id LIMIT 1');
+            $owner->execute(['id' => $project['owner_id']]);
+            $ow = $owner->fetch(PDO::FETCH_ASSOC);
+            if ($ow && trim((string)$ow['email']) !== '') {
+                $recipients[] = $ow['email'];
+            }
+        }
+
+        foreach ($memberIds as $mid) {
+            $m = $this->pdo->prepare('SELECT email FROM users WHERE id = :id LIMIT 1');
+            $m->execute(['id' => (int)$mid]);
+            $row = $m->fetch(PDO::FETCH_ASSOC);
+            if ($row && trim((string)$row['email']) !== '') {
+                $recipients[] = $row['email'];
+            }
+        }
+
+        $recipients = array_values(array_unique(array_filter($recipients, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL))));
+        if ($mailId > 0) {
+            foreach (array_values(array_unique(array_filter(array_map('intval', $memberIds), static fn(int $id): bool => $id > 0))) as $memberId) {
+                $recipientEmail = null;
+                foreach ($memberIds as $idx => $rawMemberId) {
+                    if ((int) $rawMemberId === $memberId && isset($recipients[$idx])) {
+                        $recipientEmail = $recipients[$idx];
+                        break;
+                    }
+                }
+                try {
+                    $this->pdo->prepare('INSERT INTO project_mail_recipients (mail_id, user_id, recipient_email, is_digest, digest_frequency, sent_at, created_at)
+                        VALUES (:mail_id, :user_id, :recipient_email, :is_digest, :digest_frequency, NOW(), NOW())')
+                        ->execute([
+                            'mail_id' => $mailId,
+                            'user_id' => $memberId,
+                            'recipient_email' => $recipientEmail,
+                            'is_digest' => $isDigest ? 1 : 0,
+                            'digest_frequency' => in_array($digestFrequency, ['daily', 'weekly', 'none'], true) ? $digestFrequency : 'daily',
+                        ]);
+                } catch (Throwable $exception) {
+                }
+            }
+        }
+        if ($recipients !== []) {
+            $to = implode(',', $recipients);
+            $headers = 'From: ' . (string) config::get('SMTP_FROM_EMAIL', 'no-reply@localhost');
+            @mail($to, $subject, $body, $headers);
+        }
+
+        return true;
+    }
+
+    public function listProjectMail(int $projectId, int $limit = 50): array
+    {
+        $limit = max(1, min(300, $limit));
+        $stmt = $this->pdo->prepare('SELECT pm.*, u.first_name, u.last_name
+            FROM project_mail pm
+            LEFT JOIN users u ON u.id = pm.sender_id
+            WHERE pm.project_id = :project_id
+            ORDER BY pm.created_at DESC
+            LIMIT ' . $limit);
+        $stmt->execute(['project_id' => $projectId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Execute an existing task with AI and return a structured result.
+     * Stores output in task_outputs. Returns ['output_text', 'output_type', 'task_output_id'].
+     */
+    public function executeTaskWithAI(int $taskId, int $userId): array
+    {
+        // Load task + project
+        $taskStmt = $this->pdo->prepare(
+            'SELECT t.*, p.title AS project_title, p.description AS project_description, p.owner_id
+             FROM tasks t
+             INNER JOIN projects p ON p.id = t.project_id
+             WHERE t.id = :id LIMIT 1'
+        );
+        $taskStmt->execute(['id' => $taskId]);
+        $task = $taskStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$task) {
+            throw new RuntimeException('Task not found.');
+        }
+
+        $taskTitle       = (string)($task['title']               ?? '');
+        $taskDescription = (string)($task['description']         ?? '');
+        $projectTitle    = (string)($task['project_title']       ?? '');
+        $projectDesc     = (string)($task['project_description'] ?? '');
+
+        // Classify output type from task content
+        $lowerTitle = strtolower($taskTitle . ' ' . $taskDescription);
+        $outputType = 'text';
+        if (preg_match('/\b(report|summary|analysis|overview|brief|memo|documentation)\b/', $lowerTitle)) {
+            $outputType = 'report';
+        } elseif (preg_match('/\b(plan|roadmap|strategy|steps|checklist|list)\b/', $lowerTitle)) {
+            $outputType = 'plan';
+        } elseif (preg_match('/\b(code|script|function|class|module|api|endpoint)\b/', $lowerTitle)) {
+            $outputType = 'code';
+        } elseif (preg_match('/\b(json|data|structure|schema|config)\b/', $lowerTitle)) {
+            $outputType = 'json';
+        }
+
+        // Build execution prompt
+        $systemPrompt = <<<SYS
+You are an expert AI assistant that EXECUTES tasks for software/business projects.
+You do not describe what to do — you DO IT and return the actual deliverable.
+
+Rules:
+- Return a COMPLETE, READY-TO-USE output. Not a plan. The real thing.
+- If the task is a report → write the full report.
+- If the task is a checklist/plan → write a detailed, actionable checklist.
+- If the task is code → write working, commented code.
+- If the task is analysis → perform the analysis with real insights.
+- Use clean markdown formatting: headings (##), bold (**), bullet points (-).
+- Be thorough but concise. Maximum 600 words.
+- Start immediately with the output. No preamble like "Here is your report".
+SYS;
+
+        $userPrompt = <<<USR
+Project: {$projectTitle}
+Project Context: {$projectDesc}
+
+Task Title: {$taskTitle}
+Task Description: {$taskDescription}
+
+Execute this task completely. Return the actual deliverable now.
+USR;
+
+        $messages = [
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user',   'content' => $userPrompt],
+        ];
+
+        $resp = $this->openRouterService->callChat($messages, [
+            'temperature' => 0.3,
+            'max_tokens'  => 900,
+        ]);
+
+        $outputText = trim((string)($resp['choices'][0]['message']['content'] ?? ''));
+        if ($outputText === '') {
+            throw new RuntimeException('AI returned an empty response. Please try again.');
+        }
+
+        // Store in task_outputs
+        $taskOutputId = null;
+        try {
+            $ins = $this->pdo->prepare(
+                'INSERT INTO task_outputs (project_id, task_id, user_id, prompt, output_json, output_text, created_at)
+                 VALUES (:project_id, :task_id, :user_id, :prompt, :output_json, :output_text, NOW())'
+            );
+            $ins->execute([
+                'project_id'  => (int)($task['project_id'] ?? 0),
+                'task_id'     => $taskId,
+                'user_id'     => $userId,
+                'prompt'      => $taskTitle . ': ' . $taskDescription,
+                'output_json' => json_encode(['type' => $outputType, 'text' => $outputText], JSON_UNESCAPED_UNICODE),
+                'output_text' => $outputText,
+            ]);
+            $taskOutputId = (int)$this->pdo->lastInsertId();
+        } catch (Throwable $e) {
+            error_log('executeTaskWithAI storage error: ' . $e->getMessage());
+        }
+
+        return [
+            'output_text'    => $outputText,
+            'output_type'    => $outputType,
+            'task_output_id' => $taskOutputId,
+        ];
     }
 
     public function listUsers(): array
@@ -184,6 +396,132 @@ class ProjectController
             }
         }
         return ['total' => count($rows), 'active' => $active, 'completed' => $completed];
+    }
+
+    public function buildBackofficeDashboard(array $filters = []): array
+    {
+        $fromDate = trim((string) ($filters['from'] ?? ''));
+        $toDate = trim((string) ($filters['to'] ?? ''));
+        $query = strtolower(trim((string) ($filters['q'] ?? '')));
+
+        $rows = $this->listBackofficeRows();
+        $projectIds = array_map(static fn(array $row): int => (int) ($row['id'] ?? 0), $rows);
+        $tasksByProject = $projectIds !== [] ? $this->tasksMapForProjects($projectIds) : [];
+        $inDateRange = static function (?string $value) use ($fromDate, $toDate): bool {
+            if ($value === null || trim($value) === '') {
+                return true;
+            }
+            $timestamp = strtotime($value);
+            if ($timestamp === false) {
+                return true;
+            }
+            if ($fromDate !== '') {
+                $fromTimestamp = strtotime($fromDate . ' 00:00:00');
+                if ($fromTimestamp !== false && $timestamp < $fromTimestamp) {
+                    return false;
+                }
+            }
+            if ($toDate !== '') {
+                $toTimestamp = strtotime($toDate . ' 23:59:59');
+                if ($toTimestamp !== false && $timestamp > $toTimestamp) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        $filteredRows = array_values(array_filter($rows, static function (array $row) use ($query, $inDateRange): bool {
+            if (!$inDateRange((string) ($row['created_at'] ?? ''))) {
+                return false;
+            }
+            if ($query === '') {
+                return true;
+            }
+            return str_contains(strtolower((string) json_encode($row)), $query);
+        }));
+        $filteredProjectIds = array_map(static fn(array $row): int => (int) ($row['id'] ?? 0), $filteredRows);
+        $filteredTasksByProject = [];
+        foreach ($filteredProjectIds as $projectId) {
+            $filteredTasksByProject[$projectId] = $tasksByProject[$projectId] ?? [];
+        }
+
+        $statusDistribution = ['todo' => 0, 'in_progress' => 0, 'done' => 0];
+        $workloadByOwner = [];
+        $durationByStatus = ['todo' => 0, 'in_progress' => 0, 'done' => 0];
+        $durationCountByStatus = ['todo' => 0, 'in_progress' => 0, 'done' => 0];
+        $burndownBuckets = [];
+        $completionPercentages = [];
+        $onTimeTotal = 0;
+        $onTimeDone = 0;
+
+        foreach ($filteredRows as $projectRow) {
+            $completionPercentages[] = (int) ($projectRow['progress_percent'] ?? 0);
+            $owner = trim((string) ($projectRow['first_name'] ?? '') . ' ' . (string) ($projectRow['last_name'] ?? ''));
+            $ownerKey = $owner !== '' ? $owner : 'Unknown';
+            $projectTasks = $filteredTasksByProject[(int) ($projectRow['id'] ?? 0)] ?? [];
+            $workloadByOwner[$ownerKey] = ($workloadByOwner[$ownerKey] ?? 0) + count($projectTasks);
+
+            foreach ($projectTasks as $taskRow) {
+                $status = strtolower((string) ($taskRow['status'] ?? 'todo'));
+                if (!isset($statusDistribution[$status])) {
+                    $statusDistribution[$status] = 0;
+                    $durationByStatus[$status] = 0;
+                    $durationCountByStatus[$status] = 0;
+                }
+                $statusDistribution[$status]++;
+                $createdAt = (string) ($taskRow['created_at'] ?? '');
+                $deadline = (string) ($taskRow['deadline'] ?? '');
+                if ($createdAt !== '' && $deadline !== '' && strtotime($deadline) !== false && strtotime($createdAt) !== false) {
+                    $days = max(0, (int) floor((strtotime($deadline) - strtotime($createdAt)) / 86400));
+                    $durationByStatus[$status] += $days;
+                    $durationCountByStatus[$status]++;
+                }
+                if ($deadline !== '' && strtotime($deadline) !== false) {
+                    $dayKey = date('Y-m-d', strtotime($deadline));
+                    if (!isset($burndownBuckets[$dayKey])) {
+                        $burndownBuckets[$dayKey] = 0;
+                    }
+                    if ($status !== 'done') {
+                        $burndownBuckets[$dayKey]++;
+                    }
+                    if ($status === 'done') {
+                        $onTimeTotal++;
+                        $updatedAt = (string) ($taskRow['updated_at'] ?? $taskRow['created_at'] ?? 'now');
+                        if (strtotime($updatedAt) <= strtotime($deadline)) {
+                            $onTimeDone++;
+                        }
+                    }
+                }
+            }
+        }
+
+        arsort($workloadByOwner);
+        ksort($burndownBuckets);
+        $averageCompletion = $completionPercentages !== [] ? round(array_sum($completionPercentages) / count($completionPercentages), 1) : 0;
+        $onTimeRate = $onTimeTotal > 0 ? round(($onTimeDone / $onTimeTotal) * 100, 1) : 0;
+        $durationAverages = [];
+        foreach ($durationByStatus as $status => $sum) {
+            $durationAverages[$status] = ($durationCountByStatus[$status] ?? 0) > 0 ? round($sum / $durationCountByStatus[$status], 1) : 0;
+        }
+
+        return [
+            'filters' => ['from' => $fromDate, 'to' => $toDate, 'q' => $query],
+            'rows' => $filteredRows,
+            'tasks_by_project' => $filteredTasksByProject,
+            'stats' => [
+                'total' => count($filteredRows),
+                'active' => count(array_filter($filteredRows, static fn(array $row): bool => (string) ($row['status'] ?? '') === 'active')),
+                'completed' => count(array_filter($filteredRows, static fn(array $row): bool => (string) ($row['status'] ?? '') === 'completed')),
+                'average_completion' => $averageCompletion,
+                'on_time_rate' => $onTimeRate,
+            ],
+            'charts' => [
+                'status_distribution' => $statusDistribution,
+                'duration_averages' => $durationAverages,
+                'workload_by_owner' => $workloadByOwner,
+                'burndown' => $burndownBuckets,
+            ],
+        ];
     }
 
     public function create(array $payload): int

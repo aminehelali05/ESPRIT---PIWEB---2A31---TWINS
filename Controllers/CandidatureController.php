@@ -10,32 +10,13 @@ class CandidatureController
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? config::getConnexion();
-        $this->ensureSchema();
-        $this->ensureExtendedSchema();
         $this->backfillFromLegacyApplications();
     }
 
     private function ensureSchema(): void
     {
-        try {
-            $this->pdo->exec('CREATE TABLE IF NOT EXISTS candidatures (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                job_offer_id INT NOT NULL,
-                freelancer_id INT NOT NULL,
-                message TEXT NOT NULL,
-                status ENUM("pending","accepted","rejected") NOT NULL DEFAULT "pending",
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                UNIQUE KEY uq_candidatures_offer_freelancer (job_offer_id, freelancer_id),
-                KEY idx_candidatures_job_offer_id (job_offer_id),
-                KEY idx_candidatures_freelancer_id (freelancer_id),
-                KEY idx_candidatures_status (status),
-                CONSTRAINT fk_candidatures_offer FOREIGN KEY (job_offer_id) REFERENCES job_offers(id) ON DELETE CASCADE,
-                CONSTRAINT fk_candidatures_freelancer FOREIGN KEY (freelancer_id) REFERENCES users(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci');
-        } catch (Throwable $exception) {
-            error_log('CandidatureController::ensureSchema - ' . $exception->getMessage());
-        }
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
     }
 
     private function candidatureHasColumn(string $column): bool
@@ -56,27 +37,14 @@ class CandidatureController
 
     private function ensureColumn(string $column, string $definition): void
     {
-        if ($this->candidatureHasColumn($column)) {
-            return;
-        }
-
-        try {
-            $this->pdo->exec("ALTER TABLE candidatures ADD COLUMN {$column} {$definition}");
-            $this->columnCache[$column] = true;
-        } catch (Throwable $exception) {
-            error_log('CandidatureController::ensureColumn(' . $column . ') - ' . $exception->getMessage());
-        }
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
     }
 
     private function ensureExtendedSchema(): void
     {
-        $this->ensureColumn('job_offer_id', 'INT NULL AFTER id');
-        $this->backfillJobOfferIdFromLegacyColumn();
-        $this->ensureColumn('status', 'ENUM("pending","accepted","rejected") NOT NULL DEFAULT "pending" AFTER message');
-        $this->ensureColumn('proposed_budget', 'DECIMAL(12,2) NULL AFTER message');
-        $this->ensureColumn('estimated_delivery_days', 'INT NULL AFTER proposed_budget');
-        $this->ensureColumn('skills_experience', 'TEXT NULL AFTER estimated_delivery_days');
-        $this->ensureColumn('attachments_json', 'LONGTEXT NULL AFTER skills_experience');
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
     }
 
     private function backfillJobOfferIdFromLegacyColumn(): void

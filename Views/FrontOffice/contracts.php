@@ -75,6 +75,26 @@ $currentQuery = (string)($_SERVER['QUERY_STRING'] ?? '');
 $selfRedirect = $currentPage . ($currentQuery !== '' ? '?' . $currentQuery : '');
 $redirectAfterPost = '';
 
+// Helper function to render analysis arrays as HTML
+$renderAnalysisList = static function($data, string $class = ''): string {
+  if (!is_array($data)) {
+    return '';
+  }
+  $data = array_filter(array_map('strval', $data));
+  if (empty($data)) {
+    return '';
+  }
+  $html = '<ul class="ct-analysis-list ' . htmlspecialchars($class) . '">';
+  foreach ($data as $item) {
+    $item = trim($item);
+    if ($item !== '') {
+      $html .= '<li>' . htmlspecialchars($item) . '</li>';
+    }
+  }
+  $html .= '</ul>';
+  return $html;
+};
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($csrfToken, (string)($_POST['csrf_token'] ?? ''))) {
         $notice = ['type' => 'error', 'message' => 'Invalid security token.'];
@@ -164,15 +184,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               $notice = ['type' => 'success', 'message' => 'Contract signed successfully.'];
               $redirectAfterPost = 'contracts.php?contract=' . $contractId . '#contract-' . $contractId;
             }
-        } catch (Throwable $e) { $notice = ['type' => 'error', 'message' => $e->getMessage()]; }
+            if ($action === 'analyze_contract_ai') {
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $allowedContractIds = array_map(static fn(array $contractRow): int => (int)($contractRow['id'] ?? 0), $controller->listUserContracts($userId));
+              if (!in_array($contractId, $allowedContractIds, true)) {
+                throw new RuntimeException('You cannot analyze this contract.');
+              }
+              $controller->analyzeWithAI($contractId, $userId, true);
+              $notice = ['type' => 'success', 'message' => 'Contract analysis completed.'];
+              $redirectAfterPost = 'contracts.php?contract=' . $contractId . '#contract-' . $contractId;
+            }
+            if ($action === 'export_contract_pdf') {
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $allowedContractIds = array_map(static fn(array $contractRow): int => (int)($contractRow['id'] ?? 0), $controller->listUserContracts($userId));
+              if (!in_array($contractId, $allowedContractIds, true)) {
+                throw new RuntimeException('You cannot download this contract.');
+              }
+              $pdfPath = $controller->generateProfessionalPDF($contractId);
+              if (!is_file($pdfPath)) {
+                throw new RuntimeException('Unable to generate PDF.');
+              }
+              while (ob_get_level() > 0) { ob_end_clean(); }
+              header('Content-Type: application/pdf');
+              header('Content-Disposition: attachment; filename="Contract-' . $contractId . '.pdf"');
+              header('Content-Length: ' . (string) filesize($pdfPath));
+              readfile($pdfPath);
+              @unlink($pdfPath);
+              exit;
+            }
+            if ($action === 'send_contract_email') {
+              $contractId = (int)($_POST['contract_id'] ?? 0);
+              $recipientEmail = filter_var($_POST['recipient_email'] ?? '', FILTER_VALIDATE_EMAIL);
+              if (!$recipientEmail) {
+                  throw new RuntimeException('Please provide a valid email address.');
+              }
+              $allowedContractIds = array_map(static fn(array $contractRow): int => (int)($contractRow['id'] ?? 0), $controller->listUserContracts($userId));
+              if (!in_array($contractId, $allowedContractIds, true)) {
+                throw new RuntimeException('You cannot send this contract.');
+              }
+              $controller->sendContractEmail($contractId, $recipientEmail, $displayName);
+              $notice = ['type' => 'success', 'message' => 'Contract PDF sent successfully to ' . htmlspecialchars($recipientEmail)];
+              $redirectAfterPost = 'contracts.php';
+            }
+        } catch (Throwable $e) { 
+            $notice = ['type' => 'error', 'message' => $e->getMessage()];
+            // Don't continue if this was a download action (would have exited on success)
+        }
     }
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $_SESSION['contract_notice_front'] = $notice;
-  header('Location: ' . ($redirectAfterPost !== '' ? $redirectAfterPost : $selfRedirect));
-  exit;
+    // Don't redirect for AJAX requests - let controller handle response
+    $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    
+    if ($isAjax) {
+        // Return JSON response for AJAX requests
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'success' => $notice['type'] === 'success',
+            'message' => $notice['message'] ?? 'Operation completed',
+            'type' => $notice['type'] ?? 'info'
+        ]);
+        exit;
+    } else {
+        $_SESSION['contract_notice_front'] = $notice;
+        header('Location: ' . ($redirectAfterPost !== '' ? $redirectAfterPost : $selfRedirect));
+        exit;
+    }
 }
 $contracts = $controller->listUserContracts($userId);
+$analysisByContract = [];
+foreach ($contracts as $contractRow) {
+  $contractId = (int)($contractRow['id'] ?? 0);
+  if ($contractId <= 0) {
+    continue;
+  }
+  $analysisByContract[$contractId] = $controller->latestAnalysisByContractId($contractId);
+}
 $acceptedPairs = $isClient ? $controller->listClientAcceptedApplicationsWithoutContract($userId) : [];
 $selectedContractId = (int)($_GET['contract'] ?? 0);
 $prefillOfferId = (int)($_GET['offer_id'] ?? 0);
@@ -261,6 +348,34 @@ $statusMeta = [
     .ct-field-label { font-size:.71rem; color:var(--color-text-muted); font-weight:500; margin-bottom:2px; }
     .ct-field-value { font-size:.88rem; font-weight:600; color:var(--color-text-primary); }
     .ct-field-value.amount { font-size:1.05rem; color:var(--color-accent); }
+    .ct-btn-premium-ai {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      color: #fff;
+      padding: 7px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+      transition: all 0.2s ease;
+    }
+    .ct-btn-premium-ai:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3); }
+    .ct-btn-premium-ai:disabled { opacity: .6; cursor: wait; }
+    .ct-btn-premium-ai .loading-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ct-analysis-results { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--color-border); }
     .ct-flow-steps { display:flex; flex-wrap:wrap; gap:8px; padding:14px 18px 0; }
     .ct-flow-step { display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:.7rem; font-weight:700; letter-spacing:.01em; background:var(--color-surface-2); color:var(--color-text-muted); border:1px solid var(--color-border); transition:all .18s ease; }
     .ct-flow-step.done { background:rgba(5,150,105,.1); color:#065f46; border-color:rgba(5,150,105,.22); }
@@ -269,6 +384,14 @@ $statusMeta = [
     .ct-rules-grid { padding:12px 18px; border-top:1px solid var(--color-border); display:grid; grid-template-columns:1fr 1fr; gap:12px; background:var(--color-surface); }
     .ct-rules-grid .full { grid-column:1/-1; }
     .ct-rules-copy { font-size:.79rem; color:var(--color-text-secondary); line-height:1.6; white-space:pre-line; }
+    .ct-analysis-list { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:5px; }
+    .ct-analysis-list li { font-size:.79rem; color:var(--color-text-secondary); line-height:1.55; display:flex; align-items:flex-start; gap:6px; }
+    .ct-analysis-pros li::before { content:"✓"; color:#059669; font-weight:700; flex-shrink:0; width:16px; }
+    .ct-analysis-cons li::before { content:"✕"; color:#dc2626; font-weight:700; flex-shrink:0; width:16px; }
+    .ct-analysis-red-flags { background:rgba(220,38,38,.08); border:1px solid rgba(220,38,38,.18); border-radius:8px; padding:10px 12px; margin:0; }
+    .ct-analysis-red-flags .ct-field-label { margin-bottom:6px; }
+    .ct-analysis-red-flags .ct-analysis-list { gap:6px; }
+    .ct-analysis-red-flags li::before { content:"⚠"; color:#b91c1c; flex-shrink:0; width:16px; }
     .ct-rules-empty { padding:12px 18px; border-top:1px solid var(--color-border); font-size:.79rem; color:var(--color-text-secondary); background:rgba(148,163,184,.06); }
     .ct-rules-section { padding:13px 18px; border-top:1px solid var(--color-border); background:var(--color-surface); }
     .ct-rules-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
@@ -330,6 +453,11 @@ $statusMeta = [
     .ct-signature-row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
     .ct-signature-help { font-size:.72rem; color:var(--color-text-muted); }
     .ct-sign-modal-copy { font-size:.82rem; color:var(--color-text-secondary); line-height:1.55; margin-bottom:12px; }
+
+    /* Email modal */
+    .ct-email-modal-backdrop { position:fixed; inset:0; background:rgba(15,21,42,.42); backdrop-filter:blur(5px); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+    .ct-email-modal-backdrop.open { display:flex; animation:ctfade .2s ease; }
+    .ct-email-modal { background:var(--color-surface); border:1px solid var(--color-border-strong); border-radius:16px; padding:22px; width:100%; max-width:440px; box-shadow:var(--shadow-xl); animation:ctmodal .26s cubic-bezier(.16,1,.3,1); }
 
     /* Empty */
     .ct-empty { text-align:center; padding:44px 20px; }
@@ -483,6 +611,8 @@ $statusMeta = [
             $fName       = htmlspecialchars(trim((string)($row['freelancer_first'] ?? '') . ' ' . (string)($row['freelancer_last'] ?? '')));
             $startsAt    = (string)($row['starts_at'] ?? '');
             $endsAt      = (string)($row['ends_at'] ?? '');
+            $analysis = $analysisByContract[$cId] ?? null;
+            $riskScore = max(0, min(100, (int)($analysis['risk_score'] ?? 0)));
           ?>
           <div class="ct-card" id="contract-<?= $cId ?>">
             <div class="ct-card-header">
@@ -505,6 +635,15 @@ $statusMeta = [
             </div>
             <?php if (trim((string)($row['terms'] ?? '')) !== ''): ?>
             <div class="ct-terms-block"><div class="ct-field-label" style="margin-bottom:4px;">Terms</div><?= nl2br(htmlspecialchars(substr((string)($row['terms'] ?? ''), 0, 380))) ?><?php if (strlen((string)($row['terms'] ?? '')) > 380): ?>…<?php endif; ?></div>
+            <?php endif; ?>
+            <?php if (is_array($analysis)): ?>
+            <div class="ct-rules-grid">
+              <div><div class="ct-field-label">AI Risk Score</div><div class="ct-field-value" style="font-size:1.3rem;color:<?php echo $riskScore >= 70 ? '#dc2626' : ($riskScore >= 40 ? '#d97706' : '#059669'); ?>"><?= $riskScore ?>/100</div></div>
+              <div><div class="ct-field-label">Recommendation</div><div class="ct-rules-copy"><?= htmlspecialchars((string)($analysis['recommendation'] ?? 'Review carefully.')) ?></div></div>
+              <div><div class="ct-field-label">✓ Pros</div><?= $renderAnalysisList($analysis['pros'] ?? [], 'ct-analysis-pros') ?></div>
+              <div><div class="ct-field-label">✕ Cons</div><?= $renderAnalysisList($analysis['cons'] ?? [], 'ct-analysis-cons') ?></div>
+              <div class="full ct-analysis-red-flags"><div class="ct-field-label">⚠ Red Flags</div><?= $renderAnalysisList($analysis['red_flags'] ?? [], '') ?></div>
+            </div>
             <?php endif; ?>
 
             <?php if ($isOwnerC): ?>
@@ -578,7 +717,7 @@ $statusMeta = [
               <?php if ($canManageRules): ?>
               <button type="button" class="ct-btn ct-btn-primary" onclick='openRulesModal(<?= $cId ?>, <?= $rulesJson ?>)'>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <?= $hasRules ? 'Edit Rules' : 'Add Rules' ?>
+                <?= $hasRules ? 'Add / Manage Rules (' . count($rules) . ')' : 'Add Rules' ?>
               </button>
               <?php endif; ?>
               <form method="post" data-confirm="Delete this contract?" style="display:inline">
@@ -606,6 +745,23 @@ $statusMeta = [
                 <button type="button" class="ct-btn ct-btn-success ct-sign-trigger" <?= $canFreelancerSign ? '' : 'disabled' ?> data-sign-role="freelancer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> Sign Contract</button>
               </form>
               <?php endif; ?>
+              <button type="button" class="ct-btn-premium-ai" onclick="analyzeContractAI(<?= $cId ?>)" id="btn-ai-<?= $cId ?>">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                AI Analyze
+              </button>
+              <form method="post" style="display:inline">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+                <input type="hidden" name="action" value="export_contract_pdf">
+                <input type="hidden" name="contract_id" value="<?= $cId ?>">
+                <button type="submit" class="ct-btn ct-btn-primary" style="border-radius:999px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export Contract PDF
+                </button>
+              </form>
+              <button type="button" class="ct-btn ct-btn-ghost" style="border-radius:999px;" onclick="openEmailModal(<?= $cId ?>)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Send by Email
+              </button>
               <span style="margin-left:auto;font-size:.72rem;color:var(--color-text-muted);">Contract #<?= $cId ?></span>
             </div>
           </div>
@@ -734,6 +890,33 @@ $statusMeta = [
     </div>
   </div>
 
+  <div class="ct-email-modal-backdrop" id="emailContractModal" onclick="if(event.target===this)closeEmailModal()">
+    <div class="ct-email-modal">
+      <div class="ct-modal-head">
+        <h3>Send Contract PDF by Email</h3>
+        <button class="ct-modal-close" onclick="closeEmailModal()" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
+        <input type="hidden" name="action" value="send_contract_email">
+        <input type="hidden" name="contract_id" id="emailContractId">
+        <div class="ct-modal-fg full">
+          <label class="ct-modal-fl">Recipient Email *</label>
+          <input type="email" name="recipient_email" class="ct-modal-fi" placeholder="user@example.com" required>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+          <button type="button" class="ct-btn ct-btn-ghost" onclick="closeEmailModal()">Cancel</button>
+          <button type="submit" class="ct-btn ct-btn-primary">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send Contract
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
   let activeSignatureForm = null;
   let signaturePad = null;
@@ -768,7 +951,7 @@ $statusMeta = [
   function normalizeRuleType(value) {
     const type = String(value ?? '').trim().toLowerCase();
     const mapped = legacyRuleTypeMap[type] || type;
-    return ruleTypeOptions.includes(mapped) ? mapped : 'scope';
+    return mapped || 'scope';
   }
 
   function escapeHtml(value) {
@@ -813,9 +996,7 @@ $statusMeta = [
         </div>
         <div class="ct-modal-fg">
           <label class="ct-modal-fl">Type</label>
-          <select name="rule_types[]" class="ct-modal-sel">
-            ${ruleTypeOptions.map((type) => `<option value="${type}" ${type === selectedType ? 'selected' : ''}>${type.charAt(0).toUpperCase() + type.slice(1)}</option>`).join('')}
-          </select>
+          <input type="text" name="rule_types[]" class="ct-modal-fi" value="${escapeHtml(selectedType)}" placeholder="e.g. deadline, payment, custom...">
         </div>
         <div class="ct-modal-fg">
           <label class="ct-modal-fl">Due Date</label>
@@ -866,6 +1047,22 @@ $statusMeta = [
     if (!p) return;
     const open = p.classList.toggle('open');
     if (b) b.innerHTML = open ? '✕ Close' : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
+  }
+
+  function openEmailModal(contractId) {
+    const modal = document.getElementById('emailContractModal');
+    const idInput = document.getElementById('emailContractId');
+    if (modal && idInput) {
+      idInput.value = contractId;
+      modal.classList.add('open');
+    }
+  }
+
+  function closeEmailModal() {
+    const modal = document.getElementById('emailContractModal');
+    if (modal) {
+      modal.classList.remove('open');
+    }
   }
   </script>
 
@@ -1044,6 +1241,59 @@ $statusMeta = [
     activeSignatureForm.submit();
   });
 
+  </script>
+  <script>
+    async function analyzeContractAI(contractId) {
+      const btn = document.getElementById('btn-ai-' + contractId);
+      if (!btn) return;
+      if (btn.disabled) return;
+      
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
+
+      const fd = new FormData();
+      fd.append('action', 'analyze_contract_ai');
+      fd.append('contract_id', contractId);
+      fd.append('csrf_token', '<?= $csrfToken ?>');
+
+      try {
+        const resp = await fetch('contracts.php', { 
+          method: 'POST', 
+          body: fd,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        
+        if (!resp.ok) {
+          throw new Error('Network error: ' + resp.status);
+        }
+        
+        const json = await resp.json();
+        
+        if (json.success) {
+          // Reload to show updated analysis
+          window.location.reload();
+        } else {
+          throw new Error(json.message || 'Analysis failed');
+        }
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        if (window.Swal) {
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: 'Analysis failed: ' + e.message,
+            showConfirmButton: false,
+            timer: 3200,
+            timerProgressBar: true,
+          });
+        } else {
+          alert('Analysis failed: ' + e.message);
+        }
+      }
+    }
   </script>
 </body>
 </html>

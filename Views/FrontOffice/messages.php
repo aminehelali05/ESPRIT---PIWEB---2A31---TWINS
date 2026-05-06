@@ -31,6 +31,17 @@ if (!$displayAvatarUrl) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Messages — Diversity.is</title>
+  <!-- Early theme apply — prevents flash -->
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('app_theme');
+        document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -57,32 +68,34 @@ if (!$displayAvatarUrl) {
     body, body * { font-family: 'Poppins', sans-serif; }
 
     /* ═══════════════════════════════════════════════
-       CSS VARIABLES — light & dark
+       CSS VARIABLES — LIGHT MODE (DEFAULT)
     ═══════════════════════════════════════════════ */
     :root {
       --surf: #ffffff;
-      --surf-alt: #f8faff;
-      --surf-glass: rgba(255,255,255,0.72);
-      --border: rgba(15,23,42,0.08);
-      --border-strong: rgba(15,23,42,0.13);
-      --text: #1e2a3a;
-      --text-secondary: #4b5563;
-      --text-muted: #8b95a6;
+      --surf-alt: #f8fafc;
+      --surf-glass: rgba(255,255,255,0.92);
+      --border: rgba(15,23,42,0.09);
+      --border-strong: rgba(15,23,42,0.14);
+      --text: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
       --heading: #0f172a;
       --accent: #6366f1;
       --accent-2: #a855f7;
       --accent-soft: rgba(99,102,241,0.10);
-      --accent-glow: rgba(99,102,241,0.22);
+      --accent-glow: rgba(99,102,241,0.20);
       --green: #10b981;
       --red: #ef4444;
       --radius-card: 18px;
       --radius-bubble: 22px;
-      --shadow-sm: 0 2px 8px rgba(15,23,42,0.06);
+      --shadow-sm: 0 2px 8px rgba(15,23,42,0.07);
       --shadow-md: 0 6px 24px rgba(15,23,42,0.10);
-      --shadow-lg: 0 16px 48px rgba(15,23,42,0.13);
-      --shadow-accent: 0 6px 20px rgba(99,102,241,0.20);
+      --shadow-lg: 0 16px 48px rgba(15,23,42,0.12);
+      --shadow-accent: 0 6px 20px rgba(99,102,241,0.16);
       --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
     }
+
+    /* DARK MODE OVERRIDE */
     [data-theme="dark"] {
       --surf: #111827;
       --surf-alt: #0d1220;
@@ -93,7 +106,10 @@ if (!$displayAvatarUrl) {
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
       --heading: #f1f5f9;
-      --accent-soft: rgba(99,102,241,0.15);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+      --shadow-md: 0 6px 24px rgba(0,0,0,0.3);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.4);
+      --shadow-accent: 0 6px 20px rgba(99,102,241,0.20);
     }
 
     /* ═══════════════════════════════════════════════
@@ -627,11 +643,11 @@ if (!$displayAvatarUrl) {
     .msg-bubble:hover { transform: translateY(-2px); }
 
     .msg-bubble-row.is-incoming .msg-bubble {
-      background: var(--surf);
-      color: var(--text);
-      border: 1.5px solid var(--border);
+      background: #f1f5f9;
+      color: #1e293b;
+      border: 1px solid rgba(15,23,42,0.08);
       border-bottom-left-radius: 6px;
-      box-shadow: 0 4px 16px rgba(15,23,42,0.06);
+      box-shadow: 0 4px 16px rgba(15,23,42,0.08);
     }
     .msg-bubble-row.is-incoming .msg-bubble:hover {
       box-shadow: 0 8px 24px rgba(15,23,42,0.10);
@@ -644,6 +660,14 @@ if (!$displayAvatarUrl) {
     }
     .msg-bubble-row.is-outgoing .msg-bubble:hover {
       box-shadow: 0 10px 28px rgba(99,102,241,0.40);
+    }
+
+    /* Dark mode bubble overrides */
+    [data-theme="dark"] .msg-bubble-row.is-incoming .msg-bubble {
+      background: #1e293b;
+      color: #f1f5f9;
+      border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     }
 
     .msg-bubble p {
@@ -1710,20 +1734,18 @@ if (!$displayAvatarUrl) {
       box-shadow: 0 10px 28px rgba(99,102,241,0.35);
     }
 
-    /* ═══════════════════════════════════════════════
-       DARK MODE OVERRIDES
-    ═══════════════════════════════════════════════ */
-    [data-theme="dark"] .msg-sidebar { background: var(--surf); }
-    [data-theme="dark"] .msg-thread-item:hover { background: rgba(255,255,255,0.05); }
-    [data-theme="dark"] .msg-thread-item.is-active { background: rgba(99,102,241,0.14); }
-    [data-theme="dark"] .msg-bubble-row.is-incoming .msg-bubble {
+    /* DARK MODE OVERRIDES */
+    .msg-sidebar { background: var(--surf); }
+    .msg-thread-item:hover { background: rgba(255,255,255,0.05); }
+    .msg-thread-item.is-active { background: rgba(99,102,241,0.14); }
+    .msg-bubble-row.is-incoming .msg-bubble {
       background: rgba(255,255,255,0.07);
       border-color: rgba(255,255,255,0.08);
       color: #e2e8f0;
     }
-    [data-theme="dark"] .msg-chat-header { border-color: var(--border); }
-    [data-theme="dark"] .msg-composer { border-color: var(--border); }
-    [data-theme="dark"] .msg-composer-wrap {
+    .msg-chat-header { border-color: var(--border); }
+    .msg-composer { border-color: var(--border); }
+    .msg-composer-wrap {
       background: rgba(255,255,255,0.05);
       border-color: var(--border);
     }
@@ -2454,6 +2476,58 @@ if (!$displayAvatarUrl) {
     const peopleProfileConnectBtn = $('peopleProfileConnectBtn');
     let peopleProfileUserId = 0;
 
+    const normalizeConversationThread = (thread = {}, type = 'private') => {
+      const id = Number(thread?.id ?? thread?.group_chat_id ?? thread?.group_id ?? thread?.thread_id ?? 0);
+      if (type === 'group') {
+        return {
+          ...thread,
+          id,
+          group_id: id,
+          group_chat_id: id,
+          name: String(thread?.name || 'Group'),
+          description: String(thread?.description || ''),
+          avatar_url: String(thread?.avatar_url || ''),
+          member_role: String(thread?.member_role || 'member'),
+          last_message_at: String(thread?.last_message_at || ''),
+          last_message_body: String(thread?.last_message_body || ''),
+          last_message_type: String(thread?.last_message_type || 'text'),
+          last_message_sender_id: Number(thread?.last_message_sender_id || 0),
+          unread_count: Number(thread?.unread_count || 0),
+          members: Array.isArray(thread?.members) ? thread.members : [],
+        };
+      }
+
+      return {
+        ...thread,
+        id,
+        last_message_at: String(thread?.last_message_at || ''),
+        last_message_body: String(thread?.last_message_body || ''),
+        last_message_type: String(thread?.last_message_type || 'text'),
+        last_message_sender_id: Number(thread?.last_message_sender_id || 0),
+        unread_count: Number(thread?.unread_count || 0),
+      };
+    };
+
+    const getThreadById = (type, id) => {
+      const targetId = Number(id || 0);
+      if (!targetId) return null;
+      const source = type === 'group' ? S.groupChats : S.privateConversations;
+      return source.find((thread) => Number(thread?.id ?? thread?.group_chat_id ?? thread?.group_id ?? 0) === targetId) || null;
+    };
+
+    const upsertGroupThread = (thread = {}) => {
+      const normalized = normalizeConversationThread(thread, 'group');
+      if (!normalized.id) return null;
+      const index = S.groupChats.findIndex((item) => Number(item?.id ?? 0) === normalized.id);
+      if (index >= 0) {
+        S.groupChats[index] = { ...S.groupChats[index], ...normalized };
+      } else {
+        S.groupChats.unshift(normalized);
+      }
+      renderThreads();
+      return normalized;
+    };
+
     /* ═══ Tab switching ═══ */
     document.querySelectorAll('.msg-tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -2514,7 +2588,7 @@ if (!$displayAvatarUrl) {
           ? avatarFor(t.peer || {})
           : (String(t.avatar_url || '').trim() || avatarFor({ id: `group-${id}`, name: t.name || 'Group' }));
         const avatarStyle = avatarBgStyle(avatarUrl);
-        return `<button class="msg-thread-item${active?' is-active':''}" data-type="${type}" data-id="${id}">
+        return `<button class="msg-thread-item${active?' is-active':''}" data-type="${type}" data-id="${id}"${isGroup ? ` data-group-id="${id}" data-group-chat-id="${id}"` : ''}>
           <div class="msg-thread-avatar${isGroup?' is-group':''}${hasStoryAura?' has-story-ring':''}" style="${avatarStyle}">${ini}${!isGroup?'<div class="online-dot"></div>':''}</div>
           <div class="msg-thread-body">
             <div class="msg-thread-name">${name}</div>
@@ -2842,6 +2916,7 @@ if (!$displayAvatarUrl) {
               await post('profile_group_manage', {
                 mode: 'remove_member',
                 group_chat_id: Number(thread.id),
+                group_id: Number(thread.id),
                 target_user_id: targetUserId
               });
               await loadData(true);
@@ -2886,29 +2961,48 @@ if (!$displayAvatarUrl) {
     }
 
     /* ═══ Open thread ═══ */
-    async function openThread(type, id) {
-      S.activeType=type; S.activeId=id;
-      showView('chat');
-      const src = type==='group' ? S.groupChats : S.privateConversations;
-      const thread = src.find(t=>t.id===id);
-      if (thread) {
-        const name = type==='private' ? displayName(thread.peer||{}) : String(thread.name||'Group');
-        const sub  = type==='private' ? String(thread.peer?.role||'member') : String(thread.description||'Group chat');
-        const ini  = type==='private' ? initials(thread.peer?.first_name,thread.peer?.last_name) : name.charAt(0).toUpperCase();
-        const headerAvatarUrl = type==='private'
-          ? avatarFor(thread.peer || {})
-          : (String(thread.avatar_url || '').trim() || avatarFor({ id: `group-${thread.id}`, name }));
-        $('chatHeaderAvatar').textContent = ini;
-        $('chatHeaderAvatar').style.backgroundImage = `url('${headerAvatarUrl}')`;
-        $('chatHeaderName').textContent = name;
-        $('chatHeaderSub').textContent = sub;
-        setCallPeerLabel(name);
-        thread.unread_count = 0;
-        renderRightPanelMembers(type, thread);
-        updateGroupManageActions(type, thread);
-      } else {
-        updateGroupManageActions('', null);
+    async function openThread(type, id, retry = false) {
+      const threadType = type === 'group' ? 'group' : 'private';
+      const threadId = Number(id || 0);
+      if (!threadId) {
+        toast('Conversation id is missing.', 'warning');
+        return;
       }
+
+      S.activeType = threadType;
+      S.activeId = threadId;
+      showView('chat');
+
+      let thread = getThreadById(threadType, threadId);
+      if (!thread && !retry) {
+        await loadData(true);
+        thread = getThreadById(threadType, threadId);
+      }
+
+      if (!thread) {
+        updateGroupManageActions('', null);
+        toast(threadType === 'group' ? 'Group not found. Refreshing conversations.' : 'Conversation not found. Refreshing conversations.', 'error');
+        S.activeType = null;
+        S.activeId = 0;
+        showView('welcome');
+        renderThreads();
+        return;
+      }
+
+      const name = threadType === 'private' ? displayName(thread.peer||{}) : String(thread.name||'Group');
+      const sub  = threadType === 'private' ? String(thread.peer?.role||'member') : String(thread.description||'Group chat');
+      const ini  = threadType === 'private' ? initials(thread.peer?.first_name,thread.peer?.last_name) : name.charAt(0).toUpperCase();
+      const headerAvatarUrl = threadType === 'private'
+        ? avatarFor(thread.peer || {})
+        : (String(thread.avatar_url || '').trim() || avatarFor({ id: `group-${thread.id}`, name }));
+      $('chatHeaderAvatar').textContent = ini;
+      $('chatHeaderAvatar').style.backgroundImage = `url('${headerAvatarUrl}')`;
+      $('chatHeaderName').textContent = name;
+      $('chatHeaderSub').textContent = sub;
+      setCallPeerLabel(name);
+      thread.unread_count = 0;
+      renderRightPanelMembers(threadType, thread);
+      updateGroupManageActions(threadType, thread);
       renderThreads(); await loadMessages();
       $('sendMsgBtn').disabled=false; $('composerInput').focus();
     }
@@ -2917,7 +3011,12 @@ if (!$displayAvatarUrl) {
     async function loadMessages() {
       if (!S.activeType||!S.activeId) return;
       try {
-        const data = await get('profile_messages',{thread_type:S.activeType,thread_id:S.activeId});
+        const data = await get('profile_messages',{
+          thread_type: S.activeType,
+          thread_id: S.activeId,
+          group_chat_id: S.activeType === 'group' ? S.activeId : undefined,
+          group_id: S.activeType === 'group' ? S.activeId : undefined
+        });
         if (S.activeType === 'group') {
           const thread = S.groupChats.find((g) => Number(g.id) === Number(S.activeId));
           if (thread && Array.isArray(data.group_members)) {
@@ -3088,7 +3187,15 @@ if (!$displayAvatarUrl) {
       if (!S.activeType||!S.activeId) { toast('Select a conversation first.','warning'); return; }
       $('sendMsgBtn').disabled=true;
       try {
-        await post('profile_send_message',{thread_type:S.activeType,thread_id:S.activeId,message_type:messageType,body,media_url:mediaUrl});
+        await post('profile_send_message',{
+          thread_type: S.activeType,
+          thread_id: S.activeId,
+          group_chat_id: S.activeType === 'group' ? S.activeId : undefined,
+          group_id: S.activeType === 'group' ? S.activeId : undefined,
+          message_type: messageType,
+          body,
+          media_url: mediaUrl
+        });
         if (input) input.value='';
         input.style.height='auto';
         await loadMessages(); await loadData(true);
@@ -3102,13 +3209,14 @@ if (!$displayAvatarUrl) {
       S.loading=true;
       try {
         const d=await get('profile_social_data');
-        S.friends=d.friends||[]; S.privateConversations=d.private_conversations||[];
-        S.groupChats=d.group_chats||[]; S.mapUsers=d.map_users||[];
+        S.friends=d.friends||[];
+        S.privateConversations=(d.private_conversations||[]).map(thread => normalizeConversationThread(thread, 'private'));
+        S.groupChats=(d.group_chats||[]).map(thread => normalizeConversationThread(thread, 'group'));
+        S.mapUsers=d.map_users||[];
         S.incomingRequests=d.incoming_requests||[]; S.outgoingRequests=d.outgoing_requests||[];
         S.loaded=true; renderThreads(); renderRequests(); renderPeople();
         if (S.activeType && S.activeId) {
-          const source = S.activeType === 'group' ? S.groupChats : S.privateConversations;
-          const currentThread = source.find((entry) => Number(entry.id) === Number(S.activeId));
+          const currentThread = getThreadById(S.activeType, S.activeId);
           if (currentThread) {
             renderRightPanelMembers(S.activeType, currentThread);
             updateGroupManageActions(S.activeType, currentThread);
@@ -3634,6 +3742,8 @@ if (!$displayAvatarUrl) {
           await post('profile_send_message', {
             thread_type: S.activeType,
             thread_id: S.activeId,
+            group_chat_id: S.activeType === 'group' ? S.activeId : undefined,
+            group_id: S.activeType === 'group' ? S.activeId : undefined,
             message_type: messageType,
             body: '',
             media_url: uploadResult.media_url,
@@ -3703,6 +3813,8 @@ if (!$displayAvatarUrl) {
               await post('profile_send_message', {
                 thread_type: S.activeType,
                 thread_id: S.activeId,
+                group_chat_id: S.activeType === 'group' ? S.activeId : undefined,
+                group_id: S.activeType === 'group' ? S.activeId : undefined,
                 message_type: 'audio',
                 body: '',
                 media_url: uploadResult.media_url,
@@ -3801,7 +3913,14 @@ if (!$displayAvatarUrl) {
       });
       $('shareScreenBtn')?.addEventListener('click',()=>openCall('video'));
       $('copyInviteBtn')?.addEventListener('click',async()=>{
-        const url=`${location.href.split('?')[0]}?thread_type=${S.activeType}&thread_id=${S.activeId}`;
+        const params = new URLSearchParams();
+        params.set('thread_type', String(S.activeType || 'private'));
+        params.set('thread_id', String(S.activeId || 0));
+        if (S.activeType === 'group') {
+          params.set('group_chat_id', String(S.activeId || 0));
+          params.set('group_id', String(S.activeId || 0));
+        }
+        const url=`${location.href.split('?')[0]}?${params.toString()}`;
         try{await navigator.clipboard.writeText(url);toast('Invite link copied!');}catch{toast('Copy failed.','error');}
       });
       $('openMeetingRoomBtn')?.addEventListener('click',()=>{
@@ -3869,8 +3988,27 @@ if (!$displayAvatarUrl) {
             members,
             avatar_data: S.pendingGroupAvatarData || ''
           });
+          const createdGroupId = Number(d.group_chat_id || d.group_id || d.group_chat?.id || 0);
+          const createdGroup = normalizeConversationThread({
+            ...(d.group_chat || {}),
+            id: createdGroupId,
+            group_id: createdGroupId,
+            group_chat_id: createdGroupId,
+            name,
+            description: $('groupDescInput')?.value.trim() || '',
+            avatar_url: d.group_chat?.avatar_url || '',
+            member_role: 'owner',
+            unread_count: 0,
+            last_message_at: new Date().toISOString()
+          }, 'group');
+          if (createdGroup.id) {
+            upsertGroupThread(createdGroup);
+          }
           toast('Group created!'); $('createGroupModal').hidden=true;
-          await loadData(true); if(d.group_chat_id)openThread('group',d.group_chat_id);
+          await loadData(true);
+          if (createdGroupId) {
+            await openThread('group', createdGroupId);
+          }
         } catch(e){toast(e.message||'Could not create group.','error');}
       });
 
@@ -3886,7 +4024,7 @@ if (!$displayAvatarUrl) {
         });
         if (!shouldLeave) return;
         try {
-          await post('profile_group_manage', { mode: 'leave', group_chat_id: S.activeId });
+          await post('profile_group_manage', { mode: 'leave', group_chat_id: S.activeId, group_id: S.activeId });
           S.activeType = null; S.activeId = 0;
           showView('welcome');
           await loadData(true);
@@ -3907,7 +4045,7 @@ if (!$displayAvatarUrl) {
         });
         if (!shouldDelete) return;
         try {
-          await post('profile_group_manage', { mode: 'delete', group_chat_id: S.activeId });
+          await post('profile_group_manage', { mode: 'delete', group_chat_id: S.activeId, group_id: S.activeId });
           S.activeType = null; S.activeId = 0;
           showView('welcome');
           await loadData(true);
@@ -3936,6 +4074,7 @@ if (!$displayAvatarUrl) {
           await post('profile_group_manage', {
             mode: 'report',
             group_chat_id: S.activeId,
+            group_id: S.activeId,
             reason,
             details: details || ''
           });
@@ -3966,7 +4105,8 @@ if (!$displayAvatarUrl) {
 
       // URL params
       const params=new URLSearchParams(location.search);
-      const tt=params.get('thread_type'),tid=Number(params.get('thread_id'));
+      const tt=params.get('thread_type') || ((params.get('group_chat_id') || params.get('group_id')) ? 'group' : '');
+      const tid=Number(params.get('thread_id') || params.get('group_chat_id') || params.get('group_id') || 0);
       if(tt&&tid)setTimeout(()=>openThread(tt,tid),400);
 
       // Poll

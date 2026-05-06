@@ -6,6 +6,7 @@ class JobOffer
     private $title;
     private $description;
     private $budget;
+    private $salary;
     private $skills_required;
     private $location;
     private $experience_level;
@@ -17,11 +18,12 @@ class JobOffer
     private $updated_at;
     private $candidatures = [];
 
-    public function __construct($title = null, $description = null, $budget = null, $skills_required = null, $location = null, $experience_level = null, $project_type = null, $status = null, $deadline_at = null, $client_id = null, $created_at = null, $updated_at = null, $id = null)
+    public function __construct($title = null, $description = null, $budget = null, $salary = null, $skills_required = null, $location = null, $experience_level = null, $project_type = null, $status = null, $deadline_at = null, $client_id = null, $created_at = null, $updated_at = null, $id = null)
     {
         $this->title = $title;
         $this->description = $description;
         $this->budget = $budget;
+        $this->salary = $salary;
         $this->skills_required = $skills_required;
         $this->location = $location;
         $this->experience_level = $experience_level;
@@ -38,6 +40,7 @@ class JobOffer
     public function getTitle() { return $this->title; }
     public function getDescription() { return $this->description; }
     public function getBudget() { return $this->budget; }
+    public function getSalary() { return $this->salary; }
     public function getSkillsRequired() { return $this->skills_required; }
     public function getLocation() { return $this->location; }
     public function getExperienceLevel() { return $this->experience_level; }
@@ -53,6 +56,7 @@ class JobOffer
     public function setTitle($value) { $this->title = $value; }
     public function setDescription($value) { $this->description = $value; }
     public function setBudget($value) { $this->budget = $value; }
+    public function setSalary($value) { $this->salary = $value; }
     public function setSkillsRequired($value) { $this->skills_required = $value; }
     public function setLocation($value) { $this->location = $value; }
     public function setExperienceLevel($value) { $this->experience_level = $value; }

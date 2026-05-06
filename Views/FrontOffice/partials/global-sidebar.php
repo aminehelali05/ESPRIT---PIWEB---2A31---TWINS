@@ -30,6 +30,7 @@ $sidebarRouteMap = [
     'story.php' => 'story',
     'live.php' => 'live',
     'ai-agent.php' => 'ai-agent',
+    'marketplace.php' => 'marketplace',
     'jobOffer.php' => 'job-offer',
     'JobOffer.php' => 'job-offer',
     'projects.php' => 'projects',
@@ -75,6 +76,10 @@ $sidebarIcon = static function (string $icon): string {
             return '<svg ' . $shared . '><path d="M12 2a4 4 0 0 0-4 4v2a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z"/><path d="M16 10.5v.5a4 4 0 0 1-8 0v-.5"/><path d="M8 14s-3.5 1-3.5 4v1.5h15V18c0-3-3.5-4-3.5-4"/><circle cx="12" cy="6" r="1"/></svg>';
         case 'job-offer':
             return '<svg ' . $shared . '><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="12" y1="12" x2="12" y2="12.01"/><path d="M3 12a9.5 9.5 0 0 0 9 4 9.5 9.5 0 0 0 9-4"/></svg>';
+        case 'marketplace':
+            return '<svg ' . $shared . '><path d="M3 10h18"/><path d="M5 10v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5V10H4Z"/><path d="M9 14h6"/></svg>';
+        case 'wallet':
+            return '<svg ' . $shared . '><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 11h8v2h-8z"/><path d="M16 8V4M8 8V4"/></svg>';
         case 'projects':
             return '<svg ' . $shared . '><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6"/><path d="M9 13h4"/><path d="M9 17l1.5 1.5L14 15"/></svg>';
         case 'contracts':
@@ -91,8 +96,10 @@ $sidebarItems = [
     ['key' => 'story', 'href' => 'story.php', 'label' => 'Story', 'icon' => 'story'],
     ['key' => 'live', 'href' => 'live.php', 'label' => 'Live Studio', 'icon' => 'live'],
     ['key' => 'ai-agent', 'href' => 'ai-agent.php', 'label' => 'AI Agent', 'icon' => 'ai-agent'],
-    ['key' => 'job-offer', 'href' => 'jobOffer.php', 'label' => 'Job Offer', 'icon' => 'job-offer'],
     ['key' => 'projects', 'href' => 'projects.php', 'label' => 'Projects & Tasks', 'icon' => 'projects'],
+    ['key' => 'marketplace', 'href' => 'marketplace.php', 'label' => 'Marketplace', 'icon' => 'marketplace'],
+    ['key' => 'wallet', 'href' => 'wallet.php', 'label' => 'Wallet', 'icon' => 'wallet'],
+    ['key' => 'job-offer', 'href' => 'jobOffer.php', 'label' => 'Job Offer', 'icon' => 'job-offer'],
     ['key' => 'contract', 'href' => 'contracts.php', 'label' => 'Contract', 'icon' => 'contracts'],
 ];
 ?>
@@ -126,3 +133,7 @@ $sidebarItems = [
         </div>
     </div>
 </aside>
+
+<!-- Global Blur Overlay System -->
+<div class="global-blur-overlay" id="globalBlurOverlay"></div>
+

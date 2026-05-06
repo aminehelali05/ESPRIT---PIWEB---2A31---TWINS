@@ -10,7 +10,6 @@ class TaskController
     public function __construct(?PDO $pdo = null)
     {
         $this->pdo = $pdo ?? config::getConnexion();
-        $this->ensureSchema();
         $this->backfillLegacyTasks();
     }
 
@@ -26,24 +25,24 @@ class TaskController
 
     private function ensureSchema(): void
     {
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
+    }
+
+    private function columnExists(string $column): bool
+    {
         try {
-            $this->pdo->exec('CREATE TABLE IF NOT EXISTS tasks (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                project_id INT NOT NULL,
-                title VARCHAR(255) NOT NULL,
-                description TEXT NOT NULL,
-                status ENUM("todo","in_progress","done") NOT NULL DEFAULT "todo",
-                deadline DATE NOT NULL,
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                KEY idx_tasks_project_id (project_id),
-                KEY idx_tasks_status (status),
-                KEY idx_tasks_deadline (deadline),
-                CONSTRAINT fk_tasks_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci');
+            $stmt = $this->pdo->query("SHOW COLUMNS FROM tasks LIKE " . $this->pdo->quote($column));
+            return (bool) ($stmt && $stmt->fetch(PDO::FETCH_ASSOC));
         } catch (Throwable $exception) {
-            error_log('TaskController::ensureSchema - ' . $exception->getMessage());
+            return false;
         }
+    }
+
+    private function ensureColumn(string $column, string $definition): void
+    {
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
     }
 
     private function backfillLegacyTasks(): void
@@ -97,6 +96,11 @@ class TaskController
             $status = 'in_progress';
         }
         $deadline = $this->normalizeDate((string) ($payload['deadline'] ?? ''));
+        $estimatedTimeHoursRaw = trim((string) ($payload['estimated_time_hours'] ?? ''));
+        $estimatedTimeHours = $estimatedTimeHoursRaw === '' ? null : (float) $estimatedTimeHoursRaw;
+        $generatedContent = trim((string) ($payload['generated_content'] ?? ''));
+        $subtasks = $payload['subtasks'] ?? null;
+        $subtasksJson = null;
 
         if ($title === '') {
             throw new RuntimeException('Task title is required.');
@@ -125,12 +129,31 @@ class TaskController
         if (new DateTimeImmutable($deadline) <= new DateTimeImmutable('today')) {
             throw new RuntimeException('Task deadline must be after today.');
         }
+        if ($estimatedTimeHours !== null) {
+            if (!is_numeric($estimatedTimeHoursRaw) || $estimatedTimeHours < 0 || $estimatedTimeHours > 10000) {
+                throw new RuntimeException('Estimated time must be a valid value between 0 and 10000.');
+            }
+        }
+        if ($subtasks !== null) {
+            $subtasksArray = is_array($subtasks) ? $subtasks : [];
+            $subtasksArray = array_values(array_filter(array_map(static fn($value): string => trim((string) $value), $subtasksArray), static fn(string $value): bool => $value !== ''));
+            if ($subtasksArray !== []) {
+                $encoded = json_encode($subtasksArray, JSON_UNESCAPED_UNICODE);
+                if ($encoded === false) {
+                    throw new RuntimeException('Subtasks could not be encoded.');
+                }
+                $subtasksJson = $encoded;
+            }
+        }
 
         return [
             'title' => $title,
             'description' => $description,
             'status' => $status,
             'deadline' => $deadline,
+            'estimated_time_hours' => $estimatedTimeHours,
+            'generated_content' => $generatedContent !== '' ? $generatedContent : null,
+            'subtasks_json' => $subtasksJson,
         ];
     }
 
@@ -159,8 +182,8 @@ class TaskController
     public function create(int $projectId, array $payload): int
     {
         $clean = $this->validatePayload($payload);
-        $stmt = $this->pdo->prepare('INSERT INTO tasks (project_id, title, description, status, deadline, created_at, updated_at)
-            VALUES (:project_id, :title, :description, :status, :deadline, NOW(), NOW())');
+        $stmt = $this->pdo->prepare('INSERT INTO tasks (project_id, title, description, status, deadline, estimated_time_hours, generated_content, subtasks_json, created_at, updated_at)
+            VALUES (:project_id, :title, :description, :status, :deadline, :estimated_time_hours, :generated_content, :subtasks_json, NOW(), NOW())');
         $stmt->execute($clean + ['project_id' => $projectId]);
         return (int) $this->pdo->lastInsertId();
     }
@@ -168,11 +191,26 @@ class TaskController
     public function update(int $taskId, array $payload): bool
     {
         $clean = $this->validatePayload($payload);
+        $existingStmt = $this->pdo->prepare('SELECT estimated_time_hours, generated_content, subtasks_json FROM tasks WHERE id = :id LIMIT 1');
+        $existingStmt->execute(['id' => $taskId]);
+        $existing = $existingStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        if (!array_key_exists('estimated_time_hours', $payload)) {
+            $clean['estimated_time_hours'] = array_key_exists('estimated_time_hours', $existing) ? $existing['estimated_time_hours'] : null;
+        }
+        if (!array_key_exists('generated_content', $payload)) {
+            $clean['generated_content'] = array_key_exists('generated_content', $existing) ? $existing['generated_content'] : null;
+        }
+        if (!array_key_exists('subtasks', $payload)) {
+            $clean['subtasks_json'] = array_key_exists('subtasks_json', $existing) ? $existing['subtasks_json'] : null;
+        }
         $stmt = $this->pdo->prepare('UPDATE tasks
             SET title = :title,
                 description = :description,
                 status = :status,
                 deadline = :deadline,
+                estimated_time_hours = :estimated_time_hours,
+                generated_content = :generated_content,
+                subtasks_json = :subtasks_json,
                 updated_at = NOW()
             WHERE id = :id');
         $stmt->execute($clean + ['id' => $taskId]);

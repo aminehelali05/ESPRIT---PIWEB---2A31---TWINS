@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 include_once(__DIR__ . '/../../Controllers/UserController.php');
+include_once(__DIR__ . '/../../Controllers/MessageController.php');
 
 if (!UserController::isAuthenticated()) {
   $_SESSION['flash_error'] = 'Please sign in to access your profile.';
@@ -352,7 +353,7 @@ $ensureRealtimeCommunicationSchema = static function (PDO $dbConn): void {
   $ready = true;
 };
 
-$ensureLiveStreamingSchema = static function (PDO $dbConn): void {
+$ensureLiveStreamingSchema = static function (PDO $dbConn) use ($tableHasColumn): void {
   static $ready = false;
   if ($ready) {
     return;
@@ -417,20 +418,58 @@ $ensureLiveStreamingSchema = static function (PDO $dbConn): void {
         user_id INT NOT NULL,
         body TEXT NOT NULL,
         is_deleted TINYINT(1) NOT NULL DEFAULT 0,
+        message_type VARCHAR(32) NOT NULL DEFAULT "text",
+        metadata LONGTEXT DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_live_chat_live_id (live_id, id)
+        INDEX idx_live_chat_live_id (live_id, id),
+        INDEX idx_live_chat_live_created (live_id, created_at, id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
     );
 
     try {
       $dbConn->exec(
-        'INSERT IGNORE INTO live_chat (id, live_id, user_id, body, is_deleted, created_at, updated_at)
-         SELECT id, stream_id, user_id, body, is_deleted, created_at, updated_at
+        'INSERT IGNORE INTO live_chat (id, live_id, user_id, body, is_deleted, message_type, metadata, created_at, updated_at)
+         SELECT id, stream_id, user_id, body, is_deleted, "text", NULL, created_at, updated_at
          FROM live_stream_chat'
       );
     } catch (Exception $e) {
     }
+
+    try {
+      if (!$tableHasColumn($dbConn, 'live_chat', 'message_type')) {
+        $dbConn->exec('ALTER TABLE live_chat ADD COLUMN message_type VARCHAR(32) NOT NULL DEFAULT "text" AFTER is_deleted');
+      }
+      if (!$tableHasColumn($dbConn, 'live_chat', 'metadata')) {
+        $dbConn->exec('ALTER TABLE live_chat ADD COLUMN metadata LONGTEXT DEFAULT NULL AFTER message_type');
+      }
+      if (!$tableHasColumn($dbConn, 'live_chat', 'updated_at')) {
+        $dbConn->exec('ALTER TABLE live_chat ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at');
+      }
+      $dbConn->exec('CREATE INDEX idx_live_chat_live_created ON live_chat (live_id, created_at, id)');
+    } catch (Exception $e) {
+    }
+
+    try {
+      $dbConn->exec(
+        'ALTER TABLE live_chat
+           ADD CONSTRAINT fk_live_chat_live_stream
+             FOREIGN KEY (live_id) REFERENCES live_streams (id)
+             ON DELETE CASCADE'
+      );
+    } catch (Exception $e) {
+    }
+
+    try {
+      $dbConn->exec(
+        'ALTER TABLE live_chat
+           ADD CONSTRAINT fk_live_chat_user
+             FOREIGN KEY (user_id) REFERENCES users (id)
+             ON DELETE CASCADE'
+      );
+    } catch (Exception $e) {
+    }
+
   } catch (Exception $e) {
     // Keep profile endpoints available even if table creation is restricted.
   }
@@ -528,10 +567,22 @@ $resolveGroupMemberRole = static function (PDO $dbConn, int $groupId, int $userI
     );
     $q->execute(['gid' => $groupId, 'uid' => $userId]);
     $row = $q->fetch();
-    if (!$row) {
+    if ($row) {
+      return strtolower((string) ($row['role'] ?? 'member')) ?: 'member';
+    }
+
+    $legacy = $dbConn->prepare(
+      'SELECT role
+       FROM group_members
+       WHERE group_id = :gid AND user_id = :uid AND left_at IS NULL
+       LIMIT 1'
+    );
+    $legacy->execute(['gid' => $groupId, 'uid' => $userId]);
+    $legacyRow = $legacy->fetch();
+    if (!$legacyRow) {
       return null;
     }
-    return strtolower((string) ($row['role'] ?? 'member')) ?: 'member';
+    return strtolower((string) ($legacyRow['role'] ?? 'member')) ?: 'member';
   } catch (Exception $e) {
     return null;
   }
@@ -541,6 +592,871 @@ $isGroupModerator = static function (PDO $dbConn, int $groupId, int $userId) use
   $role = $resolveGroupMemberRole($dbConn, $groupId, $userId);
   return in_array($role, ['owner', 'admin'], true);
 };
+
+$profileApiAction = strtolower((string) ($_GET['action'] ?? ''));
+$unifiedMessagingActions = [
+  'profile_social_data',
+  'profile_friend_request',
+  'profile_create_group_chat',
+  'profile_messages',
+  'profile_send_message',
+  'profile_edit_message',
+  'profile_delete_message',
+  'profile_group_manage',
+  'profile_call_relay',
+];
+
+if (in_array($profileApiAction, $unifiedMessagingActions, true)) {
+  header('Content-Type: application/json; charset=utf-8');
+  $respond = static function (array $payload, int $code = 200): void {
+    http_response_code($code);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+  };
+
+  $sessionUserForUnifiedMessaging = UserController::currentUser() ?? [];
+  $currentUserId = (int) ($sessionUserForUnifiedMessaging['id'] ?? 0);
+  if ($currentUserId <= 0) {
+    $respond(['success' => false, 'message' => 'Invalid session user.'], 401);
+  }
+
+  $messageController = new MessageController($db);
+
+  $getJsonInput = static function (): array {
+    $jsonInput = json_decode((string) file_get_contents('php://input'), true);
+    return is_array($jsonInput) ? $jsonInput : [];
+  };
+
+  $loadPendingRequests = static function (PDO $dbConn, int $uid, string $direction): array {
+    $isIncoming = $direction === 'incoming';
+    $userColumn = $isIncoming ? 'sender_id' : 'receiver_id';
+    $filterColumn = $isIncoming ? 'receiver_id' : 'sender_id';
+    try {
+      $q = $dbConn->prepare(
+        "SELECT fr.id, fr.sender_id, fr.receiver_id, fr.request_message, fr.created_at,
+                u.first_name, u.last_name, u.avatar_url, u.role, u.country, u.exact_location
+         FROM friend_requests fr
+         INNER JOIN users u ON u.id = fr.{$userColumn}
+         WHERE fr.{$filterColumn} = :uid
+           AND fr.status = 'pending'
+         ORDER BY fr.created_at DESC
+         LIMIT 80"
+      );
+      $q->execute(['uid' => $uid]);
+      $requests = [];
+      foreach ((array) $q->fetchAll() as $row) {
+        $peerId = (int) ($row[$userColumn] ?? 0);
+        $requests[] = [
+          'id' => (int) ($row['id'] ?? 0),
+          'sender_id' => (int) ($row['sender_id'] ?? 0),
+          'receiver_id' => (int) ($row['receiver_id'] ?? 0),
+          'request_message' => (string) ($row['request_message'] ?? ''),
+          'created_at' => (string) ($row['created_at'] ?? ''),
+          'user' => [
+            'id' => $peerId,
+            'first_name' => (string) ($row['first_name'] ?? ''),
+            'last_name' => (string) ($row['last_name'] ?? ''),
+            'avatar_url' => (string) ($row['avatar_url'] ?? ''),
+            'role' => (string) ($row['role'] ?? 'user'),
+            'country' => (string) ($row['country'] ?? ''),
+            'exact_location' => (string) ($row['exact_location'] ?? ''),
+          ],
+        ];
+      }
+      return $requests;
+    } catch (Exception $e) {
+      return [];
+    }
+  };
+
+  $loadMapUsers = static function (PDO $dbConn): array {
+    try {
+      $q = $dbConn->query(
+        'SELECT id, first_name, last_name, role, country, exact_location, phone, xp, bio, avatar_url, latitude, longitude
+         FROM users
+         ORDER BY xp DESC, id ASC
+         LIMIT 600'
+      );
+      $users = [];
+      foreach ((array) $q->fetchAll() as $row) {
+        $users[] = [
+          'id' => (int) ($row['id'] ?? 0),
+          'first_name' => (string) ($row['first_name'] ?? ''),
+          'last_name' => (string) ($row['last_name'] ?? ''),
+          'role' => (string) ($row['role'] ?? 'user'),
+          'country' => (string) ($row['country'] ?? ''),
+          'exact_location' => (string) ($row['exact_location'] ?? ''),
+          'phone' => (string) ($row['phone'] ?? ''),
+          'xp' => (int) ($row['xp'] ?? 0),
+          'bio' => (string) ($row['bio'] ?? ''),
+          'avatar_url' => (string) ($row['avatar_url'] ?? ''),
+          'latitude' => isset($row['latitude']) ? (float) $row['latitude'] : null,
+          'longitude' => isset($row['longitude']) ? (float) $row['longitude'] : null,
+          'has_story' => false,
+          'linked_accounts' => [],
+        ];
+      }
+      return $users;
+    } catch (Exception $e) {
+      return [];
+    }
+  };
+
+  $ensureFriendship = static function (PDO $dbConn, int $firstUserId, int $secondUserId, ?int $sourceRequestId = null): bool {
+    if ($firstUserId <= 0 || $secondUserId <= 0 || $firstUserId === $secondUserId) {
+      return false;
+    }
+    $userOne = min($firstUserId, $secondUserId);
+    $userTwo = max($firstUserId, $secondUserId);
+    try {
+      $q = $dbConn->prepare(
+        'INSERT INTO friends (user_id, friend_id, user_one_id, user_two_id, source_request_id, status)
+         VALUES (:user_id, :friend_id, :user_one_id, :user_two_id, :source_request_id, "accepted")
+         ON DUPLICATE KEY UPDATE
+           status = "accepted",
+           source_request_id = COALESCE(VALUES(source_request_id), source_request_id)'
+      );
+      return $q->execute([
+        'user_id' => $userOne,
+        'friend_id' => $userTwo,
+        'user_one_id' => $userOne,
+        'user_two_id' => $userTwo,
+        'source_request_id' => $sourceRequestId,
+      ]);
+    } catch (Exception $firstError) {
+      try {
+        $q = $dbConn->prepare(
+          'INSERT INTO friends (user_id, friend_id, source_request_id, status)
+           VALUES (:user_id, :friend_id, :source_request_id, "accepted")
+           ON DUPLICATE KEY UPDATE
+             status = "accepted",
+             source_request_id = COALESCE(VALUES(source_request_id), source_request_id)'
+        );
+        return $q->execute([
+          'user_id' => $userOne,
+          'friend_id' => $userTwo,
+          'source_request_id' => $sourceRequestId,
+        ]);
+      } catch (Exception $secondError) {
+        return false;
+      }
+    }
+  };
+
+  if ($profileApiAction === 'profile_social_data') {
+    $conversationData = $messageController->listForUser($currentUserId);
+    
+    $activeStories = [];
+    $archivedStories = [];
+    try {
+      $storyScopeIds = [$currentUserId];
+      $friendsForStories = $messageController->getFriendsForUser($currentUserId);
+      foreach ($friendsForStories as $f) { $storyScopeIds[] = (int)$f['id']; }
+      $storyScopeIds = array_values(array_unique(array_filter($storyScopeIds, fn($id) => $id > 0)));
+      
+      if (!empty($storyScopeIds)) {
+        $placeholders = implode(',', array_fill(0, count($storyScopeIds), '?'));
+        $q = $db->prepare(
+          "SELECT s.*, u.first_name, u.last_name, u.avatar_url, u.role
+           FROM stories s
+           INNER JOIN users u ON u.id = s.user_id
+           WHERE s.user_id IN ({$placeholders})
+             AND s.is_archived = 0
+             AND (s.expires_at IS NULL OR s.expires_at > NOW())
+           ORDER BY s.created_at DESC LIMIT 100"
+        );
+        $q->execute($storyScopeIds);
+        foreach ($q->fetchAll() as $row) {
+          $activeStories[] = [
+            'id' => (int)$row['id'],
+            'user_id' => (int)$row['user_id'],
+            'media_url' => $row['media_url'],
+            'story_type' => $row['story_type'],
+            'user' => [
+              'id' => (int)$row['user_id'],
+              'first_name' => $row['first_name'],
+              'last_name' => $row['last_name'],
+              'avatar_url' => $row['avatar_url']
+            ]
+          ];
+        }
+      }
+    } catch (Exception $e) {}
+
+    $liveStreams = [];
+    try {
+      if (isset($fetchAccessibleLiveStreams)) {
+        $liveStreams = $fetchAccessibleLiveStreams($db, $currentUserId, 80);
+      }
+    } catch (Exception $e) {}
+
+    $respond([
+      'success' => true,
+      'linked_accounts' => [],
+      'friends' => $messageController->getFriendsForUser($currentUserId),
+      'incoming_requests' => $loadPendingRequests($db, $currentUserId, 'incoming'),
+      'outgoing_requests' => $loadPendingRequests($db, $currentUserId, 'outgoing'),
+      'private_conversations' => $conversationData['private_conversations'],
+      'group_chats' => $conversationData['group_chats'],
+      'stories' => [
+        'active' => $activeStories,
+        'archive' => $archivedStories
+      ],
+      'live_streams' => $liveStreams,
+      'map_users' => $loadMapUsers($db),
+      'unread_total' => (int) ($conversationData['unread_total'] ?? 0),
+    ]);
+  }
+
+  if ($profileApiAction === 'profile_friend_request') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+    }
+    $jsonInput = $getJsonInput();
+    $mode = strtolower(trim((string) ($jsonInput['mode'] ?? 'send')));
+
+    if ($mode === 'send') {
+      $targetUserId = (int) ($jsonInput['target_user_id'] ?? 0);
+      $requestMessage = trim((string) ($jsonInput['request_message'] ?? ''));
+      if ($targetUserId <= 0 || $targetUserId === $currentUserId) {
+        $respond(['success' => false, 'message' => 'Invalid target user.'], 400);
+      }
+      
+      $targetUser = $userController->getUserById($targetUserId);
+      if (!$targetUser) {
+        $respond(['success' => false, 'message' => 'Target user not found.'], 404);
+      }
+
+      try {
+        $ins = $db->prepare('INSERT INTO friend_requests (sender_id, receiver_id, request_message, status) VALUES (:s, :r, :m, "pending")');
+        $ins->execute([
+          's' => $currentUserId, 
+          'r' => $targetUserId, 
+          'm' => $requestMessage !== '' ? substr($requestMessage, 0, 255) : null
+        ]);
+        $respond(['success' => true, 'message' => 'Friend request sent.']);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'A friend request might already be pending.'], 409);
+      }
+    }
+
+    $requestId = (int) ($jsonInput['request_id'] ?? 0);
+    if ($requestId <= 0) {
+      $respond(['success' => false, 'message' => 'Invalid request id.'], 400);
+    }
+
+    if ($mode === 'accept' || $mode === 'decline') {
+      $targetStatus = $mode === 'accept' ? 'accepted' : 'declined';
+      try {
+        $q = $db->prepare(
+          'SELECT sender_id, receiver_id
+           FROM friend_requests
+           WHERE id = :id AND receiver_id = :uid AND status = "pending"
+           LIMIT 1'
+        );
+        $q->execute(['id' => $requestId, 'uid' => $currentUserId]);
+        $requestRow = $q->fetch();
+        if (!$requestRow) {
+          $respond(['success' => false, 'message' => 'Request not found or already processed.'], 404);
+        }
+
+        $upd = $db->prepare(
+          'UPDATE friend_requests
+           SET status = :status, responded_at = NOW(), updated_at = NOW()
+           WHERE id = :id'
+        );
+        $upd->execute(['status' => $targetStatus, 'id' => $requestId]);
+
+        if ($mode === 'accept') {
+          $senderId = (int) ($requestRow['sender_id'] ?? 0);
+          $ensureFriendship($db, $senderId, $currentUserId, $requestId);
+          $messageController->ensurePrivateConversationForPair($senderId, $currentUserId);
+        }
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not process friend request.'], 500);
+      }
+
+      $respond(['success' => true, 'message' => $mode === 'accept' ? 'Friend request accepted.' : 'Friend request declined.']);
+    }
+
+    if ($mode === 'cancel') {
+      try {
+        $upd = $db->prepare(
+          'UPDATE friend_requests
+           SET status = "canceled", responded_at = NOW(), updated_at = NOW()
+           WHERE id = :id AND sender_id = :uid AND status = "pending"'
+        );
+        $upd->execute(['id' => $requestId, 'uid' => $currentUserId]);
+        if ((int) $upd->rowCount() <= 0) {
+          $respond(['success' => false, 'message' => 'Request not found or already processed.'], 404);
+        }
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not cancel friend request.'], 500);
+      }
+      $respond(['success' => true, 'message' => 'Friend request canceled.']);
+    }
+
+    $respond(['success' => false, 'message' => 'Unsupported friend request mode.'], 400);
+  }
+
+  if ($profileApiAction === 'profile_create_group_chat') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+    }
+    $jsonInput = $getJsonInput();
+    $name = trim((string) ($jsonInput['name'] ?? ''));
+    if ($name === '') {
+      $respond(['success' => false, 'message' => 'Group name is required.'], 400);
+    }
+
+    $membersRaw = is_array($jsonInput['members'] ?? null) ? $jsonInput['members'] : [];
+    $memberIds = $messageController->validateFriendMembers($currentUserId, $membersRaw);
+    $avatarData = (string) ($jsonInput['avatar_data'] ?? '');
+    $avatarUrl = trim((string) ($jsonInput['avatar_url'] ?? ''));
+    if ($avatarData !== '') {
+      $avatarUrl = (string) ($storeBase64ImageAsset($avatarData, 'uploads/group_avatars', 'group_avatar_') ?? '');
+    }
+
+    $group = $messageController->createGroupConversation(
+      $currentUserId,
+      $name,
+      (string) ($jsonInput['description'] ?? ''),
+      $memberIds,
+      $avatarUrl
+    );
+    if (!$group) {
+      $respond(['success' => false, 'message' => 'Could not create group chat.'], 500);
+    }
+
+    $respond([
+      'success' => true,
+      'group_id' => (int) $group['id'],
+      'group_chat_id' => (int) $group['id'],
+      'conversation_id' => (int) $group['id'],
+      'group_chat' => $group,
+    ]);
+  }
+
+  if ($profileApiAction === 'profile_messages') {
+    $threadType = strtolower(trim((string) ($_GET['thread_type'] ?? 'private')));
+    $threadId = (int) ($_GET['thread_id'] ?? $_GET['conversation_id'] ?? $_GET['group_chat_id'] ?? $_GET['group_id'] ?? 0);
+    if (!in_array($threadType, ['private', 'group'], true) || $threadId <= 0) {
+      $respond(['success' => false, 'message' => 'Invalid thread parameters.'], 400);
+    }
+    try {
+      $payload = $messageController->listMessages(
+        $currentUserId,
+        $threadId,
+        (int) ($_GET['after_id'] ?? 0),
+        (int) ($_GET['limit'] ?? 200)
+      );
+      $respond([
+        'success' => true,
+        'messages' => $payload['messages'],
+        'group_members' => $payload['group_members'],
+        'cursor' => $payload['cursor'],
+      ]);
+    } catch (Throwable $e) {
+      $respond(['success' => false, 'message' => $e->getMessage() ?: 'Could not fetch messages.'], 404);
+    }
+  }
+
+  if ($profileApiAction === 'profile_send_message') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+    }
+    $jsonInput = $getJsonInput();
+    $threadId = (int) ($jsonInput['thread_id'] ?? $jsonInput['conversation_id'] ?? $jsonInput['group_chat_id'] ?? $jsonInput['group_id'] ?? 0);
+    if ($threadId <= 0) {
+      $respond(['success' => false, 'message' => 'Invalid thread parameters.'], 400);
+    }
+    try {
+      $message = $messageController->sendMessage(
+        $currentUserId,
+        $threadId,
+        (string) ($jsonInput['message_type'] ?? 'text'),
+        (string) ($jsonInput['body'] ?? ''),
+        (string) ($jsonInput['media_url'] ?? ''),
+        $jsonInput['metadata'] ?? null
+      );
+      $respond(['success' => true, 'message' => $message]);
+    } catch (Throwable $e) {
+      $respond(['success' => false, 'message' => $e->getMessage() ?: 'Could not send message.'], 400);
+    }
+  }
+
+  if ($profileApiAction === 'profile_edit_message') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+    }
+    $jsonInput = $getJsonInput();
+    $message = $messageController->editMessage(
+      $currentUserId,
+      (int) ($jsonInput['message_id'] ?? 0),
+      (string) ($jsonInput['body'] ?? '')
+    );
+    if (!$message) {
+      $respond(['success' => false, 'message' => 'Could not edit message.'], 403);
+    }
+    $respond(['success' => true, 'message' => $message]);
+  }
+
+  if ($profileApiAction === 'profile_delete_message') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+    }
+    $jsonInput = $getJsonInput();
+    $messageId = (int) ($jsonInput['message_id'] ?? 0);
+    if (!$messageController->deleteMessage($currentUserId, $messageId)) {
+      $respond(['success' => false, 'message' => 'Not allowed to delete this message.'], 403);
+    }
+    $respond(['success' => true, 'message_id' => $messageId]);
+  }
+
+  if ($profileApiAction === 'profile_group_manage') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+      $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+    }
+    $jsonInput = $getJsonInput();
+    $mode = strtolower(trim((string) ($jsonInput['mode'] ?? '')));
+    $groupId = (int) ($jsonInput['conversation_id'] ?? $jsonInput['group_chat_id'] ?? $jsonInput['group_id'] ?? $jsonInput['thread_id'] ?? 0);
+    $currentUser = $userController->getUserById($currentUserId);
+    $isGlobalModerator = strtolower(trim((string) ($currentUser ? $currentUser->getEmail() : ($sessionUserForUnifiedMessaging['email'] ?? '')))) === 'admin@diversity.is';
+
+    if ($mode === 'reports_list') {
+      try {
+        $query =
+          'SELECT gr.id, gr.group_chat_id, gr.reporter_id, gr.reported_user_id, gr.message_id,
+                  gr.reason, gr.details, gr.status, gr.moderator_id, gr.moderation_note, gr.created_at, gr.updated_at,
+                  c.name AS group_name,
+                  ru.first_name AS reporter_first_name, ru.last_name AS reporter_last_name,
+                  tu.first_name AS target_first_name, tu.last_name AS target_last_name
+           FROM group_reports gr
+           INNER JOIN conversations c ON c.id = gr.group_chat_id
+           INNER JOIN users ru ON ru.id = gr.reporter_id
+           LEFT JOIN users tu ON tu.id = gr.reported_user_id
+           WHERE c.type = "group"';
+        $params = [];
+        if (!$isGlobalModerator) {
+          if ($groupId <= 0 || !$conversationController->isGroupModerator($groupId, $currentUserId)) {
+            $respond(['success' => false, 'message' => 'Not allowed to view reports.'], 403);
+          }
+          $query .= ' AND gr.group_chat_id = :group_id';
+          $params['group_id'] = $groupId;
+        } elseif ($groupId > 0) {
+          $query .= ' AND gr.group_chat_id = :group_id';
+          $params['group_id'] = $groupId;
+        }
+        $query .= ' ORDER BY gr.created_at DESC LIMIT 150';
+        $q = $db->prepare($query);
+        $q->execute($params);
+        $respond(['success' => true, 'reports' => (array) $q->fetchAll()]);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not load reports.'], 500);
+      }
+    }
+
+    if ($groupId <= 0) {
+      $respond(['success' => false, 'message' => 'Invalid group id.'], 400);
+    }
+    $groupConversation = $conversationController->getConversationForUser($groupId, $currentUserId, 'group');
+    $memberRole = $conversationController->resolveMemberRole($groupId, $currentUserId);
+    if (!$groupConversation && !$isGlobalModerator) {
+      $respond(['success' => false, 'message' => 'Group not found or access denied.'], 404);
+    }
+
+    if ($mode === 'leave') {
+      if (!$conversationController->leaveGroup($groupId, $currentUserId)) {
+        $respond(['success' => false, 'message' => 'Could not leave group.'], 500);
+      }
+      $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId]);
+    }
+
+    if ($mode === 'delete') {
+      if ($memberRole !== 'admin' && !$isGlobalModerator) {
+        $respond(['success' => false, 'message' => 'Only admins can delete this group.'], 403);
+      }
+      if (!$conversationController->deleteGroup($groupId, $currentUserId)) {
+        $respond(['success' => false, 'message' => 'Could not delete group.'], 500);
+      }
+      $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId]);
+    }
+
+    if ($mode === 'remove_member') {
+      if ($memberRole !== 'admin' && !$isGlobalModerator) {
+        $respond(['success' => false, 'message' => 'Only admins can remove members.'], 403);
+      }
+      $targetUserId = (int) ($jsonInput['target_user_id'] ?? 0);
+      if (!$conversationController->removeMember($groupId, $currentUserId, $targetUserId)) {
+        $respond(['success' => false, 'message' => 'Could not remove member.'], 500);
+      }
+      $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId, 'target_user_id' => $targetUserId]);
+    }
+
+    if ($mode === 'set_role') {
+      if ($memberRole !== 'admin' && !$isGlobalModerator) {
+        $respond(['success' => false, 'message' => 'Only admins can change roles.'], 403);
+      }
+      $targetUserId = (int) ($jsonInput['target_user_id'] ?? 0);
+      $targetRole = strtolower(trim((string) ($jsonInput['target_role'] ?? 'member'))) === 'admin' ? 'admin' : 'member';
+      if (!$conversationController->setMemberRole($groupId, $targetUserId, $targetRole)) {
+        $respond(['success' => false, 'message' => 'Could not update member role.'], 500);
+      }
+      $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId, 'target_user_id' => $targetUserId, 'target_role' => $targetRole]);
+    }
+
+    if ($mode === 'report') {
+      $ensureRealtimeCommunicationSchema($db);
+      $reason = trim((string) ($jsonInput['reason'] ?? ''));
+      if ($reason === '') {
+        $respond(['success' => false, 'message' => 'Report reason is required.'], 400);
+      }
+      try {
+        $q = $db->prepare(
+          'INSERT INTO group_reports (group_chat_id, reporter_id, reported_user_id, message_id, reason, details)
+           VALUES (:group_chat_id, :reporter_id, :reported_user_id, :message_id, :reason, :details)'
+        );
+        $q->execute([
+          'group_chat_id' => $groupId,
+          'reporter_id' => $currentUserId,
+          'reported_user_id' => ((int) ($jsonInput['reported_user_id'] ?? 0)) ?: null,
+          'message_id' => ((int) ($jsonInput['message_id'] ?? 0)) ?: null,
+          'reason' => substr($reason, 0, 190),
+          'details' => trim((string) ($jsonInput['details'] ?? '')) ?: null,
+        ]);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not submit report.'], 500);
+      }
+      $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId]);
+    }
+
+    if ($mode === 'moderate_report') {
+      $ensureRealtimeCommunicationSchema($db);
+      $reportId = (int) ($jsonInput['report_id'] ?? 0);
+      $status = strtolower(trim((string) ($jsonInput['moderation_status'] ?? 'reviewed')));
+      if (!in_array($status, ['reviewed', 'resolved', 'dismissed'], true)) {
+        $status = 'reviewed';
+      }
+      try {
+        $q = $db->prepare('SELECT group_chat_id FROM group_reports WHERE id = :id LIMIT 1');
+        $q->execute(['id' => $reportId]);
+        $row = $q->fetch();
+        if (!$row) {
+          $respond(['success' => false, 'message' => 'Report not found.'], 404);
+        }
+        $reportGroupId = (int) ($row['group_chat_id'] ?? 0);
+        if (!$isGlobalModerator && !$conversationController->isGroupModerator($reportGroupId, $currentUserId)) {
+          $respond(['success' => false, 'message' => 'Not allowed to moderate this report.'], 403);
+        }
+        $upd = $db->prepare(
+          'UPDATE group_reports
+           SET status = :status, moderator_id = :moderator_id, moderation_note = :note, updated_at = NOW()
+           WHERE id = :id'
+        );
+        $upd->execute([
+          'status' => $status,
+          'moderator_id' => $currentUserId,
+          'note' => trim((string) ($jsonInput['moderation_note'] ?? '')) ?: null,
+          'id' => $reportId,
+        ]);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not update report.'], 500);
+      }
+      $respond(['success' => true, 'report_id' => $reportId, 'status' => $status]);
+    }
+
+    $respond(['success' => false, 'message' => 'Unsupported group action mode.'], 400);
+  }
+
+  if ($profileApiAction === 'profile_call_relay') {
+    $ensureRealtimeCommunicationSchema($db);
+    $payload = $_SERVER['REQUEST_METHOD'] === 'GET' ? $_GET : $getJsonInput();
+    $mode = strtolower(trim((string) ($payload['mode'] ?? ($_SERVER['REQUEST_METHOD'] === 'GET' ? 'poll' : 'start'))));
+
+    $normalizeSignalPayload = static function ($value): string {
+      if ($value === null || $value === '') {
+        return '{}';
+      }
+      if (is_string($value)) {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+          return '{}';
+        }
+        json_decode($trimmed, true);
+        return json_last_error() === JSON_ERROR_NONE ? $trimmed : json_encode(['value' => $trimmed], JSON_UNESCAPED_UNICODE);
+      }
+      $encoded = json_encode($value, JSON_UNESCAPED_UNICODE);
+      return $encoded === false ? '{}' : $encoded;
+    };
+
+    $findCallSession = static function (PDO $dbConn, int $sessionId): ?array {
+      if ($sessionId <= 0) {
+        return null;
+      }
+      try {
+        $q = $dbConn->prepare('SELECT * FROM call_sessions WHERE id = :id LIMIT 1');
+        $q->execute(['id' => $sessionId]);
+        $row = $q->fetch();
+        return is_array($row) ? $row : null;
+      } catch (Exception $e) {
+        return null;
+      }
+    };
+
+    $canAccessCallSession = static function (array $sessionRow) use ($currentUserId, $conversationController): bool {
+      $threadType = strtolower((string) ($sessionRow['thread_type'] ?? ''));
+      if ($threadType === 'private') {
+        return $currentUserId === (int) ($sessionRow['caller_id'] ?? 0) || $currentUserId === (int) ($sessionRow['callee_id'] ?? 0);
+      }
+      if ($threadType === 'group') {
+        return $conversationController->resolveMemberRole((int) ($sessionRow['thread_id'] ?? 0), $currentUserId) !== null;
+      }
+      return false;
+    };
+
+    if ($mode === 'start') {
+      if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+      }
+      $threadType = strtolower(trim((string) ($payload['thread_type'] ?? 'private')));
+      $threadId = (int) ($payload['thread_id'] ?? $payload['conversation_id'] ?? 0);
+      $callType = strtolower(trim((string) ($payload['call_type'] ?? 'video')));
+      if (!in_array($threadType, ['private', 'group'], true) || $threadId <= 0) {
+        $respond(['success' => false, 'message' => 'Invalid thread parameters.'], 400);
+      }
+      if (!in_array($callType, ['audio', 'video'], true)) {
+        $callType = 'video';
+      }
+      $conversation = $conversationController->getConversationForUser($threadId, $currentUserId, $threadType);
+      if (!$conversation) {
+        $respond(['success' => false, 'message' => 'Conversation not found.'], 404);
+      }
+      $calleeId = null;
+      if ($threadType === 'private') {
+        $peer = $conversationController->getPrivatePeer($threadId, $currentUserId);
+        $calleeId = (int) ($peer['id'] ?? 0);
+        if ($calleeId <= 0) {
+          $respond(['success' => false, 'message' => 'Could not resolve recipient.'], 400);
+        }
+      }
+
+      try {
+        $expire = $db->prepare(
+          'UPDATE call_sessions
+           SET status = "missed", ended_at = NOW(), ended_by = :uid, updated_at = NOW()
+           WHERE thread_type = :thread_type AND thread_id = :thread_id AND status = "ringing"'
+        );
+        $expire->execute(['uid' => $currentUserId, 'thread_type' => $threadType, 'thread_id' => $threadId]);
+
+        $ins = $db->prepare(
+          'INSERT INTO call_sessions (thread_type, thread_id, caller_id, callee_id, call_type, status, started_at)
+           VALUES (:thread_type, :thread_id, :caller_id, :callee_id, :call_type, "ringing", NOW())'
+        );
+        $ins->execute([
+          'thread_type' => $threadType,
+          'thread_id' => $threadId,
+          'caller_id' => $currentUserId,
+          'callee_id' => $calleeId,
+          'call_type' => $callType,
+        ]);
+        $sessionId = (int) $db->lastInsertId();
+
+        if (array_key_exists('offer', $payload)) {
+          $sig = $db->prepare(
+            'INSERT INTO call_signals (session_id, sender_id, signal_type, payload)
+             VALUES (:session_id, :sender_id, "offer", :payload)'
+          );
+          $sig->execute([
+            'session_id' => $sessionId,
+            'sender_id' => $currentUserId,
+            'payload' => $normalizeSignalPayload($payload['offer']),
+          ]);
+        }
+
+        $respond([
+          'success' => true,
+          'session' => [
+            'id' => $sessionId,
+            'thread_type' => $threadType,
+            'thread_id' => $threadId,
+            'caller_id' => $currentUserId,
+            'callee_id' => $calleeId,
+            'call_type' => $callType,
+            'status' => 'ringing',
+            'created_at' => date('Y-m-d H:i:s'),
+          ],
+        ]);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not start call.'], 500);
+      }
+    }
+
+    if ($mode === 'poll') {
+      $incoming = [];
+      $active = [];
+      try {
+        $q = $db->prepare(
+          'SELECT cs.id, cs.thread_type, cs.thread_id, cs.caller_id, cs.callee_id, cs.call_type, cs.status,
+                  cs.started_at, cs.answered_at, cs.ended_at, cs.created_at,
+                  cu.first_name AS caller_first_name, cu.last_name AS caller_last_name, cu.avatar_url AS caller_avatar_url,
+                  c.name AS group_name, c.avatar_url AS group_avatar_url
+           FROM call_sessions cs
+           INNER JOIN users cu ON cu.id = cs.caller_id
+           LEFT JOIN conversations c ON c.id = cs.thread_id AND c.type = "group"
+           LEFT JOIN conversation_members cm ON cm.conversation_id = cs.thread_id AND cm.user_id = :uid AND cm.left_at IS NULL
+           WHERE cs.status = "ringing"
+             AND cs.caller_id <> :uid
+             AND (
+               (cs.thread_type = "private" AND cs.callee_id = :uid)
+               OR (cs.thread_type = "group" AND cm.id IS NOT NULL)
+             )
+           ORDER BY cs.created_at DESC
+           LIMIT 12'
+        );
+        $q->execute(['uid' => $currentUserId]);
+        foreach ((array) $q->fetchAll() as $row) {
+          $incoming[] = [
+            'id' => (int) ($row['id'] ?? 0),
+            'thread_type' => (string) ($row['thread_type'] ?? 'private'),
+            'thread_id' => (int) ($row['thread_id'] ?? 0),
+            'caller_id' => (int) ($row['caller_id'] ?? 0),
+            'callee_id' => (int) ($row['callee_id'] ?? 0),
+            'call_type' => (string) ($row['call_type'] ?? 'video'),
+            'status' => (string) ($row['status'] ?? 'ringing'),
+            'created_at' => (string) ($row['created_at'] ?? ''),
+            'group_name' => (string) ($row['group_name'] ?? ''),
+            'group_avatar_url' => (string) ($row['group_avatar_url'] ?? ''),
+            'caller' => [
+              'id' => (int) ($row['caller_id'] ?? 0),
+              'first_name' => (string) ($row['caller_first_name'] ?? ''),
+              'last_name' => (string) ($row['caller_last_name'] ?? ''),
+              'avatar_url' => (string) ($row['caller_avatar_url'] ?? ''),
+            ],
+          ];
+        }
+
+        $activeQ = $db->prepare(
+          'SELECT DISTINCT cs.id, cs.thread_type, cs.thread_id, cs.caller_id, cs.callee_id, cs.call_type, cs.status,
+                  cs.started_at, cs.answered_at, cs.ended_at, cs.created_at
+           FROM call_sessions cs
+           LEFT JOIN conversation_members cm ON cm.conversation_id = cs.thread_id AND cm.user_id = :uid AND cm.left_at IS NULL
+           WHERE cs.status IN ("ringing", "accepted")
+             AND (
+               (cs.thread_type = "private" AND (cs.caller_id = :uid OR cs.callee_id = :uid))
+               OR (cs.thread_type = "group" AND cm.id IS NOT NULL)
+             )
+           ORDER BY cs.created_at DESC
+           LIMIT 16'
+        );
+        $activeQ->execute(['uid' => $currentUserId]);
+        $active = (array) $activeQ->fetchAll();
+      } catch (Exception $e) {
+      }
+      $respond(['success' => true, 'incoming' => $incoming, 'active' => $active]);
+    }
+
+    if ($mode === 'answer') {
+      if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        $respond(['success' => false, 'message' => 'Method not allowed.'], 405);
+      }
+      $sessionId = (int) ($payload['session_id'] ?? 0);
+      $sessionRow = $findCallSession($db, $sessionId);
+      if (!$sessionRow || !$canAccessCallSession($sessionRow)) {
+        $respond(['success' => false, 'message' => 'Call session not found.'], 404);
+      }
+      $decision = strtolower(trim((string) ($payload['decision'] ?? 'accept')));
+      try {
+        if ($decision === 'reject') {
+          $db->prepare('UPDATE call_sessions SET status = "rejected", ended_at = NOW(), ended_by = :uid, updated_at = NOW() WHERE id = :id')
+            ->execute(['uid' => $currentUserId, 'id' => $sessionId]);
+          $respond(['success' => true, 'session_id' => $sessionId, 'status' => 'rejected']);
+        }
+        $db->prepare('UPDATE call_sessions SET status = "accepted", answered_at = NOW(), updated_at = NOW() WHERE id = :id')
+          ->execute(['id' => $sessionId]);
+        if (array_key_exists('answer', $payload)) {
+          $db->prepare('INSERT INTO call_signals (session_id, sender_id, signal_type, payload) VALUES (:session_id, :sender_id, "answer", :payload)')
+            ->execute(['session_id' => $sessionId, 'sender_id' => $currentUserId, 'payload' => $normalizeSignalPayload($payload['answer'])]);
+        }
+        $respond(['success' => true, 'session_id' => $sessionId, 'status' => 'accepted']);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not process call response.'], 500);
+      }
+    }
+
+    if ($mode === 'signal' || $mode === 'signals' || $mode === 'end') {
+      $sessionId = (int) ($payload['session_id'] ?? 0);
+      $sessionRow = $findCallSession($db, $sessionId);
+      if (!$sessionRow || !$canAccessCallSession($sessionRow)) {
+        $respond(['success' => false, 'message' => 'Call session not found.'], 404);
+      }
+
+      if ($mode === 'signals') {
+        try {
+          $q = $db->prepare(
+            'SELECT id, session_id, sender_id, signal_type, payload, created_at
+             FROM call_signals
+             WHERE session_id = :session_id
+               AND id > :last_signal_id
+               AND sender_id <> :sender_id
+             ORDER BY id ASC
+             LIMIT 180'
+          );
+          $q->execute([
+            'session_id' => $sessionId,
+            'last_signal_id' => (int) ($payload['last_signal_id'] ?? 0),
+            'sender_id' => $currentUserId,
+          ]);
+          $signals = [];
+          foreach ((array) $q->fetchAll() as $row) {
+            $decoded = json_decode((string) ($row['payload'] ?? ''), true);
+            $signals[] = [
+              'id' => (int) ($row['id'] ?? 0),
+              'session_id' => (int) ($row['session_id'] ?? 0),
+              'sender_id' => (int) ($row['sender_id'] ?? 0),
+              'signal_type' => (string) ($row['signal_type'] ?? 'candidate'),
+              'payload' => json_last_error() === JSON_ERROR_NONE ? $decoded : ['value' => (string) ($row['payload'] ?? '')],
+              'created_at' => (string) ($row['created_at'] ?? ''),
+            ];
+          }
+          $respond(['success' => true, 'signals' => $signals]);
+        } catch (Exception $e) {
+          $respond(['success' => false, 'message' => 'Could not fetch call signals.'], 500);
+        }
+      }
+
+      if ($mode === 'end') {
+        try {
+          $db->prepare('UPDATE call_sessions SET status = "ended", ended_at = NOW(), ended_by = :uid, updated_at = NOW() WHERE id = :id')
+            ->execute(['uid' => $currentUserId, 'id' => $sessionId]);
+          $db->prepare('INSERT INTO call_signals (session_id, sender_id, signal_type, payload) VALUES (:session_id, :sender_id, "bye", :payload)')
+            ->execute(['session_id' => $sessionId, 'sender_id' => $currentUserId, 'payload' => $normalizeSignalPayload(['reason' => (string) ($payload['reason'] ?? 'Call ended')])]);
+          $respond(['success' => true, 'session_id' => $sessionId, 'status' => 'ended']);
+        } catch (Exception $e) {
+          $respond(['success' => false, 'message' => 'Could not end call.'], 500);
+        }
+      }
+
+      try {
+        $signalType = strtolower(trim((string) ($payload['signal_type'] ?? 'candidate')));
+        if (!in_array($signalType, ['offer', 'answer', 'candidate', 'renegotiate', 'bye'], true)) {
+          $signalType = 'candidate';
+        }
+        $db->prepare('INSERT INTO call_signals (session_id, sender_id, signal_type, payload) VALUES (:session_id, :sender_id, :signal_type, :payload)')
+          ->execute([
+            'session_id' => $sessionId,
+            'sender_id' => $currentUserId,
+            'signal_type' => $signalType,
+            'payload' => $normalizeSignalPayload($payload['payload'] ?? null),
+          ]);
+        $respond(['success' => true, 'signal_id' => (int) $db->lastInsertId()]);
+      } catch (Exception $e) {
+        $respond(['success' => false, 'message' => 'Could not relay signal.'], 500);
+      }
+    }
+
+    $respond(['success' => false, 'message' => 'Unsupported call mode.'], 400);
+  }
+}
 
 if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_upload_avatar') {
   header('Content-Type: application/json; charset=utf-8');
@@ -1388,6 +2304,12 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   }
 
   $mode = strtolower(trim((string) ($payload['mode'] ?? ($_SERVER['REQUEST_METHOD'] === 'GET' ? 'list' : 'start'))));
+  if (isset($payload['live_id']) && !isset($payload['stream_id'])) {
+    $payload['stream_id'] = $payload['live_id'];
+  }
+  if (isset($payload['stream_id']) && !isset($payload['live_id'])) {
+    $payload['live_id'] = $payload['stream_id'];
+  }
 
   $normalizeSignalPayload = static function ($value): string {
     if ($value === null || $value === '') {
@@ -1458,8 +2380,8 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       $q = $dbConn->prepare(
         'SELECT id
          FROM friends
-         WHERE (user_one_id = :uid AND user_two_id = :hid)
-            OR (user_two_id = :uid AND user_one_id = :hid)
+         WHERE ((user_one_id = :uid AND user_two_id = :hid)
+            OR (user_two_id = :uid AND user_one_id = :hid))
            AND status = "accepted"
          LIMIT 1'
       );
@@ -1970,6 +2892,11 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
 
     $streamId = (int) ($payload['stream_id'] ?? 0);
     $body = trim((string) ($payload['body'] ?? ''));
+    $messageType = strtolower(trim((string) ($payload['message_type'] ?? 'text')));
+  if (!in_array($messageType, ['text', 'system', 'donation'], true)) {
+    $messageType = 'text';
+  }
+    $metadata = $normalizeMetadataJson($payload['metadata'] ?? null);
     if ($streamId <= 0) {
       $respond(['success' => false, 'message' => 'Invalid stream id.'], 400);
     }
@@ -1997,22 +2924,24 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
 
     try {
       $ins = $db->prepare(
-        'INSERT INTO live_chat (live_id, user_id, body, is_deleted)
-         VALUES (:stream_id, :user_id, :body, 0)'
+        'INSERT INTO messages (conversation_id, sender_id, body, is_deleted, message_type, metadata)
+         VALUES (:conversation_id, :user_id, :body, 0, :message_type, :metadata)'
       );
       $ins->execute([
-        'stream_id' => $streamId,
+        'conversation_id' => 4000000 + $streamId,
         'user_id' => $currentUserId,
         'body' => substr($body, 0, 2000),
+        'message_type' => $messageType,
+        'metadata' => $metadata !== null && $metadata !== '' ? $metadata : null,
       ]);
       $chatId = (int) $db->lastInsertId();
 
       $q = $db->prepare(
-        'SELECT c.id, c.live_id AS stream_id, c.user_id, c.body, c.created_at,
+        'SELECT m.id, m.conversation_id, m.sender_id AS user_id, m.body, m.message_type, m.metadata, m.created_at,
                 u.first_name, u.last_name, u.avatar_url, u.role
-         FROM live_chat c
-         INNER JOIN users u ON u.id = c.user_id
-         WHERE c.id = :id
+         FROM messages m
+         INNER JOIN users u ON u.id = m.sender_id
+         WHERE m.id = :id
          LIMIT 1'
       );
       $q->execute(['id' => $chatId]);
@@ -2022,9 +2951,11 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
         'success' => true,
         'message' => [
           'id' => (int) ($row['id'] ?? $chatId),
-          'stream_id' => (int) ($row['stream_id'] ?? $streamId),
+          'stream_id' => $streamId,
           'user_id' => (int) ($row['user_id'] ?? $currentUserId),
           'body' => (string) ($row['body'] ?? $body),
+          'message_type' => (string) ($row['message_type'] ?? $messageType),
+          'metadata' => isset($row['metadata']) && $row['metadata'] !== null ? json_decode((string) $row['metadata'], true) : null,
           'created_at' => (string) ($row['created_at'] ?? date('Y-m-d H:i:s')),
           'user' => [
             'id' => (int) ($row['user_id'] ?? $currentUserId),
@@ -2037,6 +2968,112 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       ]);
     } catch (Exception $e) {
       $respond(['success' => false, 'message' => 'Could not send chat message.'], 500);
+    }
+  }
+
+  if ($mode === 'donation_send') {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') { $respond(['success' => false, 'message' => 'Method not allowed.'], 405); }
+
+    $streamId = (int) ($payload['stream_id'] ?? 0);
+    $amount = (float) ($payload['amount'] ?? 0);
+    $message = trim((string) ($payload['message'] ?? ''));
+    
+    if ($streamId <= 0 || $amount <= 0) {
+      $respond(['success' => false, 'message' => 'Invalid stream or amount.'], 400);
+    }
+    
+    $streamRow = $findLiveStream($db, $streamId);
+    if (!$streamRow || strtolower((string) ($streamRow['status'] ?? '')) !== 'live') {
+      $respond(['success' => false, 'message' => 'Stream is not active.'], 404);
+    }
+    
+    try {
+      $db->beginTransaction();
+      
+      $body = "💎 SUPPORTED $" . number_format($amount, 2);
+      if ($message) {
+          $body .= ": " . $message;
+      }
+      
+      $stmt = $db->prepare(
+        'INSERT INTO messages (conversation_id, sender_id, message_type, body, metadata)
+         VALUES (:cid, :sid, "donation", :body, :meta)'
+      );
+      $stmt->execute([
+        'cid'  => 4000000 + $streamId,
+        'sid'  => $currentUserId,
+        'body' => $body,
+        'meta' => json_encode(['amount' => $amount, 'message' => $message])
+      ]);
+      $msgId = (int) $db->lastInsertId();
+      
+      $streamRow = $findLiveStream($db, $streamId);
+      if (!$streamRow) { $respond(['success' => false, 'message' => 'Stream not found.'], 404); }
+      $streamerId = (int)($streamRow['host_user_id'] ?? 0);
+
+      if (!class_exists('WalletController')) {
+        include_once dirname(__DIR__, 2) . '/Controllers/WalletController.php';
+      }
+      $wallet = new WalletController($db);
+
+      // 1. Deduct from donor
+      $donorOk = $wallet->addTransaction(
+          $currentUserId, 
+          'donation_out', 
+          -$amount, 
+          "Donation to " . ($streamRow['first_name'] ?? 'Streamer'),
+          'completed',
+          'live',
+          $streamId
+      );
+      if (!$donorOk) throw new Exception("Insufficient funds for donation.");
+
+      // 2. Credit to streamer
+      $streamerOk = $wallet->addTransaction(
+          $streamerId, 
+          'donation_in', 
+          $amount, 
+          "Donation from " . ($sessionUserForLive['first_name'] ?? 'User'),
+          'completed',
+          'live',
+          $streamId
+      );
+      if (!$streamerOk) throw new Exception("Failed to credit streamer.");
+
+      $stmt = $db->prepare(
+        'INSERT INTO live_donations (stream_id, user_id, amount, message)
+         VALUES (:stream_id, :user_id, :amount, :message)'
+      );
+      $stmt->execute([
+        'stream_id' => $streamId,
+        'user_id' => $currentUserId,
+        'amount' => $amount,
+        'message' => $message
+      ]);
+      
+      $db->commit();
+      
+      $respond([
+        'success' => true,
+        'chat_message' => [
+          'id' => $msgId,
+          'stream_id' => $streamId,
+          'sender_id' => $currentUserId,
+          'body' => $body,
+          'message_type' => 'donation',
+          'created_at' => date('Y-m-d H:i:s'),
+          'user' => [
+            'id' => $currentUserId,
+            'first_name' => $sessionUserForLive['first_name'] ?? 'User',
+            'last_name' => $sessionUserForLive['last_name'] ?? '',
+            'avatar_url' => $sessionUserForLive['avatar_url'] ?? '',
+            'role' => $sessionUserForLive['role'] ?? 'user'
+          ]
+        ]
+      ]);
+    } catch (Exception $e) {
+      if ($db->inTransaction()) $db->rollBack();
+      $respond(['success' => false, 'message' => 'Donation failed: ' . $e->getMessage()], 500);
     }
   }
 
@@ -2058,26 +3095,28 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     $messages = [];
     try {
       $q = $db->prepare(
-        'SELECT c.id, c.live_id AS stream_id, c.user_id, c.body, c.created_at,
+        'SELECT m.id, m.conversation_id, m.sender_id AS user_id, m.body, m.message_type, m.metadata, m.created_at,
                 u.first_name, u.last_name, u.avatar_url, u.role
-         FROM live_chat c
-         INNER JOIN users u ON u.id = c.user_id
-         WHERE c.live_id = :stream_id
-           AND c.is_deleted = 0
-           AND c.id > :after_id
-         ORDER BY c.id ASC
+         FROM messages m
+         INNER JOIN users u ON u.id = m.sender_id
+         WHERE m.conversation_id = :conversation_id
+           AND m.is_deleted = 0
+           AND m.id > :after_id
+         ORDER BY m.id ASC
          LIMIT 180'
       );
       $q->execute([
-        'stream_id' => $streamId,
+        'conversation_id' => 4000000 + $streamId,
         'after_id' => $afterId,
       ]);
       foreach ((array) $q->fetchAll() as $row) {
         $messages[] = [
           'id' => (int) ($row['id'] ?? 0),
-          'stream_id' => (int) ($row['stream_id'] ?? 0),
+          'stream_id' => $streamId,
           'user_id' => (int) ($row['user_id'] ?? 0),
           'body' => (string) ($row['body'] ?? ''),
+          'message_type' => (string) ($row['message_type'] ?? 'text'),
+          'metadata' => isset($row['metadata']) && $row['metadata'] !== null ? json_decode((string) $row['metadata'], true) : null,
           'created_at' => (string) ($row['created_at'] ?? ''),
           'user' => [
             'id' => (int) ($row['user_id'] ?? 0),
@@ -2247,6 +3286,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     $q = $db->prepare(
       'SELECT
           pc.id,
+          ' . "1000000 + pc.id AS conversation_id," . '
           pc.user_one_id,
           pc.user_two_id,
           pc.last_message_at,
@@ -2295,6 +3335,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       $peerId = (int) ($row['peer_id'] ?? 0);
       $privateConversations[] = [
         'id' => (int) ($row['id'] ?? 0),
+        'conversation_id' => (int) ($row['conversation_id'] ?? (1000000 + (int) ($row['id'] ?? 0))),
         'last_message_at' => (string) ($row['last_message_created_at'] ?? ($row['last_message_at'] ?? '')),
         'last_message_body' => (string) ($row['last_message_body'] ?? ''),
         'last_message_type' => (string) ($row['last_message_type'] ?? 'text'),
@@ -2318,14 +3359,90 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   } catch (Exception $e) {
   }
 
-  if (!empty($groupChats)) {
+  $groupChats = [];
+  try {
+    $q = $db->prepare(
+      'SELECT
+          gc.id,
+          COALESCE(gc.conversation_id, 2000000 + gc.id) AS conversation_id,
+          gc.name,
+          gc.description,
+          gc.avatar_url,
+          gc.last_message_at,
+          COALESCE(gcm_me.role, gm_me.role) AS member_role,
+          lm.body AS last_message_body,
+          lm.message_type AS last_message_type,
+          lm.created_at AS last_message_created_at,
+          lm.sender_id AS last_message_sender_id,
+          COALESCE(unread.unread_count, 0) AS unread_count
+       FROM group_chats gc
+       LEFT JOIN group_chat_members gcm_me ON gcm_me.group_chat_id = gc.id AND gcm_me.user_id = :uid AND gcm_me.left_at IS NULL
+       LEFT JOIN group_members gm_me ON gm_me.group_id = gc.id AND gm_me.user_id = :uid AND gm_me.left_at IS NULL
+       LEFT JOIN messages lm ON lm.id = (
+          SELECT m2.id
+          FROM messages m2
+          WHERE m2.group_chat_id = gc.id
+          ORDER BY m2.created_at DESC, m2.id DESC
+          LIMIT 1
+       )
+       LEFT JOIN (
+          SELECT m.group_chat_id, COUNT(*) AS unread_count
+          FROM messages m
+          LEFT JOIN message_reads mr ON mr.message_id = m.id AND mr.user_id = :uid
+          WHERE m.group_chat_id IS NOT NULL
+            AND m.sender_id <> :uid
+            AND mr.id IS NULL
+            AND (
+              EXISTS (
+                SELECT 1
+                FROM group_chat_members gm1
+                WHERE gm1.group_chat_id = m.group_chat_id
+                  AND gm1.user_id = :uid
+                  AND gm1.left_at IS NULL
+              )
+              OR EXISTS (
+                SELECT 1
+                FROM group_members gm2
+                WHERE gm2.group_id = m.group_chat_id
+                  AND gm2.user_id = :uid
+                  AND gm2.left_at IS NULL
+              )
+            )
+          GROUP BY m.group_chat_id
+       ) unread ON unread.group_chat_id = gc.id
+       WHERE gcm_me.id IS NOT NULL OR gm_me.id IS NOT NULL
+       ORDER BY COALESCE(gc.last_message_at, gc.updated_at, gc.created_at) DESC
+       LIMIT 120'
+    );
+    $q->execute(['uid' => $currentUserId]);
+    foreach ((array) $q->fetchAll() as $row) {
+      $groupChats[] = [
+        'id' => (int) ($row['id'] ?? 0),
+        'conversation_id' => (int) ($row['conversation_id'] ?? (2000000 + (int) ($row['id'] ?? 0))),
+        'group_id' => (int) ($row['id'] ?? 0),
+        'group_chat_id' => (int) ($row['id'] ?? 0),
+        'name' => (string) ($row['name'] ?? ''),
+        'description' => (string) ($row['description'] ?? ''),
+        'avatar_url' => (string) ($row['avatar_url'] ?? ''),
+        'member_role' => (string) ($row['member_role'] ?? 'member'),
+        'last_message_at' => (string) ($row['last_message_created_at'] ?? ($row['last_message_at'] ?? '')),
+        'last_message_body' => (string) ($row['last_message_body'] ?? ''),
+        'last_message_type' => (string) ($row['last_message_type'] ?? 'text'),
+        'last_message_sender_id' => (int) ($row['last_message_sender_id'] ?? 0),
+        'unread_count' => (int) ($row['unread_count'] ?? 0),
+        'members' => [],
+      ];
+    }
+
     $groupIds = array_values(array_unique(array_filter(array_map(static fn ($g): int => (int) ($g['id'] ?? 0), $groupChats))));
     if (!empty($groupIds)) {
+      $groupMembers = [];
+      $groupMembersSource = [];
       try {
-        $groupMembers = [];
         $placeholders = implode(',', array_fill(0, count($groupIds), '?'));
         $q = $db->prepare(
           "SELECT gcm.group_chat_id, gcm.user_id, gcm.role,
+                  gcm.joined_at,
                   u.first_name, u.last_name, u.avatar_url, u.role AS user_role
            FROM group_chat_members gcm
            INNER JOIN users u ON u.id = gcm.user_id
@@ -2338,18 +3455,22 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
         $q->execute($groupIds);
         foreach ((array) $q->fetchAll() as $row) {
           $gid = (int) ($row['group_chat_id'] ?? 0);
-          if ($gid <= 0) {
+          $uid = (int) ($row['user_id'] ?? 0);
+          if ($gid <= 0 || $uid <= 0) {
             continue;
           }
           if (!isset($groupMembers[$gid])) {
             $groupMembers[$gid] = [];
+            $groupMembersSource[$gid] = [];
           }
-          $groupMembers[$gid][] = [
+          $groupMembers[$gid][$uid] = [
             'group_chat_id' => $gid,
-            'user_id' => (int) ($row['user_id'] ?? 0),
+            'user_id' => $uid,
             'role' => (string) ($row['role'] ?? 'member'),
+            'joined_at' => (string) ($row['joined_at'] ?? ''),
+            '_source' => 'current',
             'user' => [
-              'id' => (int) ($row['user_id'] ?? 0),
+              'id' => $uid,
               'first_name' => (string) ($row['first_name'] ?? ''),
               'last_name' => (string) ($row['last_name'] ?? ''),
               'avatar_url' => (string) ($row['avatar_url'] ?? ''),
@@ -2357,70 +3478,67 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
             ],
           ];
         }
-
-        foreach ($groupChats as &$groupChat) {
-          $gid = (int) ($groupChat['id'] ?? 0);
-          $groupChat['members'] = $groupMembers[$gid] ?? [];
-        }
-        unset($groupChat);
       } catch (Exception $e) {
       }
-    }
-  }
 
-  $groupChats = [];
-  try {
-    $q = $db->prepare(
-      'SELECT
-          gc.id,
-          gc.name,
-          gc.description,
-          gc.avatar_url,
-          gc.last_message_at,
-          gcm.role AS member_role,
-          lm.body AS last_message_body,
-          lm.message_type AS last_message_type,
-          lm.created_at AS last_message_created_at,
-          lm.sender_id AS last_message_sender_id,
-          COALESCE(unread.unread_count, 0) AS unread_count
-       FROM group_chat_members gcm
-       INNER JOIN group_chats gc ON gc.id = gcm.group_chat_id
-       LEFT JOIN messages lm ON lm.id = (
-          SELECT m2.id
-          FROM messages m2
-          WHERE m2.group_chat_id = gc.id
-          ORDER BY m2.created_at DESC, m2.id DESC
-          LIMIT 1
-       )
-       LEFT JOIN (
-          SELECT m.group_chat_id, COUNT(*) AS unread_count
-          FROM messages m
-          INNER JOIN group_chat_members gm ON gm.group_chat_id = m.group_chat_id AND gm.user_id = :uid AND gm.left_at IS NULL
-          LEFT JOIN message_reads mr ON mr.message_id = m.id AND mr.user_id = :uid
-          WHERE m.group_chat_id IS NOT NULL
-            AND m.sender_id <> :uid
-            AND mr.id IS NULL
-          GROUP BY m.group_chat_id
-       ) unread ON unread.group_chat_id = gc.id
-       WHERE gcm.user_id = :uid AND gcm.left_at IS NULL
-       ORDER BY COALESCE(gc.last_message_at, gc.updated_at, gc.created_at) DESC
-       LIMIT 120'
-    );
-    $q->execute(['uid' => $currentUserId]);
-    foreach ((array) $q->fetchAll() as $row) {
-      $groupChats[] = [
-        'id' => (int) ($row['id'] ?? 0),
-        'name' => (string) ($row['name'] ?? ''),
-        'description' => (string) ($row['description'] ?? ''),
-        'avatar_url' => (string) ($row['avatar_url'] ?? ''),
-        'member_role' => (string) ($row['member_role'] ?? 'member'),
-        'last_message_at' => (string) ($row['last_message_created_at'] ?? ($row['last_message_at'] ?? '')),
-        'last_message_body' => (string) ($row['last_message_body'] ?? ''),
-        'last_message_type' => (string) ($row['last_message_type'] ?? 'text'),
-        'last_message_sender_id' => (int) ($row['last_message_sender_id'] ?? 0),
-        'unread_count' => (int) ($row['unread_count'] ?? 0),
-        'members' => [],
-      ];
+      try {
+        $placeholders = implode(',', array_fill(0, count($groupIds), '?'));
+        $q = $db->prepare(
+          "SELECT gm.group_id AS group_chat_id, gm.user_id, gm.role,
+                  gm.joined_at,
+                  u.first_name, u.last_name, u.avatar_url, u.role AS user_role
+           FROM group_members gm
+           INNER JOIN users u ON u.id = gm.user_id
+           WHERE gm.group_id IN ({$placeholders})
+             AND gm.left_at IS NULL
+           ORDER BY gm.group_id ASC,
+                    CASE gm.role WHEN 'owner' THEN 0 WHEN 'admin' THEN 1 ELSE 2 END ASC,
+                    u.first_name ASC"
+        );
+        $q->execute($groupIds);
+        foreach ((array) $q->fetchAll() as $row) {
+          $gid = (int) ($row['group_chat_id'] ?? 0);
+          $uid = (int) ($row['user_id'] ?? 0);
+          if ($gid <= 0 || $uid <= 0) {
+            continue;
+          }
+          if (!isset($groupMembers[$gid])) {
+            $groupMembers[$gid] = [];
+            $groupMembersSource[$gid] = [];
+          }
+          $existingSource = (string) ($groupMembers[$gid][$uid]['_source'] ?? '');
+          if ($existingSource === 'current') {
+            continue;
+          }
+          $groupMembers[$gid][$uid] = [
+            'group_chat_id' => $gid,
+            'user_id' => $uid,
+            'role' => (string) ($row['role'] ?? 'member'),
+            'joined_at' => (string) ($row['joined_at'] ?? ''),
+            '_source' => 'legacy',
+            'user' => [
+              'id' => $uid,
+              'first_name' => (string) ($row['first_name'] ?? ''),
+              'last_name' => (string) ($row['last_name'] ?? ''),
+              'avatar_url' => (string) ($row['avatar_url'] ?? ''),
+              'role' => (string) ($row['user_role'] ?? 'user'),
+            ],
+          ];
+        }
+      } catch (Exception $e) {
+      }
+
+      foreach ($groupChats as &$groupChat) {
+        $gid = (int) ($groupChat['id'] ?? 0);
+        $members = $groupMembers[$gid] ?? [];
+        if (!empty($members)) {
+          $groupChat['members'] = array_values(array_map(static function (array $member): array {
+            unset($member['_source']);
+            return $member;
+          }, $members));
+        }
+      }
+      unset($groupChat);
     }
   } catch (Exception $e) {
   }
@@ -2936,37 +4054,80 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       'created_by' => $currentUserId,
     ]);
     $newGroupId = (int) $db->lastInsertId();
+    if ($newGroupId <= 0) {
+      throw new RuntimeException('Group chat insert did not return a valid id.');
+    }
+
+    $conversationId = 2000000 + $newGroupId;
+    $db->prepare(
+      'INSERT INTO conversations (id, type, name, created_by, created_at, updated_at)
+       VALUES (:id, "group", :name, :created_by, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE type = VALUES(type), name = VALUES(name), created_by = VALUES(created_by), updated_at = NOW()'
+    )->execute([
+      'id' => $conversationId,
+      'name' => substr($name, 0, 120),
+      'created_by' => $currentUserId,
+    ]);
+
+    $db->prepare(
+      'UPDATE group_chats
+       SET conversation_id = :conversation_id
+       WHERE id = :id'
+    )->execute([
+      'conversation_id' => $conversationId,
+      'id' => $newGroupId,
+    ]);
 
     $insMember = $db->prepare(
       'INSERT IGNORE INTO group_chat_members (group_chat_id, user_id, role)
        VALUES (:group_chat_id, :user_id, :role)'
     );
+    $insLegacyMember = $db->prepare(
+      'INSERT IGNORE INTO group_members (group_id, user_id, role)
+       VALUES (:group_id, :user_id, :role)'
+    );
+    $insConversationMember = $db->prepare(
+      'INSERT IGNORE INTO conversation_members (conversation_id, user_id, role)
+       VALUES (:conversation_id, :user_id, :role)'
+    );
     $insMember->execute(['group_chat_id' => $newGroupId, 'user_id' => $currentUserId, 'role' => 'owner']);
+    $insLegacyMember->execute(['group_id' => $newGroupId, 'user_id' => $currentUserId, 'role' => 'owner']);
+    $insConversationMember->execute(['conversation_id' => $conversationId, 'user_id' => $currentUserId, 'role' => 'admin']);
     foreach ($memberIds as $memberId) {
       $insMember->execute(['group_chat_id' => $newGroupId, 'user_id' => $memberId, 'role' => 'member']);
+      $insLegacyMember->execute(['group_id' => $newGroupId, 'user_id' => $memberId, 'role' => 'member']);
+      $insConversationMember->execute(['conversation_id' => $conversationId, 'user_id' => $memberId, 'role' => 'member']);
     }
 
     $insMessage = $db->prepare(
-      'INSERT INTO messages (sender_id, group_chat_id, message_type, body)
-       VALUES (:sender_id, :group_chat_id, "system", :body)'
+      'INSERT INTO messages (sender_id, conversation_id, group_chat_id, message_type, body)
+       VALUES (:sender_id, :conversation_id, :group_chat_id, "system", :body)'
     );
     $insMessage->execute([
       'sender_id' => $currentUserId,
+      'conversation_id' => $conversationId,
       'group_chat_id' => $newGroupId,
       'body' => 'Group chat created.',
     ]);
 
     $db->commit();
-  } catch (Exception $e) {
+  } catch (Throwable $e) {
     if ($db->inTransaction()) { $db->rollBack(); }
-    $respond(['success' => false, 'message' => 'Could not create group chat.'], 500);
+    $errorMessage = 'Could not create group chat: ' . $e->getMessage();
+    error_log('[profile_create_group_chat] ' . $errorMessage);
+    $respond(['success' => false, 'message' => $errorMessage], 500);
   }
 
   $respond([
     'success' => true,
+    'group_id' => $newGroupId,
     'group_chat_id' => $newGroupId,
+    'conversation_id' => $conversationId,
     'group_chat' => [
       'id' => $newGroupId,
+      'group_id' => $newGroupId,
+      'group_chat_id' => $newGroupId,
+      'conversation_id' => $conversationId,
       'name' => substr($name, 0, 120),
       'description' => $description !== '' ? substr($description, 0, 255) : '',
       'avatar_url' => $groupAvatarUrl,
@@ -2983,7 +4144,10 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   if ($currentUserId <= 0) { $respond(['success' => false, 'message' => 'Invalid session user.'], 401); }
 
   $threadType = strtolower(trim((string) ($_GET['thread_type'] ?? 'private')));
-  $threadId = (int) ($_GET['thread_id'] ?? 0);
+  $threadId = (int) ($_GET['thread_id'] ?? $_GET['group_chat_id'] ?? $_GET['group_id'] ?? 0);
+  if ($threadType === 'private' && $threadId > 0 && (isset($_GET['group_chat_id']) || isset($_GET['group_id']))) {
+    $threadType = 'group';
+  }
   if ($threadId <= 0 || !in_array($threadType, ['private', 'group'], true)) {
     $respond(['success' => false, 'message' => 'Invalid thread parameters.'], 400);
   }
@@ -3004,13 +4168,38 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     if (!$row) { $respond(['success' => false, 'message' => 'Private conversation not found.'], 404); }
     $privatePeerId = (int) ($row['peer_id'] ?? 0);
   } else {
-    $q = $db->prepare('SELECT id FROM group_chat_members WHERE group_chat_id = :id AND user_id = :uid AND left_at IS NULL LIMIT 1');
+    $q = $db->prepare(
+      'SELECT 1
+       FROM group_chats gc
+       WHERE gc.id = :id
+         AND (
+           EXISTS (
+             SELECT 1
+             FROM group_chat_members gcm
+             WHERE gcm.group_chat_id = gc.id
+               AND gcm.user_id = :uid
+               AND gcm.left_at IS NULL
+           )
+           OR EXISTS (
+             SELECT 1
+             FROM group_members gm
+             WHERE gm.group_id = gc.id
+               AND gm.user_id = :uid
+               AND gm.left_at IS NULL
+           )
+         )
+       LIMIT 1'
+    );
     $q->execute(['id' => $threadId, 'uid' => $currentUserId]);
     if (!$q->fetch()) { $respond(['success' => false, 'message' => 'Group chat not found.'], 404); }
 
     try {
+      $groupMembersById = [];
+      $groupMemberSources = [];
+
       $m = $db->prepare(
         'SELECT gcm.group_chat_id, gcm.user_id, gcm.role,
+                gcm.joined_at,
                 u.first_name, u.last_name, u.avatar_url, u.role AS user_role
          FROM group_chat_members gcm
          INNER JOIN users u ON u.id = gcm.user_id
@@ -3020,12 +4209,18 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       );
       $m->execute(['gid' => $threadId]);
       foreach ((array) $m->fetchAll() as $memberRow) {
-        $groupMembers[] = [
+        $memberId = (int) ($memberRow['user_id'] ?? 0);
+        if ($memberId <= 0) {
+          continue;
+        }
+        $groupMembersById[$memberId] = [
           'group_chat_id' => (int) ($memberRow['group_chat_id'] ?? 0),
-          'user_id' => (int) ($memberRow['user_id'] ?? 0),
+          'user_id' => $memberId,
           'role' => (string) ($memberRow['role'] ?? 'member'),
+          'joined_at' => (string) ($memberRow['joined_at'] ?? ''),
+          '_source' => 'current',
           'user' => [
-            'id' => (int) ($memberRow['user_id'] ?? 0),
+            'id' => $memberId,
             'first_name' => (string) ($memberRow['first_name'] ?? ''),
             'last_name' => (string) ($memberRow['last_name'] ?? ''),
             'avatar_url' => (string) ($memberRow['avatar_url'] ?? ''),
@@ -3033,6 +4228,47 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
           ],
         ];
       }
+
+      $legacyMembers = $db->prepare(
+        'SELECT gm.group_id AS group_chat_id, gm.user_id, gm.role,
+                gm.joined_at,
+                u.first_name, u.last_name, u.avatar_url, u.role AS user_role
+         FROM group_members gm
+         INNER JOIN users u ON u.id = gm.user_id
+         WHERE gm.group_id = :gid AND gm.left_at IS NULL
+         ORDER BY CASE gm.role WHEN "owner" THEN 0 WHEN "admin" THEN 1 ELSE 2 END ASC,
+                  u.first_name ASC'
+      );
+      $legacyMembers->execute(['gid' => $threadId]);
+      foreach ((array) $legacyMembers->fetchAll() as $memberRow) {
+        $memberId = (int) ($memberRow['user_id'] ?? 0);
+        if ($memberId <= 0) {
+          continue;
+        }
+        $existingSource = (string) ($groupMembersById[$memberId]['_source'] ?? '');
+        if ($existingSource === 'current') {
+          continue;
+        }
+        $groupMembersById[$memberId] = [
+          'group_chat_id' => (int) ($memberRow['group_chat_id'] ?? 0),
+          'user_id' => $memberId,
+          'role' => (string) ($memberRow['role'] ?? 'member'),
+          'joined_at' => (string) ($memberRow['joined_at'] ?? ''),
+          '_source' => 'legacy',
+          'user' => [
+            'id' => $memberId,
+            'first_name' => (string) ($memberRow['first_name'] ?? ''),
+            'last_name' => (string) ($memberRow['last_name'] ?? ''),
+            'avatar_url' => (string) ($memberRow['avatar_url'] ?? ''),
+            'role' => (string) ($memberRow['user_role'] ?? 'user'),
+          ],
+        ];
+      }
+
+      $groupMembers = array_values(array_map(static function (array $memberRow): array {
+        unset($memberRow['_source']);
+        return $memberRow;
+      }, $groupMembersById));
     } catch (Exception $e) {
     }
   }
@@ -3167,7 +4403,10 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   if (!is_array($jsonInput)) { $jsonInput = []; }
 
   $threadType = strtolower(trim((string) ($jsonInput['thread_type'] ?? 'private')));
-  $threadId = (int) ($jsonInput['thread_id'] ?? 0);
+  $threadId = (int) ($jsonInput['thread_id'] ?? $jsonInput['group_chat_id'] ?? $jsonInput['group_id'] ?? 0);
+  if ($threadType === 'private' && $threadId > 0 && (isset($jsonInput['group_chat_id']) || isset($jsonInput['group_id']))) {
+    $threadType = 'group';
+  }
   $messageType = strtolower(trim((string) ($jsonInput['message_type'] ?? 'text')));
   $body = trim((string) ($jsonInput['body'] ?? ''));
   $mediaUrl = trim((string) ($jsonInput['media_url'] ?? ''));
@@ -3187,8 +4426,42 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     $q = $db->prepare('SELECT id FROM private_conversations WHERE id = :id AND (user_one_id = :uid OR user_two_id = :uid) LIMIT 1');
     $q->execute(['id' => $threadId, 'uid' => $currentUserId]);
     if (!$q->fetch()) { $respond(['success' => false, 'message' => 'Private conversation not found.'], 404); }
+
+    $conversationId = 1000000 + $threadId;
+    try {
+      $db->prepare(
+        'INSERT INTO conversations (id, type, name, created_by, created_at, updated_at)
+         VALUES (:id, "private", NULL, :created_by, NOW(), NOW())
+         ON DUPLICATE KEY UPDATE type = VALUES(type), created_by = VALUES(created_by), updated_at = NOW()'
+      )->execute([
+        'id' => $conversationId,
+        'created_by' => $currentUserId,
+      ]);
+    } catch (Exception $e) {
+    }
   } else {
-    $q = $db->prepare('SELECT id FROM group_chat_members WHERE group_chat_id = :id AND user_id = :uid AND left_at IS NULL LIMIT 1');
+    $q = $db->prepare(
+      'SELECT 1
+       FROM group_chats gc
+       WHERE gc.id = :id
+         AND (
+           EXISTS (
+             SELECT 1
+             FROM group_chat_members gcm
+             WHERE gcm.group_chat_id = gc.id
+               AND gcm.user_id = :uid
+               AND gcm.left_at IS NULL
+           )
+           OR EXISTS (
+             SELECT 1
+             FROM group_members gm
+             WHERE gm.group_id = gc.id
+               AND gm.user_id = :uid
+               AND gm.left_at IS NULL
+           )
+         )
+       LIMIT 1'
+    );
     $q->execute(['id' => $threadId, 'uid' => $currentUserId]);
     if (!$q->fetch()) { $respond(['success' => false, 'message' => 'Group chat not found.'], 404); }
   }
@@ -3199,12 +4472,14 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   $newMessageId = 0;
   try {
     if ($threadType === 'private') {
+      $conversationId = 1000000 + $threadId;
       $ins = $db->prepare(
-        'INSERT INTO messages (sender_id, private_conversation_id, message_type, body, media_url, metadata)
-         VALUES (:sender_id, :private_conversation_id, :message_type, :body, :media_url, :metadata)'
+        'INSERT INTO messages (sender_id, conversation_id, private_conversation_id, message_type, body, media_url, metadata)
+         VALUES (:sender_id, :conversation_id, :private_conversation_id, :message_type, :body, :media_url, :metadata)'
       );
       $ins->execute([
         'sender_id' => $currentUserId,
+        'conversation_id' => $conversationId,
         'private_conversation_id' => $threadId,
         'message_type' => $messageType,
         'body' => $body !== '' ? $body : null,
@@ -3212,15 +4487,39 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
         'metadata' => $metadata !== null && $metadata !== '' ? $metadata : null,
       ]);
 
+      if (function_exists('tableHasColumn') && $tableHasColumn($db, 'private_conversations', 'conversation_id')) {
+        try {
+          $db->prepare('UPDATE private_conversations SET conversation_id = :conversation_id WHERE id = :id AND (conversation_id IS NULL OR conversation_id = 0)')
+            ->execute(['conversation_id' => $conversationId, 'id' => $threadId]);
+        } catch (Exception $e) {
+        }
+      }
+
       $updThread = $db->prepare('UPDATE private_conversations SET last_message_at = NOW(), updated_at = NOW() WHERE id = :id');
       $updThread->execute(['id' => $threadId]);
     } else {
+      $conversationId = 2000000 + $threadId;
+      try {
+        $db->prepare(
+          'INSERT INTO conversations (id, type, name, created_by, created_at, updated_at)
+           VALUES (:id, "group", NULL, :created_by, NOW(), NOW())
+           ON DUPLICATE KEY UPDATE type = VALUES(type), updated_at = NOW()'
+        )->execute([
+          'id' => $conversationId,
+          'created_by' => $currentUserId,
+        ]);
+        $db->prepare('UPDATE group_chats SET conversation_id = :conversation_id WHERE id = :id AND (conversation_id IS NULL OR conversation_id = 0)')
+          ->execute(['conversation_id' => $conversationId, 'id' => $threadId]);
+      } catch (Exception $e) {
+      }
+
       $ins = $db->prepare(
-        'INSERT INTO messages (sender_id, group_chat_id, message_type, body, media_url, metadata)
-         VALUES (:sender_id, :group_chat_id, :message_type, :body, :media_url, :metadata)'
+        'INSERT INTO messages (sender_id, conversation_id, group_chat_id, message_type, body, media_url, metadata)
+         VALUES (:sender_id, :conversation_id, :group_chat_id, :message_type, :body, :media_url, :metadata)'
       );
       $ins->execute([
         'sender_id' => $currentUserId,
+        'conversation_id' => $conversationId,
         'group_chat_id' => $threadId,
         'message_type' => $messageType,
         'body' => $body !== '' ? $body : null,
@@ -3460,7 +4759,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
   $jsonInput = json_decode((string) file_get_contents('php://input'), true);
   if (!is_array($jsonInput)) { $jsonInput = []; }
   $mode = strtolower(trim((string) ($jsonInput['mode'] ?? '')));
-  $groupId = (int) ($jsonInput['group_chat_id'] ?? 0);
+  $groupId = (int) ($jsonInput['group_chat_id'] ?? $jsonInput['group_id'] ?? $jsonInput['thread_id'] ?? 0);
   $isGlobalModerator = strtolower(trim((string) ($existingForGroupManage->getEmail() ?? ($sessionUserForGroupManage['email'] ?? '')))) === 'admin@diversity.is';
 
   if ($mode === 'reports_list') {
@@ -3544,13 +4843,23 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     try {
       if ($memberRole === 'owner') {
         $q = $db->prepare(
-          'SELECT user_id, role
-           FROM group_chat_members
-           WHERE group_chat_id = :gid
-             AND user_id <> :uid
-             AND left_at IS NULL
+          'SELECT user_id, role, joined_at
+           FROM (
+             SELECT user_id, role, joined_at, 0 AS source_rank
+             FROM group_chat_members
+             WHERE group_chat_id = :gid
+               AND user_id <> :uid
+               AND left_at IS NULL
+             UNION ALL
+             SELECT user_id, role, joined_at, 1 AS source_rank
+             FROM group_members
+             WHERE group_id = :gid
+               AND user_id <> :uid
+               AND left_at IS NULL
+           ) members
            ORDER BY CASE role WHEN "admin" THEN 0 WHEN "member" THEN 1 ELSE 2 END ASC,
-                    joined_at ASC
+                    joined_at ASC,
+                    source_rank ASC
            LIMIT 1'
         );
         $q->execute(['gid' => $groupId, 'uid' => $currentUserId]);
@@ -3565,6 +4874,15 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
             'gid' => $groupId,
             'uid' => (int) ($candidate['user_id'] ?? 0),
           ]);
+          $promoteLegacy = $db->prepare(
+            'UPDATE group_members
+             SET role = "owner"
+             WHERE group_id = :gid AND user_id = :uid AND left_at IS NULL'
+          );
+          $promoteLegacy->execute([
+            'gid' => $groupId,
+            'uid' => (int) ($candidate['user_id'] ?? 0),
+          ]);
         }
       }
 
@@ -3574,6 +4892,12 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
          WHERE group_chat_id = :gid AND user_id = :uid AND left_at IS NULL'
       );
       $upd->execute(['gid' => $groupId, 'uid' => $currentUserId]);
+      $updLegacy = $db->prepare(
+        'UPDATE group_members
+         SET left_at = NOW()
+         WHERE group_id = :gid AND user_id = :uid AND left_at IS NULL'
+      );
+      $updLegacy->execute(['gid' => $groupId, 'uid' => $currentUserId]);
 
       $msg = $db->prepare(
         'INSERT INTO messages (sender_id, group_chat_id, message_type, body)
@@ -3591,7 +4915,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       $respond(['success' => false, 'message' => 'Could not leave group.'], 500);
     }
 
-    $respond(['success' => true, 'group_chat_id' => $groupId]);
+    $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId]);
   }
 
   if ($mode === 'delete') {
@@ -3608,6 +4932,12 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
          WHERE group_chat_id = :gid AND left_at IS NULL'
       );
       $updMembers->execute(['gid' => $groupId]);
+      $updLegacyMembers = $db->prepare(
+        'UPDATE group_members
+         SET left_at = NOW()
+         WHERE group_id = :gid AND left_at IS NULL'
+      );
+      $updLegacyMembers->execute(['gid' => $groupId]);
 
       $updGroup = $db->prepare(
         'UPDATE group_chats
@@ -3634,7 +4964,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       $respond(['success' => false, 'message' => 'Could not delete group.'], 500);
     }
 
-    $respond(['success' => true, 'group_chat_id' => $groupId]);
+    $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId]);
   }
 
   if ($mode === 'remove_member') {
@@ -3648,19 +4978,10 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
     }
 
     try {
-      $targetRoleQuery = $db->prepare(
-        'SELECT role
-         FROM group_chat_members
-         WHERE group_chat_id = :gid AND user_id = :uid AND left_at IS NULL
-         LIMIT 1'
-      );
-      $targetRoleQuery->execute(['gid' => $groupId, 'uid' => $targetUserId]);
-      $targetRoleRow = $targetRoleQuery->fetch();
-      if (!$targetRoleRow) {
+      $targetRole = $resolveGroupMemberRole($db, $groupId, $targetUserId);
+      if ($targetRole === null) {
         $respond(['success' => false, 'message' => 'Member not found in this group.'], 404);
       }
-
-      $targetRole = strtolower((string) ($targetRoleRow['role'] ?? 'member'));
       if (!$isGlobalModerator && $memberRole === 'admin' && in_array($targetRole, ['admin', 'owner'], true)) {
         $respond(['success' => false, 'message' => 'Admins can only remove regular members.'], 403);
       }
@@ -3671,7 +4992,13 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
          WHERE group_chat_id = :gid AND user_id = :uid AND left_at IS NULL'
       );
       $upd->execute(['gid' => $groupId, 'uid' => $targetUserId]);
-      if ((int) $upd->rowCount() <= 0) {
+      $legacyUpd = $db->prepare(
+        'UPDATE group_members
+         SET left_at = NOW()
+         WHERE group_id = :gid AND user_id = :uid AND left_at IS NULL'
+      );
+      $legacyUpd->execute(['gid' => $groupId, 'uid' => $targetUserId]);
+      if ((int) $upd->rowCount() <= 0 && (int) $legacyUpd->rowCount() <= 0) {
         $respond(['success' => false, 'message' => 'Member not found in this group.'], 404);
       }
 
@@ -3691,7 +5018,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       $respond(['success' => false, 'message' => 'Could not remove member.'], 500);
     }
 
-    $respond(['success' => true, 'group_chat_id' => $groupId, 'target_user_id' => $targetUserId]);
+    $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId, 'target_user_id' => $targetUserId]);
   }
 
   if ($mode === 'set_role') {
@@ -3719,14 +5046,25 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
         'uid' => $targetUserId,
         'role' => $targetRole,
       ]);
-      if ((int) $upd->rowCount() <= 0) {
+
+      $legacyUpd = $db->prepare(
+        'UPDATE group_members
+         SET role = :role
+         WHERE group_id = :gid AND user_id = :uid AND left_at IS NULL'
+      );
+      $legacyUpd->execute([
+        'gid' => $groupId,
+        'uid' => $targetUserId,
+        'role' => $targetRole,
+      ]);
+      if ((int) $upd->rowCount() <= 0 && (int) $legacyUpd->rowCount() <= 0) {
         $respond(['success' => false, 'message' => 'Member not found in this group.'], 404);
       }
     } catch (Exception $e) {
       $respond(['success' => false, 'message' => 'Could not update member role.'], 500);
     }
 
-    $respond(['success' => true, 'group_chat_id' => $groupId, 'target_user_id' => $targetUserId, 'target_role' => $targetRole]);
+    $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId, 'target_user_id' => $targetUserId, 'target_role' => $targetRole]);
   }
 
   if ($mode === 'report') {
@@ -3760,7 +5098,7 @@ if (isset($_GET['action']) && strtolower((string) $_GET['action']) === 'profile_
       $respond(['success' => false, 'message' => 'Could not submit report.'], 500);
     }
 
-    $respond(['success' => true, 'group_chat_id' => $groupId]);
+    $respond(['success' => true, 'group_id' => $groupId, 'group_chat_id' => $groupId]);
   }
 
   if ($mode === 'moderate_report') {
@@ -4480,7 +5818,21 @@ $displayAvatarResolved = $displayAvatarUrl;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Your professional profile on Diversity.is — manage your identity, skills, and activity.">
   <title>Profile — Diversity.is</title>
-
+  <!-- Early theme apply — prevents dark flash -->
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('app_theme');
+        if (t === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
   <!-- Poppins font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

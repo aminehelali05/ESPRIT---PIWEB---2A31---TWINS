@@ -48,12 +48,24 @@ $bootstrap = [
 ];
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Diversity.is Live Studio — broadcast or watch live streams with your network.">
   <title>Live Studio — Diversity.is</title>
+
+  <!-- Early theme apply — prevents flash -->
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('app_theme');
+        document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -266,6 +278,10 @@ $bootstrap = [
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                   <span>Share Screen</span>
                 </button>
+                <button type="button" class="live-ctrl-btn" id="lsDonateBtn" aria-label="Send donation">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  <span>Donate</span>
+                </button>
               </div>
             </div>
 
@@ -355,7 +371,7 @@ $bootstrap = [
             </div>
 
             <!-- Chat panel -->
-            <div class="live-chat-panel">
+            <div class="live-chat-panel glass-card">
               <div class="live-panel-head">
                 <h3>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -377,11 +393,161 @@ $bootstrap = [
               </div>
             </div>
 
+            <!-- Donation Support Card (Integrated under Chat) -->
+            <style>
+              .live-donation-panel {
+                background: var(--surf, #fff);
+                border: 1px solid var(--border, rgba(15,23,42,0.09));
+                border-radius: var(--radius-card, 16px);
+                padding: 20px;
+                margin-top: 16px;
+                text-align: center;
+                box-shadow: var(--shadow-sm, 0 2px 8px rgba(15,23,42,0.07));
+                transition: all 0.3s;
+              }
+              .ls-donation-header-mini h4 {
+                margin: 0 0 4px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: var(--heading, #0f172a);
+              }
+              .ls-donation-header-mini p {
+                margin: 0 0 16px;
+                font-size: 0.85rem;
+                color: var(--text-muted, #64748b);
+              }
+              .ls-amount-grid-mini {
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+                margin-bottom: 12px;
+              }
+              .ls-amount-btn {
+                flex: 1;
+                padding: 10px 0;
+                background: var(--surf-alt, #f8fafc);
+                border: 1px solid var(--border, rgba(15,23,42,0.09));
+                border-radius: 10px;
+                font-weight: 600;
+                color: var(--text, #1e293b);
+                cursor: pointer;
+                transition: all 0.2s;
+              }
+              .ls-amount-btn:hover, .ls-amount-btn.selected {
+                background: rgba(99,102,241,0.1);
+                border-color: #6366f1;
+                color: #6366f1;
+              }
+              .ls-input-group {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 16px;
+              }
+              .ls-mini-input {
+                width: 100%;
+                padding: 10px 14px;
+                background: var(--surf-alt, #f8fafc);
+                border: 1px solid var(--border, rgba(15,23,42,0.09));
+                border-radius: 10px;
+                font-family: 'Poppins', sans-serif;
+                font-size: 0.9rem;
+                color: var(--text, #1e293b);
+                outline: none;
+                transition: border-color 0.2s;
+                text-align: center;
+              }
+              .ls-mini-input:focus {
+                border-color: #6366f1;
+              }
+              .ls-donate-submit-btn {
+                width: 100%;
+                padding: 12px;
+                background: linear-gradient(135deg, #6366f1, #a855f7);
+                border: none;
+                border-radius: 12px;
+                color: #fff;
+                font-weight: 600;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(99,102,241,0.2);
+                transition: all 0.2s;
+              }
+              .ls-donate-submit-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(99,102,241,0.3);
+              }
+              /* Dark mode overrides if needed */
+              [data-theme="dark"] .live-donation-panel {
+                background: var(--surf, #111827);
+                border-color: var(--border, rgba(255,255,255,0.07));
+              }
+              [data-theme="dark"] .ls-amount-btn, 
+              [data-theme="dark"] .ls-mini-input {
+                background: rgba(255,255,255,0.03);
+                border-color: rgba(255,255,255,0.1);
+                color: #e2e8f0;
+              }
+            </style>
+            <div class="live-donation-panel">
+              <div class="ls-donation-header-mini">
+                <h4>Support Streamer</h4>
+                <p>Quick support for this stream</p>
+              </div>
+              <div class="ls-donation-body-mini">
+                <div class="ls-amount-grid-mini">
+                  <button class="ls-amount-btn" data-amount="1">$1</button>
+                  <button class="ls-amount-btn" data-amount="5">$5</button>
+                  <button class="ls-amount-btn" data-amount="10">$10</button>
+                </div>
+                <div class="ls-input-group mt-2">
+                  <input type="number" id="lsCustomAmount" class="ls-mini-input" min="1" step="0.5" placeholder="Custom Amount ($)">
+                  <input type="text" id="lsDonationMessage" class="ls-mini-input" placeholder="Your message (optional)">
+                </div>
+                <button id="lsSubmitDonation" class="ls-donate-submit-btn">
+                  <span>Send Support</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <script>
+              document.addEventListener('DOMContentLoaded', () => {
+                const amountBtns = document.querySelectorAll('.ls-amount-btn');
+                const customInput = document.getElementById('lsCustomAmount');
+                
+                amountBtns.forEach(btn => {
+                  btn.addEventListener('click', () => {
+                    amountBtns.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    customInput.value = btn.dataset.amount;
+                  });
+                });
+
+                customInput.addEventListener('input', () => {
+                  amountBtns.forEach(b => b.classList.remove('selected'));
+                });
+              });
+            </script>
+
           </aside><!-- /live-side-col -->
         </div><!-- /live-workspace -->
       </section><!-- /live-content-area -->
     </div><!-- /live-page-layout -->
   </main>
+
+  <div id="lsDonationToast" class="ls-donation-toast" style="display:none;">
+      <div class="ls-toast-content">
+          <div class="ls-toast-avatar" id="lsToastAvatar"></div>
+          <div class="ls-toast-text">
+              <strong id="lsToastName">User</strong> donated <span id="lsToastAmount">$0</span>
+          </div>
+      </div>
+  </div>
 
   <!-- ── Join notification ─────────────────────────── -->
   <div class="live-join-notification" id="lsJoinNotification" role="status" aria-live="polite">
@@ -390,6 +556,7 @@ $bootstrap = [
       <span id="lsJoinToastText">Someone joined the stream</span>
     </div>
   </div>
+
 
   <!-- ── Toast stack ───────────────────────────────── -->
   <div class="live-toast-stack" id="lsToastStack" aria-live="assertive"></div>

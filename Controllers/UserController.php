@@ -101,46 +101,8 @@ class UserController
 
     private function ensureAuthSchema(): void
     {
-        $db = config::getConnexion();
-        $table = $this->modelState->getTableName();
-
-        try {
-            $db->exec(
-                "CREATE TABLE IF NOT EXISTS password_resets (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    email VARCHAR(255) NOT NULL,
-                    token VARCHAR(255) NOT NULL,
-                    expires_at DATETIME NOT NULL,
-                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    INDEX idx_password_resets_email (email),
-                    INDEX idx_password_resets_token (token),
-                    INDEX idx_password_resets_expires_at (expires_at)
-                )"
-            );
-            $this->modelState->setColumnInCache('password_resets:token', true);
-        } catch (Exception $e) {
-            error_log('UserController::ensureAuthSchema password_resets - ' . $e->getMessage());
-        }
-
-        $userColumnDefinitions = [
-            'google_id' => "VARCHAR(191) DEFAULT NULL",
-            'google_avatar_url' => "VARCHAR(255) DEFAULT NULL",
-            'invitation_code' => "VARCHAR(100) DEFAULT NULL",
-            'referred_by' => "INT DEFAULT NULL",
-        ];
-
-        foreach ($userColumnDefinitions as $column => $definition) {
-            if ($this->userHasColumn($column)) {
-                continue;
-            }
-
-            try {
-                $db->exec("ALTER TABLE {$table} ADD COLUMN {$column} {$definition}");
-                $this->modelState->setColumnInCache('users:' . $column, true);
-            } catch (Exception $e) {
-                error_log('UserController::ensureAuthSchema ' . $column . ' - ' . $e->getMessage());
-            }
-        }
+        // Schema is owned by Diversity.sql (single source of truth).
+        return;
     }
 
     private function generateUniqueInvitationCode(string $firstName = '', string $lastName = ''): string
@@ -1299,8 +1261,6 @@ class UserController
 
     public function register(array $data): array
     {
-        $this->ensureAuthSchema();
-
         $firstName   = trim((string)($data['first_name']   ?? ''));
         $lastName    = trim((string)($data['last_name']    ?? ''));
         $email       = trim((string)($data['email']        ?? ''));
@@ -1410,8 +1370,6 @@ class UserController
 
     public function requestPasswordReset(string $email): array
     {
-        $this->ensureAuthSchema();
-
         $email = trim($email);
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['success' => false, 'message' => 'Please enter a valid email address.'];
@@ -1447,7 +1405,6 @@ class UserController
 
     public function isPasswordResetTokenValid(string $token): bool
     {
-        $this->ensureAuthSchema();
         $token = trim($token);
         if ($token === '') {
             return false;
@@ -1470,7 +1427,6 @@ class UserController
 
     public function resetPasswordWithToken(string $token, string $newPassword): array
     {
-        $this->ensureAuthSchema();
         $token = trim($token);
         if ($token === '') {
             return ['success' => false, 'message' => 'Reset token is missing.'];
@@ -1522,8 +1478,6 @@ class UserController
 
     public function getGoogleAuthorizationUrl(): array
     {
-        $this->ensureAuthSchema();
-
         $clientId = trim((string) config::get('GOOGLE_CLIENT_ID', ''));
         if ($clientId === '') {
             return ['success' => false, 'message' => 'Google OAuth client ID is not configured.'];
@@ -1548,8 +1502,6 @@ class UserController
 
     public function handleGoogleOAuthCallback(string $code, string $state): array
     {
-        $this->ensureAuthSchema();
-
         $expectedState = (string) ($_SESSION['google_oauth_state'] ?? '');
         unset($_SESSION['google_oauth_state']);
 
@@ -2417,32 +2369,6 @@ class UserController
         if ($userId <= 0) return null;
         $db = config::getConnexion();
         try {
-            // Auto-heal legacy schemas so rich Story editor payload can persist.
-            $storyColumnDDL = [
-                'music_url' => "VARCHAR(255) DEFAULT NULL",
-                'music_title' => "VARCHAR(255) DEFAULT NULL",
-                'drawing_data' => "LONGTEXT DEFAULT NULL",
-                'text_layers' => "JSON DEFAULT NULL",
-                'sticker_layers' => "JSON DEFAULT NULL",
-                'filter_css' => "VARCHAR(255) DEFAULT NULL",
-                'gradient_bg' => "VARCHAR(255) DEFAULT NULL",
-                'duration' => "INT NOT NULL DEFAULT 5",
-                'visibility' => "ENUM('public','friends') NOT NULL DEFAULT 'public'",
-                'location_label' => "VARCHAR(255) DEFAULT NULL",
-                'content_json' => "LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(content_json))",
-            ];
-            foreach ($storyColumnDDL as $column => $ddl) {
-                if ($this->storiesHasColumn($column)) {
-                    continue;
-                }
-                try {
-                    $db->exec("ALTER TABLE stories ADD COLUMN `{$column}` {$ddl}");
-                    $this->modelState->setColumnInCache('stories:' . $column, true);
-                } catch (Exception $e) {
-                    // Keep backward compatibility even if a column cannot be added.
-                }
-            }
-
             $jsonField = static function ($value): ?string {
                 if ($value === null || $value === '') {
                     return null;
@@ -2892,33 +2818,37 @@ class UserController
             $db->beginTransaction();
 
             $q = $db->prepare(
-                "INSERT INTO group_chats (name, description, created_by) VALUES (:name, :description, :created_by)"
+                "INSERT INTO conversations (type, name, description, created_by) VALUES ('group', :name, :description, :created_by)"
             );
             $q->execute([
                 'name'        => trim($name),
                 'description' => trim($description),
                 'created_by'  => $creatorId,
             ]);
-            $groupId = (int)$db->lastInsertId();
+            $conversationId = (int)$db->lastInsertId();
 
-            // Add creator as owner
-            $db->prepare(
-                "INSERT INTO group_chat_members (group_chat_id, user_id, role) VALUES (:gid, :uid, 'owner')"
-            )->execute(['gid' => $groupId, 'uid' => $creatorId]);
-
-            // Add members
-            $memberStmt = $db->prepare(
-                "INSERT IGNORE INTO group_chat_members (group_chat_id, user_id, role) VALUES (:gid, :uid, 'member')"
+            $conversationMemberStmt = $db->prepare(
+                "INSERT IGNORE INTO conversation_members (conversation_id, user_id, role) VALUES (:conversation_id, :user_id, :role)"
             );
+            $conversationMemberStmt->execute(['conversation_id' => $conversationId, 'user_id' => $creatorId, 'role' => 'admin']);
+
             foreach ($memberIds as $memberId) {
                 $memberId = (int)$memberId;
                 if ($memberId > 0 && $memberId !== $creatorId) {
-                    $memberStmt->execute(['gid' => $groupId, 'uid' => $memberId]);
+                    $conversationMemberStmt->execute(['conversation_id' => $conversationId, 'user_id' => $memberId, 'role' => 'member']);
                 }
             }
 
+            $db->prepare(
+                "INSERT INTO messages (sender_id, conversation_id, message_type, body) VALUES (:sender_id, :conversation_id, 'system', :body)"
+            )->execute([
+                'sender_id' => $creatorId,
+                'conversation_id' => $conversationId,
+                'body' => 'Group chat created.',
+            ]);
+
             $db->commit();
-            return $groupId;
+            return $conversationId;
         } catch (Exception $e) {
             if ($db->inTransaction()) $db->rollBack();
             error_log('UserController::createGroupChat — ' . $e->getMessage());
@@ -2931,11 +2861,12 @@ class UserController
         $db = config::getConnexion();
         try {
             $q = $db->prepare(
-                "SELECT g.*, gm.role as my_role,
-                        (SELECT COUNT(*) FROM group_chat_members WHERE group_chat_id = g.id AND left_at IS NULL) as member_count
-                 FROM group_chats g
-                 JOIN group_chat_members gm ON gm.group_chat_id = g.id AND gm.user_id = :user_id AND gm.left_at IS NULL
-                 ORDER BY g.last_message_at DESC, g.created_at DESC"
+                "SELECT c.*, cm.role as my_role,
+                        (SELECT COUNT(*) FROM conversation_members WHERE conversation_id = c.id AND left_at IS NULL) as member_count
+                 FROM conversations c
+                 JOIN conversation_members cm ON cm.conversation_id = c.id AND cm.user_id = :user_id AND cm.left_at IS NULL
+                 WHERE c.type = 'group'
+                 ORDER BY c.updated_at DESC, c.created_at DESC"
             );
             $q->execute(['user_id' => $userId]);
             return $q->fetchAll() ?: [];
@@ -2947,16 +2878,14 @@ class UserController
     public function getGroupChatMembers(int $groupId): array
     {
         $db = config::getConnexion();
-        $table = $this->modelState->getTableName();
         try {
             $q = $db->prepare(
-                "SELECT u.id, u.first_name, u.last_name, u.avatar_url, u.email, gm.role, gm.joined_at
-                 FROM group_chat_members gm
-                 JOIN {$table} u ON u.id = gm.user_id
-                 WHERE gm.group_chat_id = :group_id AND gm.left_at IS NULL
-                 ORDER BY FIELD(gm.role, 'owner', 'admin', 'member'), gm.joined_at ASC"
+                "SELECT u.id, u.first_name, u.last_name, u.avatar_url, u.email, cm.role, cm.joined_at
+                 FROM conversation_members cm
+                 JOIN users u ON u.id = cm.user_id
+                 WHERE cm.conversation_id = :gid AND cm.left_at IS NULL"
             );
-            $q->execute(['group_id' => $groupId]);
+            $q->execute(['gid' => $groupId]);
             return $q->fetchAll() ?: [];
         } catch (Exception $e) {
             return [];
@@ -2984,6 +2913,21 @@ class UserController
             return $q->fetchAll() ?: [];
         } catch (Exception $e) {
             return [];
+        }
+    }
+
+    public function getBalance(int $userId): float
+    {
+        if ($userId <= 0) {
+            return 0.0;
+        }
+
+        try {
+            $q = $this->pdo->prepare('SELECT balance FROM wallets WHERE user_id = :user_id LIMIT 1');
+            $q->execute(['user_id' => $userId]);
+            return (float) (($q->fetch())['balance'] ?? 0);
+        } catch (Throwable $exception) {
+            return 0.0;
         }
     }
 }
