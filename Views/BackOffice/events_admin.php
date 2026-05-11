@@ -34,22 +34,7 @@ $allEvents = $eventController->listEvents();
 </head>
 <body style="background: #020617; color: #e2e8f0; font-family: Inter, sans-serif;">
     <div class="app-container" style="display: flex; min-height: 100vh;">
-        <aside class="sidebar" style="width: 260px; border-right: 1px solid rgba(255,255,255,0.1); padding: 20px;">
-            <div class="brand" style="margin-bottom: 40px;">
-                <h2 style="color: #38bdf8;">VoP Admin</h2>
-            </div>
-            <nav class="nav-menu">
-                <a href="dashboard.php" class="nav-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; color: #94a3b8; text-decoration: none;">
-                    <i data-lucide="layout-dashboard"></i> Overview
-                </a>
-                <a href="events_admin.php" class="nav-item active" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(56, 189, 248, 0.1); color: #38bdf8; text-decoration: none; border-radius: 8px;">
-                    <i data-lucide="calendar"></i> Events
-                </a>
-                <a href="resources_admin.php" class="nav-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; color: #94a3b8; text-decoration: none;">
-                    <i data-lucide="library"></i> Resources
-                </a>
-            </nav>
-        </aside>
+        <?php include 'admin_sidebar.php'; ?>
 
         <main class="main-content" style="flex: 1; padding: 40px;">
             <header style="margin-bottom: 40px;">
@@ -79,7 +64,10 @@ $allEvents = $eventController->listEvents();
                                 <strong><?= htmlspecialchars($e['title']) ?></strong><br>
                                 <small style="color: #94a3b8;"><?= htmlspecialchars(substr($e['description'], 0, 50)) ?>...</small>
                             </td>
-                            <td><?= date('M d, Y', strtotime($e['event_date'])) ?></td>
+                            <td>
+                                <?= date('M d, Y', strtotime($e['start_date'])) ?><br>
+                                <small style="opacity: 0.7;"><?= date('H:i', strtotime($e['start_date'])) ?> - <?= date('H:i', strtotime($e['end_date'])) ?></small>
+                            </td>
                             <td><?= htmlspecialchars($e['category']) ?></td>
                             <td>
                                 <a href="../../index.php?action=approve_event&id=<?= $e['id'] ?>" class="action-btn btn-approve">Approve</a>
@@ -116,8 +104,11 @@ $allEvents = $eventController->listEvents();
                                 </span>
                             </td>
                             <td>
+                                <a href="../FrontOffice/event_details.php?id=<?= $e['id'] ?>" class="action-btn" style="background: rgba(255,255,255,0.1); color: white;">View</a>
+                                <?php if ($e['user_id'] == ($sidebarUser['id'] ?? -1)): ?>
                                 <a href="../FrontOffice/event_edit.php?id=<?= $e['id'] ?>" class="action-btn" style="background: rgba(255,255,255,0.1); color: white;">Edit</a>
                                 <a href="../../index.php?action=delete_event&id=<?= $e['id'] ?>" class="action-btn" style="color: #ef4444;" onclick="return confirm('Delete this event permanently?')">Delete</a>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

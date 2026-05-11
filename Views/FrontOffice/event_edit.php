@@ -35,8 +35,10 @@ if (!$isOwner && !$isAdmin) {
   <title>Edit Event — Diversity.is</title>
   <link rel="stylesheet" href="../../assets/css/global.css">
   <link rel="stylesheet" href="../../assets/css/projects.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Leaflet for Map Location -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body class="grid-dot-bg">
   <canvas id="gradient-canvas"></canvas>
@@ -66,7 +68,7 @@ if (!$isOwner && !$isAdmin) {
             </div>
         <?php endif; ?>
 
-        <form id="eventEditForm" action="../../index.php?action=update_event" method="POST" class="fade-in-section">
+        <form id="eventEditForm" action="../../index.php?action=update_event" method="POST" class="fade-in-section" novalidate>
           <input type="hidden" name="id" value="<?= $event->getId() ?>">
           
           <div style="margin-bottom: 20px;">
@@ -76,9 +78,16 @@ if (!$isOwner && !$isAdmin) {
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
             <div>
-              <label class="text-small" style="font-weight: 600; display: block; margin-bottom: 8px;">Date & Time</label>
-              <input type="datetime-local" name="event_date" value="<?= date('Y-m-d\TH:i', strtotime($event->getEventDate())) ?>" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;">
+              <label class="text-small" style="font-weight: 600; display: block; margin-bottom: 8px;">Start Date & Time</label>
+              <input type="datetime-local" name="start_date" value="<?= date('Y-m-d\TH:i', strtotime($event->getStartDate())) ?>" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;">
             </div>
+            <div>
+              <label class="text-small" style="font-weight: 600; display: block; margin-bottom: 8px;">End Date & Time</label>
+              <input type="datetime-local" name="end_date" value="<?= date('Y-m-d\TH:i', strtotime($event->getEndDate())) ?>" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
             <div>
               <label class="text-small" style="font-weight: 600; display: block; margin-bottom: 8px;">Category</label>
               <select name="category" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;">
@@ -92,7 +101,9 @@ if (!$isOwner && !$isAdmin) {
 
           <div style="margin-bottom: 20px;">
             <label class="text-small" style="font-weight: 600; display: block; margin-bottom: 8px;">Location</label>
-            <input type="text" name="location" value="<?= htmlspecialchars($event->getLocation()) ?>" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px;">
+            <div style="margin-bottom: 10px; font-size: 0.8rem; opacity: 0.8;">Click on the map to set the exact location.</div>
+            <div id="eventLocationMap" style="height: 250px; border-radius: 12px; margin-bottom: 15px; z-index: 1;"></div>
+            <input type="text" id="formLocation" name="location" value="<?= htmlspecialchars($event->getLocation()) ?>" class="glass-input" style="width: 100%; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); cursor: default;" readonly>
           </div>
 
           <div style="margin-bottom: 20px;">
@@ -122,6 +133,55 @@ if (!$isOwner && !$isAdmin) {
 
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/event-resource-validation.js"></script>
-  <script>lucide.createIcons();</script>
+  <script>
+    lucide.createIcons();
+
+    // Map logic
+    document.addEventListener("DOMContentLoaded", function() {
+        let map = L.map('eventLocationMap').setView([36.8065, 10.1815], 11); // Default
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        let marker = L.marker([36.8065, 10.1815], {draggable: true}).addTo(map);
+
+        // Try to search the current location string to place the marker
+        const currentLoc = document.getElementById('formLocation').value;
+        if (currentLoc && currentLoc !== "Remote") {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentLoc)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = data[0].lat;
+                        const lon = data[0].lon;
+                        map.setView([lat, lon], 13);
+                        marker.setLatLng([lat, lon]);
+                    }
+                })
+                .catch(e => console.log(e));
+        }
+
+        const updateLocation = async (lat, lng) => {
+            const locInput = document.getElementById('formLocation');
+            locInput.value = 'Fetching address...';
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                const data = await res.json();
+                locInput.value = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            } catch (e) {
+                locInput.value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            }
+        };
+
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+        marker.on('dragend', function(e) {
+            const pos = marker.getLatLng();
+            updateLocation(pos.lat, pos.lng);
+        });
+    });
+  </script>
 </body>
 </html>

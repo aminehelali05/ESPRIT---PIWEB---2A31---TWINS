@@ -1,37 +1,10 @@
-<<<<<<< Updated upstream
-﻿<!DOCTYPE html>
-<html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Your professional profile on Diversity.is â€” manage your identity, skills, and activity.">
-  <title>Profile â€” Diversity.is</title>
-  <link rel="stylesheet" href="../assets/css/global.css">
-  <link rel="stylesheet" href="../assets/css/profile.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body class="grid-dot-bg">
-  <canvas id="gradient-canvas"></canvas>
-
-  <nav class="navbar" id="navbar">
-    <div class="container">
-      <a href="TemplateHome.php" class="navbar-brand"><div class="brand-icon">â¬¡</div>Diversity.is</a>
-      <div class="navbar-nav" id="navbar-nav">
-        <a href="TemplateHome.php">Home</a>
-        <a href="auth.html">Sign In</a>
-        <a href="social.html">Feed</a>
-        <a href="skills.html">Skills</a>
-        <a href="projects.html">Projects</a>
-        <a href="reviews.html">Reviews</a>
-        <a href="challenges.html">Challenges</a>
-      </div>
-=======
 <?php
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
 include_once(__DIR__ . '/../../Controllers/UserController.php');
+include_once(__DIR__ . '/../../Controllers/EventController.php');
 
 if (!UserController::isAuthenticated()) {
   $_SESSION['flash_error'] = 'Please sign in to access your profile.';
@@ -40,6 +13,7 @@ if (!UserController::isAuthenticated()) {
 }
 
 $userController = new UserController();
+$eventController = new EventController();
 
 $buildGeneratedAvatarUrl = static function (string $firstName, string $lastName, string $email = ''): string {
   $seed = trim($firstName . '-' . $lastName . '-' . $email);
@@ -1187,7 +1161,6 @@ $displayAvatarResolved = $displayAvatarUrl;
         Diversity.is
       </a>
       <div class="navbar-nav" id="navbar-nav" aria-hidden="true"></div>
->>>>>>> Stashed changes
       <div class="navbar-actions">
         <button class="theme-toggle" aria-label="Toggle theme">
           <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -1195,48 +1168,24 @@ $displayAvatarResolved = $displayAvatarUrl;
         </button>
         <div class="nav-profile">
           <button class="nav-profile-btn" aria-label="User menu">
-            <div class="nav-avatar">AD</div>
+            <div class="nav-avatar"><?= htmlspecialchars($initials) ?></div>
           </button>
           <div class="nav-dropdown">
             <div class="nav-dropdown-header">
-              <strong>Admin User</strong>
-              <span>admin@diversity.is</span>
+              <strong><?= htmlspecialchars($displayName) ?></strong>
+              <span><?= htmlspecialchars($displayEmail) ?></span>
             </div>
-            <a href="profile.html" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="dashboard.html" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
+            <a href="../BackOffice/dashboard.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
-            <a href="auth.html" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
+            <a href="../../index.php?action=logout" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
         </div>
       </div>
-      <div class="nav-toggle" id="nav-toggle"><span></span><span></span><span></span></div>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Toggle mobile menu" aria-controls="navbar-nav" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </nav>
 
-<<<<<<< Updated upstream
-  <main class="profile-main">
-    <div class="container">
-
-      <!-- Profile Header Card -->
-      <div class="profile-header glass-card fade-in-section">
-        <div class="profile-header-glow"></div>
-        <div class="profile-header-inner">
-          <!-- Avatar -->
-          <div class="profile-avatar-wrap">
-            <div class="profile-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=JohnDoe" alt="Profile" id="profileAvatar">
-              <button class="avatar-upload-btn" id="avatarUploadBtn" title="Change Photo">
-                <i data-lucide="camera" class="w-5 h-5"></i>
-              </button>
-              <input type="file" id="avatarInput" accept="image/*" hidden>
-            </div>
-            <button class="avatar-random-btn" id="randomAvatarBtn" title="Random Avatar">
-              <i data-lucide="dices" class="w-3.5 h-3.5"></i>
-            </button>
-            <div class="avatar-verified" title="Verified Account">
-              <i data-lucide="badge-check" class="w-4 h-4"></i>
-            </div>
-=======
   <!-- ── Main ──────────────────────────────────────── -->
   <main class="profile-main" id="profile-main-content" tabindex="-1">
     <div class="container profile-page-layout">
@@ -1248,19 +1197,15 @@ $displayAvatarResolved = $displayAvatarUrl;
           <div>
             <h4><?= htmlspecialchars($sidebarDisplayName) ?></h4>
             <p><?= htmlspecialchars($profileLevel) ?></p>
->>>>>>> Stashed changes
           </div>
         </div>
         <nav class="left-nav">
-          <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> Home Feed</a>
-          <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> Social</a>
-          <a class="active" href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> Profile</a>
-          <a href="brainstormings.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6m-5 3h4M12 2a7 7 0 00-7 7c0 2.5 1.5 4.5 3 6v1a2 2 0 002 2h4a2 2 0 002-2v-1c1.5-1.5 3-3.5 3-6a7 7 0 00-7-7z"/></svg> Brainstorming</a>
-          <a href="skills.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Skills & Certificates</a>
-          <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg> Projects & Collaborators</a>
-          <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z"/></svg> Reviews & Ratings</a>
-          <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg> Challenges & Daily Quiz</a>
-          <?php if ($isAdminSidebar): ?><a href="../BackOffice/dashboard.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M14 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V6z"/><path d="M4 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z"/></svg> User Management</a><?php endif; ?>
+          <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span>Home Feed</span></a>
+          <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg><span>Social Feed</span></a>
+          <a href="brainstormings.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6m-5 3h4M12 2a7 7 0 00-7 7c0 2.5 1.5 4.5 3 6v1a2 2 0 002 2h4a2 2 0 002-2v-1c1.5-1.5 3-3.5 3-6a7 7 0 00-7-7z"/></svg><span>Brainstorming</span></a>
+          <a href="events.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Events</span></a>
+
+          <a class="active" href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg><span>Profile</span></a>
         </nav>
         <div class="left-gamification">
           <div class="mini-score"><span>Reputation</span><strong><?= (int) $reputationScore ?></strong></div>
@@ -1268,44 +1213,6 @@ $displayAvatarResolved = $displayAvatarUrl;
         </div>
       </aside>
 
-<<<<<<< Updated upstream
-          <!-- Info -->
-          <div class="profile-info">
-            <div class="profile-info-top">
-              <h1 class="profile-name">John Doe</h1>
-              <span class="profile-badge badge-legend">
-                <i data-lucide="crown" class="w-3 h-3"></i> Legend
-              </span>
-            </div>
-            <div class="profile-meta-row">
-              <span class="profile-meta-item"><i data-lucide="mail" class="w-3.5 h-3.5"></i> john@diversity.is</span>
-              <span class="profile-meta-dot"></span>
-              <span class="profile-meta-item"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i> San Francisco, CA</span>
-              <span class="profile-meta-dot"></span>
-              <span class="profile-meta-item"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Joined Sept 2023</span>
-            </div>
-            <div class="profile-tags">
-              <span class="profile-tag"><i data-lucide="code-2" class="w-3 h-3"></i> Full Stack Dev</span>
-              <span class="profile-tag tag-accent"><i data-lucide="rocket" class="w-3 h-3"></i> Innovator</span>
-              <span class="profile-tag tag-green"><i data-lucide="users" class="w-3 h-3"></i> Community Builder</span>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="profile-actions">
-            <button class="btn btn-primary btn-sm" id="editToggleBtn">
-              <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Edit Details
-            </button>
-            <button class="profile-action-icon" title="Export Data">
-              <i data-lucide="download" class="w-4 h-4"></i>
-            </button>
-            <button class="profile-action-icon action-danger" title="Sign Out">
-              <i data-lucide="log-out" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-=======
       <!-- Main content -->
       <section class="profile-content-area">
 
@@ -1402,6 +1309,42 @@ $displayAvatarResolved = $displayAvatarUrl;
             </div>
           </div>
         </section>
+
+        <!-- ── Mes Favoris (Special for Freelancers) ── -->
+        <?php 
+        $isFreelancer = strtolower($displayRole) === 'freelancer' || strtolower($displayTitle) === 'freelancer';
+        if ($isFreelancer): 
+          $favorites = $eventController->listFavorites($sessionUser['id'] ?? 0);
+        ?>
+        <section class="glass-card panel fade-in-section" style="padding: 28px; margin-top: 30px;" aria-labelledby="fav-heading">
+          <div class="about-v2-label" id="fav-heading">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Mes Favoris
+          </div>
+          
+          <?php if (empty($favorites)): ?>
+            <div class="about-v2-empty">
+              <div class="about-v2-empty-icon"><i data-lucide="heart"></i></div>
+              <h4>No favorites yet</h4>
+              <p>Explore events and click the heart icon to save them here for quick access.</p>
+              <a href="events.php" class="btn btn-secondary btn-sm" style="margin-top: 15px;">Explore Events</a>
+            </div>
+          <?php else: ?>
+            <div class="grid grid-3" style="gap: 20px; margin-top: 20px;">
+              <?php foreach ($favorites as $fav): ?>
+              <div class="project-card glass-card" style="padding: 15px; background: rgba(255,255,255,0.03);">
+                <span class="text-small" style="color: var(--color-accent); font-weight: 600;"><?= htmlspecialchars($fav['category']) ?></span>
+                <h4 style="font-size: 14px; margin: 8px 0;"><?= htmlspecialchars($fav['title']) ?></h4>
+                <div class="text-small" style="opacity: 0.7; margin-bottom: 12px;">
+                    <i data-lucide="calendar" class="w-3 h-3"></i> <?= date('M d, Y', strtotime($fav['event_date'])) ?>
+                </div>
+                <a href="event_details.php?id=<?= $fav['id'] ?>" class="btn btn-secondary btn-sm" style="width: 100%; font-size: 11px;">Details</a>
+              </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+        </section>
+        <?php endif; ?>
 
         <!-- ── Top grid: About + Insights ─────────────── -->
         <div class="profile-top-grid">
@@ -1559,7 +1502,6 @@ $displayAvatarResolved = $displayAvatarUrl;
             </div>
           </aside>
         </div><!-- /profile-top-grid -->
->>>>>>> Stashed changes
 
         <!-- ── Content Grid ────────────────────────────── -->
         <div class="profile-grid">
@@ -1597,26 +1539,6 @@ $displayAvatarResolved = $displayAvatarUrl;
               </div>
             </div>
 
-<<<<<<< Updated upstream
-          <!-- Skills Panel -->
-          <div class="glass-card panel fade-in-section">
-            <div class="panel-header">
-              <h3 class="panel-title">Skills & Expertise</h3>
-              <button class="panel-action" title="Add Skill"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
-            </div>
-            <div class="skills-tags">
-              <span class="skill-tag">React <button class="skill-remove"><i data-lucide="x" class="w-2.5 h-2.5"></i></button></span>
-              <span class="skill-tag">Node.js <button class="skill-remove"><i data-lucide="x" class="w-2.5 h-2.5"></i></button></span>
-              <span class="skill-tag">TypeScript <button class="skill-remove"><i data-lucide="x" class="w-2.5 h-2.5"></i></button></span>
-              <span class="skill-tag">Python <button class="skill-remove"><i data-lucide="x" class="w-2.5 h-2.5"></i></button></span>
-              <span class="skill-tag">System Design <button class="skill-remove"><i data-lucide="x" class="w-2.5 h-2.5"></i></button></span>
-              <span class="skill-tag">AWS <button class="skill-remove"><i data-lucide="x" class="w-2.5 h-2.5"></i></button></span>
-            </div>
-            <div class="skill-input-row">
-              <input type="text" placeholder="Add a skill..." class="skill-input" id="skillInput">
-            </div>
-          </div>
-=======
             <!-- ── Skills & Certificates ──────────────── -->
             <div class="glass-card panel fade-in-section">
               <div class="skills-section-v2">
@@ -1670,7 +1592,6 @@ $displayAvatarResolved = $displayAvatarUrl;
                 </div>
               </div>
             </div>
->>>>>>> Stashed changes
 
             <!-- Connections -->
             <div class="glass-card panel fade-in-section">
@@ -1695,10 +1616,6 @@ $displayAvatarResolved = $displayAvatarUrl;
                 </div>
               </div>
             </div>
-<<<<<<< Updated upstream
-          </div>
-        </div>
-=======
 
             <!-- Achievements -->
             <div class="glass-card panel fade-in-section">
@@ -1719,7 +1636,6 @@ $displayAvatarResolved = $displayAvatarUrl;
                 <small>+180 XP to reach Level 13</small>
               </div>
             </div>
->>>>>>> Stashed changes
 
           </div><!-- /profile-left -->
 
@@ -1804,39 +1720,6 @@ $displayAvatarResolved = $displayAvatarUrl;
               </div>
             </div>
 
-<<<<<<< Updated upstream
-          <!-- History Panel -->
-          <div class="tab-content" data-content="history">
-            <div class="glass-card panel fade-in-section">
-              <h4 class="panel-sub-title">Recent Activity</h4>
-              <div class="activity-timeline">
-                <div class="activity-item">
-                  <div class="activity-dot dot-blue"></div>
-                  <div class="activity-body">
-                    <p>Updated profile settings</p>
-                    <span>Just now Â· Web</span>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot dot-green"></div>
-                  <div class="activity-body">
-                    <p>Completed <strong>API Design Sprint</strong> challenge</p>
-                    <span>2 hours ago Â· +300 XP</span>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot dot-purple"></div>
-                  <div class="activity-body">
-                    <p>Reviewed <strong>Sarah Kim's</strong> project</p>
-                    <span>Yesterday, 14:00 Â· Review</span>
-                  </div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot dot-amber"></div>
-                  <div class="activity-body">
-                    <p>Earned <strong>Team Player</strong> badge</p>
-                    <span>3 days ago Â· Achievement</span>
-=======
             <!-- ── Security Panel v2 — Premium Redesign ── -->
             <div class="tab-content" data-content="security">
               <div class="glass-card panel fade-in-section">
@@ -1926,7 +1809,6 @@ $displayAvatarResolved = $displayAvatarUrl;
                         </div>
                       </div>
                     </form>
->>>>>>> Stashed changes
                   </div>
                 </div>
 
@@ -1957,40 +1839,6 @@ $displayAvatarResolved = $displayAvatarUrl;
               </div>
             </div>
 
-<<<<<<< Updated upstream
-      <!-- Edit Profile Modal -->
-      <div class="modal-overlay" id="editModal">
-        <div class="modal glass-card">
-          <div class="modal-header">
-            <h3>Edit Profile Details</h3>
-            <button class="modal-close" id="closeEditBtn"><i data-lucide="x" class="w-4 h-4"></i></button>
-          </div>
-          <form id="profileForm" class="modal-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label-sm">Full Name</label>
-                <input type="text" class="form-input" id="editName" placeholder="Your name" value="John Doe">
-              </div>
-              <div class="form-group">
-                <label class="form-label-sm">Title / Role</label>
-                <input type="text" class="form-input" placeholder="e.g. Full Stack Developer" value="Full Stack Dev">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label-sm">Location</label>
-              <input type="text" class="form-input" id="editLocation" placeholder="City, Country" value="San Francisco, CA">
-            </div>
-            <div class="form-group">
-              <div class="form-label-row">
-                <label class="form-label-sm">Bio</label>
-                <button type="button" class="ai-enhance-btn"><i data-lucide="sparkles" class="w-3 h-3"></i> Enhance with AI</button>
-              </div>
-              <textarea class="form-input" id="editBio" rows="3" placeholder="Tell us about yourself...">Passionate full-stack developer with 5+ years of experience building scalable web applications.</textarea>
-            </div>
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary btn-sm" id="cancelEditBtn">Cancel</button>
-              <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
-=======
           </div><!-- /profile-right -->
         </div><!-- /profile-grid -->
 
@@ -2143,7 +1991,6 @@ $displayAvatarResolved = $displayAvatarUrl;
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
                 Save Profile
               </button>
->>>>>>> Stashed changes
             </div>
 
           </div>
@@ -2153,14 +2000,6 @@ $displayAvatarResolved = $displayAvatarUrl;
     </div>
   </main>
 
-<<<<<<< Updated upstream
-  <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/mouse-tracking.js"></script>
-  <script src="../assets/js/profile.js"></script>
-</body>
-</html>
-
-=======
   <!-- FAB -->
   <button class="profile-fab" id="profileFab" aria-label="Quick profile actions">
     <i data-lucide="plus" class="w-5 h-5"></i>
@@ -2192,4 +2031,3 @@ $displayAvatarResolved = $displayAvatarUrl;
   <script src="../../assets/js/profile.js"></script>
 </body>
 </html>
->>>>>>> Stashed changes

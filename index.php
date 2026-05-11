@@ -8,14 +8,12 @@ include_once(__DIR__ . '/Controllers/EventController.php');
 include_once(__DIR__ . '/Controllers/ResourceController.php');
 include_once(__DIR__ . '/Controllers/BrainstormingController.php');
 include_once(__DIR__ . '/Controllers/IdeaController.php');
-include_once(__DIR__ . '/Controllers/AiController.php');
 
 $authController = new UserController();
 $eventController = new EventController();
 $resourceController = new ResourceController();
 $brainstormingController = new BrainstormingController();
 $ideaController = new IdeaController();
-$aiController = new AiController();
 
 $action = $_GET['action'] ?? null;
 $page = $_GET['page'] ?? null;
@@ -86,18 +84,21 @@ if ($action === 'create_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $user['id'],
         $_POST['title'] ?? '',
         $_POST['description'] ?? '',
-        $_POST['event_date'] ?? '',
+        $_POST['start_date'] ?? '',
+        $_POST['end_date'] ?? '',
         $_POST['location'] ?? '',
         $_POST['category'] ?? '',
         'EN_ATTENTE',
         (int)($_POST['capacite_max'] ?? 0)
     );
-    if ($eventController->addEvent($event)) {
-        $_SESSION['flash_success'] = 'Event submitted for validation.';
+    $newId = $eventController->addEvent($event);
+    if ($newId) {
+        $_SESSION['flash_success'] = 'Event created! Now configure its resources.';
+        header('Location: Views/FrontOffice/event_resources.php?event_id=' . $newId);
     } else {
         $_SESSION['flash_error'] = 'Failed to create event.';
+        header('Location: Views/FrontOffice/events.php');
     }
-    header('Location: Views/FrontOffice/events.php');
     exit;
 }
 
@@ -105,7 +106,7 @@ if ($action === 'update_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!UserController::isAuthenticated()) { header('Location: Views/FrontOffice/auth.php'); exit; }
     $id = $_POST['id'] ?? null;
 
-    $errors = $eventController->validate($_POST);
+    $errors = $eventController->validate($_POST, $id);
     if (!empty($errors)) {
         $_SESSION['flash_error'] = implode(' ', $errors);
         header('Location: Views/FrontOffice/event_edit.php?id=' . $id);
@@ -113,30 +114,34 @@ if ($action === 'update_event' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $existing = $eventController->getEventById($id);
-    if ($existing && ($existing->getUserId() == UserController::currentUser()['id'] || UserController::isAdmin())) {
+    $currentUser = UserController::currentUser();
+    if ($existing && $currentUser && $existing->getUserId() == $currentUser['id']) {
         $existing->setTitle($_POST['title'] ?? $existing->getTitle());
         $existing->setDescription($_POST['description'] ?? $existing->getDescription());
-        $existing->setEventDate($_POST['event_date'] ?? $existing->getEventDate());
+        $existing->setStartDate($_POST['start_date'] ?? $existing->getStartDate());
+        $existing->setEndDate($_POST['end_date'] ?? $existing->getEndDate());
         $existing->setLocation($_POST['location'] ?? $existing->getLocation());
         $existing->setCategory($_POST['category'] ?? $existing->getCategory());
-        if (UserController::isAdmin()) {
-            $existing->setStatus($_POST['status'] ?? $existing->getStatus());
-        }
         $eventController->updateEvent($existing, $id);
         $_SESSION['flash_success'] = 'Event updated.';
+    } else {
+        $_SESSION['flash_error'] = 'You can only edit events you created.';
     }
-    header('Location: Views/FrontOffice/events.php');
+    header('Location: Views/FrontOffice/event_details.php?id=' . $id);
     exit;
 }
 
 if ($action === 'delete_event' && isset($_GET['id'])) {
     if (!UserController::isAuthenticated()) { header('Location: Views/FrontOffice/auth.php'); exit; }
-    $event = $eventController->getEventById($_GET['id']);
-    if ($event && ($event->getUserId() == UserController::currentUser()['id'] || UserController::isAdmin())) {
+    $eventToDelete = $eventController->getEventById($_GET['id']);
+    $currentUser = UserController::currentUser();
+    if ($eventToDelete && $currentUser && $eventToDelete->getUserId() == $currentUser['id']) {
         $eventController->deleteEvent($_GET['id']);
         $_SESSION['flash_success'] = 'Event deleted.';
+    } else {
+        $_SESSION['flash_error'] = 'You can only delete events you created.';
     }
-    header('Location: ' . (UserController::isAdmin() ? 'Views/BackOffice/events_all.php' : 'Views/FrontOffice/events.php'));
+    header('Location: Views/FrontOffice/events.php');
     exit;
 }
 
@@ -184,7 +189,8 @@ if ($action === 'get_calendar_events') {
         $formatted[] = [
             'id' => $e['id'],
             'title' => $e['title'],
-            'start' => $e['event_date'],
+            'start' => $e['start_date'],
+            'end' => $e['end_date'],
             'extendedProps' => [
                 'category' => $e['category'],
                 'location' => $e['location']
@@ -192,6 +198,51 @@ if ($action === 'get_calendar_events') {
         ];
     }
     echo json_encode($formatted);
+    exit;
+}
+
+// ── Save Event Resources (Wizard) ───────────────────────────────────
+if ($action === 'save_event_resources' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    if (!UserController::isAuthenticated()) {
+        echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+        exit;
+    }
+    $user = UserController::currentUser();
+    $event_id = $_POST['event_id'] ?? null;
+    $resourcesJson = $_POST['resources'] ?? '[]';
+    $resources = json_decode($resourcesJson, true);
+
+    if (!$event_id || !is_array($resources) || empty($resources)) {
+        echo json_encode(['success' => false, 'message' => 'No resources provided.']);
+        exit;
+    }
+
+    // Delete existing resources for this event before saving new ones
+    $existing = $resourceController->getResourcesByEvent($event_id);
+    foreach ($existing as $ex) {
+        $resourceController->deleteResource($ex['id']);
+    }
+
+    $saved = 0;
+    foreach ($resources as $r) {
+        $type = $r['type'] ?? '';
+        $title = $r['title'] ?? '';
+        $description = $r['description'] ?? '';
+        if (!in_array($type, ['planning', 'regles', 'materiel'])) continue;
+
+        $res = new ResourceItem(
+            $user['id'],
+            $type,
+            $title,
+            $description,
+            'active',
+            (int)$event_id
+        );
+        if ($resourceController->addResource($res)) $saved++;
+    }
+
+    echo json_encode(['success' => $saved > 0, 'count' => $saved]);
     exit;
 }
 
@@ -206,7 +257,7 @@ if ($action === 'create_resource' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     $user = UserController::currentUser();
-    $res = new ResourceItem($user['id'], $_POST['type'], $_POST['title'], $_POST['description'], $_POST['status'] ?? 'active');
+    $res = new ResourceItem($user['id'], $_POST['type'], $_POST['title'], $_POST['description'], $_POST['status'] ?? 'active', $_POST['event_id'] ?? null);
     $resourceController->addResource($res);
     $_SESSION['flash_success'] = 'Resource created successfully.';
     $redirect = UserController::isAdmin() ? 'Views/BackOffice/resources_admin.php' : 'Views/FrontOffice/resources.php';
@@ -225,31 +276,36 @@ if ($action === 'update_resource' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     $res = $resourceController->getResourceById($id);
-    if ($res && ($res->getUserId() == UserController::currentUser()['id'] || UserController::isAdmin())) {
+    $currentUser = UserController::currentUser();
+    if ($res && $currentUser && $res->getUserId() == $currentUser['id']) {
         $res->setType($_POST['type']);
         $res->setTitle($_POST['title']);
         $res->setDescription($_POST['description']);
         $res->setStatus($_POST['status'] ?? $res->getStatus());
+        $res->setEventId($_POST['event_id'] ?? $res->getEventId());
         $resourceController->updateResource($res, $id);
         $_SESSION['flash_success'] = 'Resource updated successfully.';
     } else {
-        $_SESSION['flash_error'] = 'Unauthorized action.';
+        $_SESSION['flash_error'] = 'You can only edit resources you created.';
     }
-    $redirect = UserController::isAdmin() ? 'Views/BackOffice/resources_admin.php' : 'Views/FrontOffice/resources.php';
+    $eventIdRef = $res ? $res->getEventId() : null;
+    $redirect = $eventIdRef ? 'Views/FrontOffice/event_details.php?id=' . $eventIdRef : 'Views/FrontOffice/resources.php';
     header('Location: ' . $redirect);
     exit;
 }
 
 if ($action === 'delete_resource' && isset($_GET['id'])) {
     if (!UserController::isAuthenticated()) { header('Location: Views/FrontOffice/auth.php'); exit; }
-    $res = $resourceController->getResourceById($_GET['id']);
-    if ($res && ($res->getUserId() == UserController::currentUser()['id'] || UserController::isAdmin())) {
+    $resToDel = $resourceController->getResourceById($_GET['id']);
+    $currentUser = UserController::currentUser();
+    $refEventId = $resToDel ? $resToDel->getEventId() : null;
+    if ($resToDel && $currentUser && $resToDel->getUserId() == $currentUser['id']) {
         $resourceController->deleteResource($_GET['id']);
         $_SESSION['flash_success'] = 'Resource deleted.';
     } else {
-        $_SESSION['flash_error'] = 'Unauthorized action.';
+        $_SESSION['flash_error'] = 'You can only delete resources you created.';
     }
-    $redirect = UserController::isAdmin() ? 'Views/BackOffice/resources_admin.php' : 'Views/FrontOffice/resources.php';
+    $redirect = $refEventId ? 'Views/FrontOffice/event_details.php?id=' . $refEventId : 'Views/FrontOffice/resources.php';
     header('Location: ' . $redirect);
     exit;
 }
@@ -354,7 +410,6 @@ if ($action === 'add_idea' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $bid = $_POST['brainstorming_id'] ?? null;
     $title = $_POST['title'] ?? 'Untitled Idea';
     $content = $_POST['content'] ?? '';
-    $type = $_POST['type'] ?? 'Standard';
     
     if (empty($content)) {
         $_SESSION['flash_error'] = 'Idea content cannot be empty.';
@@ -363,7 +418,7 @@ if ($action === 'add_idea' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $user = UserController::currentUser();
-    $idea = new Idea($bid, $user['id'], $title, $content, 'PROPOSED', $type);
+    $idea = new Idea($bid, $user['id'], $title, $content, 'PROPOSED');
     if ($ideaController->addIdea($idea)) {
         $_SESSION['flash_success'] = 'Idea posted successfully.';
     } else {
@@ -409,17 +464,6 @@ if ($action === 'delete_idea' && isset($_GET['id'])) {
     $ideaController->deleteIdea($_GET['id']);
     $_SESSION['flash_success'] = 'Idea deleted successfully.';
     header('Location: Views/BackOffice/ideas_all.php');
-    exit;
-}
-
-if ($action === 'generate_ai' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    $input = json_decode(file_get_contents('php://input'), true);
-    $prompt = $input['prompt'] ?? '';
-    $context = $input['context'] ?? 'Brainstorming Description';
-    
-    $result = $aiController->generateContent($prompt, $context);
-    echo json_encode($result);
     exit;
 }
 
