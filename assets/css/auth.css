@@ -1,0 +1,214 @@
+/* ============================================================
+   AUTH.CSS — Friend's 3D Animation Auth (Adapted for System Colors)
+   ============================================================ */
+
+/* Background Animation Canvas */
+body {
+    background-color: transparent !important;
+}
+
+#particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: radial-gradient(circle at center, var(--color-bg), var(--color-surface));
+}
+
+[data-theme="dark"] #particleCanvas {
+    background: radial-gradient(circle at center, #1f1f23 0%, #09090b 100%);
+}
+
+/* Glassmorphism Card */
+.glass-card {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="dark"] .glass-card {
+    background: rgba(25, 25, 28, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .glass-card:hover {
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Inputs */
+.auth-input {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--color-text-primary);
+    transition: all 0.3s ease;
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border-radius: 0.75rem;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+}
+
+[data-theme="dark"] .auth-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-input:focus {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(79, 82, 217, 0.2);
+}
+
+[data-theme="dark"] .auth-input:focus {
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 2px rgba(174, 225, 249, 0.2);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-accent) 0%, #6366f1 100%);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding: 0.875rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.btn-primary:hover::after {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(79, 82, 217, 0.3);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: var(--color-text-primary);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .btn-secondary {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: white;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+
+/* Custom Tailwind UI Bridges used in JS injected modales */
+.bg-zinc-800 { background-color: var(--color-surface) !important; }
+.text-zinc-300 { color: var(--color-text-secondary) !important; }
+.text-zinc-400 { color: var(--color-text-secondary) !important; }
+.border-zinc-700 { border-color: rgba(125, 125, 125, 0.2) !important; }
+.bg-zinc-900 { background-color: var(--color-bg) !important; }
+.text-white { color: var(--color-text-primary) !important; }
+.hover\:bg-zinc-700:hover { background-color: rgba(125, 125, 125, 0.1) !important; }
+.bg-emerald-500 { background-color: #10b981 !important; color: white !important; }
+
+/* Face Recognition Smooth Transitions */
+.quality-bar-smooth {
+    transition: width 300ms ease-out, background-color 300ms ease-out;
+}
+
+.quality-bar-stabilizing {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Progressive Feedback Badges */
+.feedback-badge { transition: all 300ms ease-out; }
+.feedback-badge-poor { background-color: rgba(239, 68, 68, 0.2); color: rgb(252, 165, 165); }
+.feedback-badge-fair { background-color: rgba(234, 179, 8, 0.2); color: rgb(253, 224, 71); }
+.feedback-badge-good { background-color: rgba(59, 130, 246, 0.2); color: rgb(147, 197, 253); }
+.feedback-badge-excellent { background-color: rgba(16, 185, 129, 0.2); color: rgb(110, 231, 183); }
+
+.auth-type-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    min-height: 44px;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+[data-theme="dark"] .auth-type-option {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.auth-type-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.auth-type-option span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.auth-type-option:has(input:checked) {
+    border-color: rgba(79, 82, 217, 0.42);
+    background: linear-gradient(135deg, rgba(79,82,217,0.13), rgba(14,165,233,0.1));
+    box-shadow: 0 8px 22px rgba(79,82,217,0.16);
+}

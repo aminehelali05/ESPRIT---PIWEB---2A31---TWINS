@@ -1,0 +1,2503 @@
+[Fri Apr 24 20:55:00 2026] PHP 8.0.30 Development Server (http://127.0.0.1:3000) started
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53621 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53621 [200]: GET /Views/FrontOffice/auth.php
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53621 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53807 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:52568 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53807 [200]: GET /assets/css/global.css
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:52568 [200]: GET /assets/css/auth.css
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53807 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:52568 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:51545 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53504 Accepted
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:51545 [200]: GET /assets/js/main.js
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53504 [200]: GET /assets/js/user.js
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:51545 Closing
+[Fri Apr 24 20:55:23 2026] 127.0.0.1:53504 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:58659 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:58659 [302]: POST /index.php?action=login
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:58659 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:60937 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:60937 [200]: GET /Views/BackOffice/dashboardUser.php
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:60937 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62140 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:49501 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62533 Accepted
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62140 [200]: GET /assets/css/backoffice-dashboard.css
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62533 [200]: GET /assets/css/user-form.css
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:49501 [404]: GET /assets/images/avatars/default-avatar.jpg - No such file or directory
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62140 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:49501 Closing
+[Fri Apr 24 20:55:52 2026] 127.0.0.1:62533 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:51429 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:51429 [200]: GET /assets/js/globe-explorer.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:51429 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:52895 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:52895 [200]: GET /assets/js/user.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:52895 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55124 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55124 [200]: GET /assets/js/skilluser.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55124 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:53501 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:53501 [200]: GET /assets/js/backoffice-dashboard.js
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:53501 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:50852 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:57902 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:50852 [200]: GET /Views/BackOffice/dashboardUser.php?action=list
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:50852 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:57902 [200]: GET /Views/BackOffice/dashboardUser.php?action=list_delete_requests&status=pending
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:57902 Closing
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55402 Accepted
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55402 [200]: GET /Views/BackOffice/dashboardUser.php?action=stats
+[Fri Apr 24 20:55:53 2026] 127.0.0.1:55402 Closing
+[Fri Apr 24 20:56:11 2026] 127.0.0.1:60878 Accepted
+[Fri Apr 24 20:56:11 2026] PHP Warning:  Undefined variable $userController in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php on line 25
+[Fri Apr 24 20:56:11 2026] PHP Fatal error:  Uncaught Error: Call to a member function getProfileExportSummary() on null in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php:25
+Stack trace:
+#0 {main}
+  thrown in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php on line 25
+[Fri Apr 24 20:56:11 2026] 127.0.0.1:60878 [200]: GET /Views/FrontOffice/home.php - Uncaught Error: Call to a member function getProfileExportSummary() on null in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php:25
+Stack trace:
+#0 {main}
+  thrown in C:\Users\user\Desktop\⠀⠀\LARPLARP\Views\FrontOffice\home.php on line 25
+[Fri Apr 24 20:56:11 2026] 127.0.0.1:60878 Closing
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:53988 Accepted
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:53988 [200]: GET /Views/FrontOffice/home.php
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:53988 Closing
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:63654 Accepted
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:58820 Accepted
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:58859 Accepted
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:63654 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:58820 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:58859 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:63654 Closing
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:58820 Closing
+[Fri Apr 24 21:23:55 2026] 127.0.0.1:58859 Closing
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:59855 Accepted
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:59855 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:59855 Closing
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:57518 Accepted
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:57518 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:57518 Closing
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:54866 Accepted
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:54745 Accepted
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:52258 Accepted
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:54866 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:54745 [200]: GET /assets/images/projects/project-thumb.svg
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:52258 [200]: GET /assets/images/challenges/challenge-card.svg
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:54866 Closing
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:54745 Closing
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:52258 Closing
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:52726 Accepted
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:52726 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:23:56 2026] 127.0.0.1:52726 Closing
+[Fri Apr 24 21:24:16 2026] 127.0.0.1:63052 Accepted
+[Fri Apr 24 21:24:16 2026] 127.0.0.1:63052 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:24:16 2026] 127.0.0.1:63052 Closing
+[Fri Apr 24 21:24:36 2026] 127.0.0.1:64870 Accepted
+[Fri Apr 24 21:24:36 2026] 127.0.0.1:64870 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:24:36 2026] 127.0.0.1:64870 Closing
+[Fri Apr 24 21:24:56 2026] 127.0.0.1:62320 Accepted
+[Fri Apr 24 21:24:56 2026] 127.0.0.1:62320 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:24:56 2026] 127.0.0.1:62320 Closing
+[Fri Apr 24 21:25:16 2026] 127.0.0.1:51369 Accepted
+[Fri Apr 24 21:25:16 2026] 127.0.0.1:51369 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:25:16 2026] 127.0.0.1:51369 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:56966 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:56966 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:56966 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:62576 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:50161 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:59477 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:61721 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:62576 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:50161 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:59477 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:62576 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:50161 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:59477 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:50949 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:61721 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:50949 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:61721 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:50949 Closing
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:65452 Accepted
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:65452 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:25:21 2026] 127.0.0.1:65452 Closing
+[Fri Apr 24 21:25:22 2026] 127.0.0.1:64940 Accepted
+[Fri Apr 24 21:25:22 2026] 127.0.0.1:64940 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:22 2026] 127.0.0.1:64940 Closing
+[Fri Apr 24 21:25:24 2026] 127.0.0.1:64991 Accepted
+[Fri Apr 24 21:25:24 2026] 127.0.0.1:64991 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:24 2026] 127.0.0.1:64991 Closing
+[Fri Apr 24 21:25:27 2026] 127.0.0.1:62846 Accepted
+[Fri Apr 24 21:25:27 2026] 127.0.0.1:62846 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:27 2026] 127.0.0.1:62846 Closing
+[Fri Apr 24 21:25:30 2026] 127.0.0.1:49236 Accepted
+[Fri Apr 24 21:25:30 2026] 127.0.0.1:49236 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:30 2026] 127.0.0.1:49236 Closing
+[Fri Apr 24 21:25:32 2026] 127.0.0.1:65371 Accepted
+[Fri Apr 24 21:25:32 2026] 127.0.0.1:65371 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:32 2026] 127.0.0.1:65371 Closing
+[Fri Apr 24 21:25:35 2026] 127.0.0.1:51010 Accepted
+[Fri Apr 24 21:25:35 2026] 127.0.0.1:51010 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:35 2026] 127.0.0.1:51010 Closing
+[Fri Apr 24 21:25:37 2026] 127.0.0.1:60696 Accepted
+[Fri Apr 24 21:25:37 2026] 127.0.0.1:60696 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:37 2026] 127.0.0.1:60696 Closing
+[Fri Apr 24 21:25:40 2026] 127.0.0.1:58062 Accepted
+[Fri Apr 24 21:25:40 2026] 127.0.0.1:58062 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:40 2026] 127.0.0.1:58062 Closing
+[Fri Apr 24 21:25:42 2026] 127.0.0.1:62302 Accepted
+[Fri Apr 24 21:25:42 2026] 127.0.0.1:62302 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:42 2026] 127.0.0.1:62302 Closing
+[Fri Apr 24 21:25:45 2026] 127.0.0.1:61414 Accepted
+[Fri Apr 24 21:25:45 2026] 127.0.0.1:61414 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:45 2026] 127.0.0.1:61414 Closing
+[Fri Apr 24 21:25:47 2026] 127.0.0.1:54350 Accepted
+[Fri Apr 24 21:25:47 2026] 127.0.0.1:54350 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:47 2026] 127.0.0.1:54350 Closing
+[Fri Apr 24 21:25:50 2026] 127.0.0.1:59368 Accepted
+[Fri Apr 24 21:25:50 2026] 127.0.0.1:59368 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:50 2026] 127.0.0.1:59368 Closing
+[Fri Apr 24 21:25:52 2026] 127.0.0.1:59614 Accepted
+[Fri Apr 24 21:25:52 2026] 127.0.0.1:59614 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:52 2026] 127.0.0.1:59614 Closing
+[Fri Apr 24 21:25:55 2026] 127.0.0.1:51979 Accepted
+[Fri Apr 24 21:25:55 2026] 127.0.0.1:51979 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:55 2026] 127.0.0.1:51979 Closing
+[Fri Apr 24 21:25:57 2026] 127.0.0.1:58124 Accepted
+[Fri Apr 24 21:25:57 2026] 127.0.0.1:58124 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:25:57 2026] 127.0.0.1:58124 Closing
+[Fri Apr 24 21:26:00 2026] 127.0.0.1:57363 Accepted
+[Fri Apr 24 21:26:00 2026] 127.0.0.1:57363 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:00 2026] 127.0.0.1:57363 Closing
+[Fri Apr 24 21:26:02 2026] 127.0.0.1:64265 Accepted
+[Fri Apr 24 21:26:02 2026] 127.0.0.1:64265 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:02 2026] 127.0.0.1:64265 Closing
+[Fri Apr 24 21:26:05 2026] 127.0.0.1:55178 Accepted
+[Fri Apr 24 21:26:05 2026] 127.0.0.1:55178 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:05 2026] 127.0.0.1:55178 Closing
+[Fri Apr 24 21:26:07 2026] 127.0.0.1:53674 Accepted
+[Fri Apr 24 21:26:07 2026] 127.0.0.1:53674 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:07 2026] 127.0.0.1:53674 Closing
+[Fri Apr 24 21:26:10 2026] 127.0.0.1:54028 Accepted
+[Fri Apr 24 21:26:10 2026] 127.0.0.1:54028 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:10 2026] 127.0.0.1:54028 Closing
+[Fri Apr 24 21:26:12 2026] 127.0.0.1:53097 Accepted
+[Fri Apr 24 21:26:12 2026] 127.0.0.1:53097 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:12 2026] 127.0.0.1:53097 Closing
+[Fri Apr 24 21:26:15 2026] 127.0.0.1:56245 Accepted
+[Fri Apr 24 21:26:15 2026] 127.0.0.1:56245 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:15 2026] 127.0.0.1:56245 Closing
+[Fri Apr 24 21:26:17 2026] 127.0.0.1:64228 Accepted
+[Fri Apr 24 21:26:17 2026] 127.0.0.1:64228 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:17 2026] 127.0.0.1:64228 Closing
+[Fri Apr 24 21:26:20 2026] 127.0.0.1:54093 Accepted
+[Fri Apr 24 21:26:20 2026] 127.0.0.1:54093 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:20 2026] 127.0.0.1:54093 Closing
+[Fri Apr 24 21:26:23 2026] 127.0.0.1:61150 Accepted
+[Fri Apr 24 21:26:23 2026] 127.0.0.1:61150 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:23 2026] 127.0.0.1:61150 Closing
+[Fri Apr 24 21:26:25 2026] 127.0.0.1:52216 Accepted
+[Fri Apr 24 21:26:25 2026] 127.0.0.1:52216 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:25 2026] 127.0.0.1:52216 Closing
+[Fri Apr 24 21:26:27 2026] 127.0.0.1:57652 Accepted
+[Fri Apr 24 21:26:27 2026] 127.0.0.1:57652 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:27 2026] 127.0.0.1:57652 Closing
+[Fri Apr 24 21:26:30 2026] 127.0.0.1:62602 Accepted
+[Fri Apr 24 21:26:30 2026] 127.0.0.1:62602 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:30 2026] 127.0.0.1:62602 Closing
+[Fri Apr 24 21:26:32 2026] 127.0.0.1:61634 Accepted
+[Fri Apr 24 21:26:32 2026] 127.0.0.1:61634 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:32 2026] 127.0.0.1:61634 Closing
+[Fri Apr 24 21:26:35 2026] 127.0.0.1:64894 Accepted
+[Fri Apr 24 21:26:35 2026] 127.0.0.1:64894 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:35 2026] 127.0.0.1:64894 Closing
+[Fri Apr 24 21:26:37 2026] 127.0.0.1:64718 Accepted
+[Fri Apr 24 21:26:37 2026] 127.0.0.1:64718 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:37 2026] 127.0.0.1:64718 Closing
+[Fri Apr 24 21:26:40 2026] 127.0.0.1:50471 Accepted
+[Fri Apr 24 21:26:40 2026] 127.0.0.1:50471 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:40 2026] 127.0.0.1:50471 Closing
+[Fri Apr 24 21:26:42 2026] 127.0.0.1:65333 Accepted
+[Fri Apr 24 21:26:42 2026] 127.0.0.1:65333 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:42 2026] 127.0.0.1:65333 Closing
+[Fri Apr 24 21:26:45 2026] 127.0.0.1:65511 Accepted
+[Fri Apr 24 21:26:45 2026] 127.0.0.1:65511 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:45 2026] 127.0.0.1:65511 Closing
+[Fri Apr 24 21:26:47 2026] 127.0.0.1:60265 Accepted
+[Fri Apr 24 21:26:47 2026] 127.0.0.1:60265 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:47 2026] 127.0.0.1:60265 Closing
+[Fri Apr 24 21:26:50 2026] 127.0.0.1:59515 Accepted
+[Fri Apr 24 21:26:50 2026] 127.0.0.1:59515 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:50 2026] 127.0.0.1:59515 Closing
+[Fri Apr 24 21:26:52 2026] 127.0.0.1:62751 Accepted
+[Fri Apr 24 21:26:52 2026] 127.0.0.1:62751 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:52 2026] 127.0.0.1:62751 Closing
+[Fri Apr 24 21:26:55 2026] 127.0.0.1:61230 Accepted
+[Fri Apr 24 21:26:55 2026] 127.0.0.1:61230 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:55 2026] 127.0.0.1:61230 Closing
+[Fri Apr 24 21:26:57 2026] 127.0.0.1:58681 Accepted
+[Fri Apr 24 21:26:57 2026] 127.0.0.1:58681 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:26:57 2026] 127.0.0.1:58681 Closing
+[Fri Apr 24 21:27:00 2026] 127.0.0.1:59992 Accepted
+[Fri Apr 24 21:27:00 2026] 127.0.0.1:59992 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:00 2026] 127.0.0.1:59992 Closing
+[Fri Apr 24 21:27:02 2026] 127.0.0.1:54891 Accepted
+[Fri Apr 24 21:27:02 2026] 127.0.0.1:54891 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:02 2026] 127.0.0.1:54891 Closing
+[Fri Apr 24 21:27:05 2026] 127.0.0.1:60386 Accepted
+[Fri Apr 24 21:27:05 2026] 127.0.0.1:60386 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:05 2026] 127.0.0.1:60386 Closing
+[Fri Apr 24 21:27:07 2026] 127.0.0.1:51645 Accepted
+[Fri Apr 24 21:27:07 2026] 127.0.0.1:51645 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:07 2026] 127.0.0.1:51645 Closing
+[Fri Apr 24 21:27:10 2026] 127.0.0.1:53485 Accepted
+[Fri Apr 24 21:27:10 2026] 127.0.0.1:53485 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:10 2026] 127.0.0.1:53485 Closing
+[Fri Apr 24 21:27:12 2026] 127.0.0.1:56796 Accepted
+[Fri Apr 24 21:27:12 2026] 127.0.0.1:56796 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:12 2026] 127.0.0.1:56796 Closing
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:59123 Accepted
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:59123 [200]: GET /Views/FrontOffice/home.php
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:59123 Closing
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:64067 Accepted
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:56368 Accepted
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:58507 Accepted
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:64067 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:56368 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:58507 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:64067 Closing
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:56368 Closing
+[Fri Apr 24 21:27:28 2026] 127.0.0.1:58507 Closing
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:49335 Accepted
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:62561 Accepted
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:49335 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:62561 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:49335 Closing
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:64090 Accepted
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:62561 Closing
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:64090 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:64090 Closing
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:63303 Accepted
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:63303 [200]: GET /assets/images/projects/project-thumb.svg
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:63303 Closing
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:52389 Accepted
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:52389 [200]: GET /assets/images/challenges/challenge-card.svg
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:52389 Closing
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:52087 Accepted
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:52087 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:27:29 2026] 127.0.0.1:52087 Closing
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:50649 Accepted
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:50649 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:50649 Closing
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:59547 Accepted
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:65043 Accepted
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:56545 Accepted
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:59547 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:65043 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:56545 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:59547 Closing
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:65043 Closing
+[Fri Apr 24 21:27:49 2026] 127.0.0.1:56545 Closing
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:52324 Accepted
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:57691 Accepted
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:57691 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:52324 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:57691 Closing
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:52324 Closing
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:52387 Accepted
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:52387 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:52387 Closing
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:51534 Accepted
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:51534 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:50 2026] 127.0.0.1:51534 Closing
+[Fri Apr 24 21:27:54 2026] 127.0.0.1:52738 Accepted
+[Fri Apr 24 21:27:54 2026] 127.0.0.1:52738 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:54 2026] 127.0.0.1:52738 Closing
+[Fri Apr 24 21:27:56 2026] 127.0.0.1:53156 Accepted
+[Fri Apr 24 21:27:56 2026] 127.0.0.1:53156 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:56 2026] 127.0.0.1:53156 Closing
+[Fri Apr 24 21:27:58 2026] 127.0.0.1:49170 Accepted
+[Fri Apr 24 21:27:58 2026] 127.0.0.1:49170 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:27:58 2026] 127.0.0.1:49170 Closing
+[Fri Apr 24 21:28:00 2026] 127.0.0.1:57073 Accepted
+[Fri Apr 24 21:28:00 2026] 127.0.0.1:57073 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:00 2026] 127.0.0.1:57073 Closing
+[Fri Apr 24 21:28:03 2026] 127.0.0.1:51950 Accepted
+[Fri Apr 24 21:28:03 2026] 127.0.0.1:51950 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:03 2026] 127.0.0.1:51950 Closing
+[Fri Apr 24 21:28:05 2026] 127.0.0.1:60730 Accepted
+[Fri Apr 24 21:28:05 2026] 127.0.0.1:60730 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:05 2026] 127.0.0.1:60730 Closing
+[Fri Apr 24 21:28:08 2026] 127.0.0.1:65078 Accepted
+[Fri Apr 24 21:28:08 2026] 127.0.0.1:65078 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:08 2026] 127.0.0.1:65078 Closing
+[Fri Apr 24 21:28:10 2026] 127.0.0.1:54873 Accepted
+[Fri Apr 24 21:28:10 2026] 127.0.0.1:54873 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:10 2026] 127.0.0.1:54873 Closing
+[Fri Apr 24 21:28:13 2026] 127.0.0.1:57390 Accepted
+[Fri Apr 24 21:28:13 2026] 127.0.0.1:57390 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:13 2026] 127.0.0.1:57390 Closing
+[Fri Apr 24 21:28:15 2026] 127.0.0.1:51400 Accepted
+[Fri Apr 24 21:28:15 2026] 127.0.0.1:51400 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:15 2026] 127.0.0.1:51400 Closing
+[Fri Apr 24 21:28:18 2026] 127.0.0.1:64806 Accepted
+[Fri Apr 24 21:28:18 2026] 127.0.0.1:64806 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:18 2026] 127.0.0.1:64806 Closing
+[Fri Apr 24 21:28:20 2026] 127.0.0.1:63740 Accepted
+[Fri Apr 24 21:28:20 2026] 127.0.0.1:63740 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:20 2026] 127.0.0.1:63740 Closing
+[Fri Apr 24 21:28:23 2026] 127.0.0.1:63878 Accepted
+[Fri Apr 24 21:28:23 2026] 127.0.0.1:63878 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:23 2026] 127.0.0.1:63878 Closing
+[Fri Apr 24 21:28:25 2026] 127.0.0.1:60658 Accepted
+[Fri Apr 24 21:28:25 2026] 127.0.0.1:60658 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:25 2026] 127.0.0.1:60658 Closing
+[Fri Apr 24 21:28:28 2026] 127.0.0.1:50324 Accepted
+[Fri Apr 24 21:28:28 2026] 127.0.0.1:50324 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:28 2026] 127.0.0.1:50324 Closing
+[Fri Apr 24 21:28:31 2026] 127.0.0.1:50941 Accepted
+[Fri Apr 24 21:28:31 2026] 127.0.0.1:50941 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:31 2026] 127.0.0.1:50941 Closing
+[Fri Apr 24 21:28:34 2026] 127.0.0.1:63989 Accepted
+[Fri Apr 24 21:28:34 2026] 127.0.0.1:63989 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:34 2026] 127.0.0.1:63989 Closing
+[Fri Apr 24 21:28:36 2026] 127.0.0.1:51462 Accepted
+[Fri Apr 24 21:28:36 2026] 127.0.0.1:51462 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:36 2026] 127.0.0.1:51462 Closing
+[Fri Apr 24 21:28:39 2026] 127.0.0.1:58714 Accepted
+[Fri Apr 24 21:28:39 2026] 127.0.0.1:58714 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:39 2026] 127.0.0.1:58714 Closing
+[Fri Apr 24 21:28:41 2026] 127.0.0.1:50290 Accepted
+[Fri Apr 24 21:28:41 2026] 127.0.0.1:50290 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:41 2026] 127.0.0.1:50290 Closing
+[Fri Apr 24 21:28:44 2026] 127.0.0.1:53391 Accepted
+[Fri Apr 24 21:28:44 2026] 127.0.0.1:53391 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:44 2026] 127.0.0.1:53391 Closing
+[Fri Apr 24 21:28:46 2026] 127.0.0.1:58122 Accepted
+[Fri Apr 24 21:28:46 2026] 127.0.0.1:58122 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:46 2026] 127.0.0.1:58122 Closing
+[Fri Apr 24 21:28:49 2026] 127.0.0.1:62575 Accepted
+[Fri Apr 24 21:28:49 2026] 127.0.0.1:62575 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:49 2026] 127.0.0.1:62575 Closing
+[Fri Apr 24 21:28:51 2026] 127.0.0.1:51622 Accepted
+[Fri Apr 24 21:28:51 2026] 127.0.0.1:51622 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:51 2026] 127.0.0.1:51622 Closing
+[Fri Apr 24 21:28:54 2026] 127.0.0.1:54790 Accepted
+[Fri Apr 24 21:28:54 2026] 127.0.0.1:54790 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:54 2026] 127.0.0.1:54790 Closing
+[Fri Apr 24 21:28:56 2026] 127.0.0.1:59051 Accepted
+[Fri Apr 24 21:28:56 2026] 127.0.0.1:59051 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:56 2026] 127.0.0.1:59051 Closing
+[Fri Apr 24 21:28:59 2026] 127.0.0.1:49988 Accepted
+[Fri Apr 24 21:28:59 2026] 127.0.0.1:49988 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:28:59 2026] 127.0.0.1:49988 Closing
+[Fri Apr 24 21:29:01 2026] 127.0.0.1:60997 Accepted
+[Fri Apr 24 21:29:01 2026] 127.0.0.1:60997 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:01 2026] 127.0.0.1:60997 Closing
+[Fri Apr 24 21:29:04 2026] 127.0.0.1:54522 Accepted
+[Fri Apr 24 21:29:04 2026] 127.0.0.1:54522 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:04 2026] 127.0.0.1:54522 Closing
+[Fri Apr 24 21:29:06 2026] 127.0.0.1:57400 Accepted
+[Fri Apr 24 21:29:06 2026] 127.0.0.1:57400 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:06 2026] 127.0.0.1:57400 Closing
+[Fri Apr 24 21:29:09 2026] 127.0.0.1:62650 Accepted
+[Fri Apr 24 21:29:09 2026] 127.0.0.1:62650 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:09 2026] 127.0.0.1:62650 Closing
+[Fri Apr 24 21:29:11 2026] 127.0.0.1:57243 Accepted
+[Fri Apr 24 21:29:11 2026] 127.0.0.1:57243 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:11 2026] 127.0.0.1:57243 Closing
+[Fri Apr 24 21:29:14 2026] 127.0.0.1:49293 Accepted
+[Fri Apr 24 21:29:14 2026] 127.0.0.1:49293 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:14 2026] 127.0.0.1:49293 Closing
+[Fri Apr 24 21:29:16 2026] 127.0.0.1:50307 Accepted
+[Fri Apr 24 21:29:16 2026] 127.0.0.1:50307 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:16 2026] 127.0.0.1:50307 Closing
+[Fri Apr 24 21:29:19 2026] 127.0.0.1:59403 Accepted
+[Fri Apr 24 21:29:19 2026] 127.0.0.1:59403 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:19 2026] 127.0.0.1:59403 Closing
+[Fri Apr 24 21:29:21 2026] 127.0.0.1:53454 Accepted
+[Fri Apr 24 21:29:21 2026] 127.0.0.1:53454 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:21 2026] 127.0.0.1:53454 Closing
+[Fri Apr 24 21:29:24 2026] 127.0.0.1:61741 Accepted
+[Fri Apr 24 21:29:24 2026] 127.0.0.1:61741 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:24 2026] 127.0.0.1:61741 Closing
+[Fri Apr 24 21:29:26 2026] 127.0.0.1:50652 Accepted
+[Fri Apr 24 21:29:26 2026] 127.0.0.1:50652 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:26 2026] 127.0.0.1:50652 Closing
+[Fri Apr 24 21:29:29 2026] 127.0.0.1:65353 Accepted
+[Fri Apr 24 21:29:29 2026] 127.0.0.1:65353 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:29 2026] 127.0.0.1:65353 Closing
+[Fri Apr 24 21:29:31 2026] 127.0.0.1:56162 Accepted
+[Fri Apr 24 21:29:31 2026] 127.0.0.1:56162 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:31 2026] 127.0.0.1:56162 Closing
+[Fri Apr 24 21:29:34 2026] 127.0.0.1:50959 Accepted
+[Fri Apr 24 21:29:34 2026] 127.0.0.1:50959 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:34 2026] 127.0.0.1:50959 Closing
+[Fri Apr 24 21:29:36 2026] 127.0.0.1:64325 Accepted
+[Fri Apr 24 21:29:36 2026] 127.0.0.1:64325 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:36 2026] 127.0.0.1:64325 Closing
+[Fri Apr 24 21:29:39 2026] 127.0.0.1:63951 Accepted
+[Fri Apr 24 21:29:39 2026] 127.0.0.1:63951 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:39 2026] 127.0.0.1:63951 Closing
+[Fri Apr 24 21:29:41 2026] 127.0.0.1:55481 Accepted
+[Fri Apr 24 21:29:41 2026] 127.0.0.1:55481 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:41 2026] 127.0.0.1:55481 Closing
+[Fri Apr 24 21:29:44 2026] 127.0.0.1:55762 Accepted
+[Fri Apr 24 21:29:44 2026] 127.0.0.1:55762 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:44 2026] 127.0.0.1:55762 Closing
+[Fri Apr 24 21:29:46 2026] 127.0.0.1:50589 Accepted
+[Fri Apr 24 21:29:46 2026] 127.0.0.1:50589 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:46 2026] 127.0.0.1:50589 Closing
+[Fri Apr 24 21:29:49 2026] 127.0.0.1:53611 Accepted
+[Fri Apr 24 21:29:49 2026] 127.0.0.1:53611 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:49 2026] 127.0.0.1:53611 Closing
+[Fri Apr 24 21:29:51 2026] 127.0.0.1:61412 Accepted
+[Fri Apr 24 21:29:51 2026] 127.0.0.1:61412 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:51 2026] 127.0.0.1:61412 Closing
+[Fri Apr 24 21:29:54 2026] 127.0.0.1:50333 Accepted
+[Fri Apr 24 21:29:54 2026] 127.0.0.1:50333 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:54 2026] 127.0.0.1:50333 Closing
+[Fri Apr 24 21:29:56 2026] 127.0.0.1:55158 Accepted
+[Fri Apr 24 21:29:56 2026] 127.0.0.1:55158 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:56 2026] 127.0.0.1:55158 Closing
+[Fri Apr 24 21:29:59 2026] 127.0.0.1:61457 Accepted
+[Fri Apr 24 21:29:59 2026] 127.0.0.1:61457 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:29:59 2026] 127.0.0.1:61457 Closing
+[Fri Apr 24 21:30:01 2026] 127.0.0.1:54148 Accepted
+[Fri Apr 24 21:30:01 2026] 127.0.0.1:54148 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:01 2026] 127.0.0.1:54148 Closing
+[Fri Apr 24 21:30:04 2026] 127.0.0.1:64517 Accepted
+[Fri Apr 24 21:30:04 2026] 127.0.0.1:64517 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:04 2026] 127.0.0.1:64517 Closing
+[Fri Apr 24 21:30:06 2026] 127.0.0.1:53180 Accepted
+[Fri Apr 24 21:30:06 2026] 127.0.0.1:53180 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:06 2026] 127.0.0.1:53180 Closing
+[Fri Apr 24 21:30:08 2026] 127.0.0.1:54687 Accepted
+[Fri Apr 24 21:30:08 2026] 127.0.0.1:54687 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:08 2026] 127.0.0.1:54687 Closing
+[Fri Apr 24 21:30:10 2026] 127.0.0.1:55857 Accepted
+[Fri Apr 24 21:30:10 2026] 127.0.0.1:55857 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:10 2026] 127.0.0.1:55857 Closing
+[Fri Apr 24 21:30:13 2026] 127.0.0.1:53094 Accepted
+[Fri Apr 24 21:30:13 2026] 127.0.0.1:53094 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:13 2026] 127.0.0.1:53094 Closing
+[Fri Apr 24 21:30:15 2026] 127.0.0.1:56618 Accepted
+[Fri Apr 24 21:30:15 2026] 127.0.0.1:56618 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:15 2026] 127.0.0.1:56618 Closing
+[Fri Apr 24 21:30:19 2026] 127.0.0.1:52965 Accepted
+[Fri Apr 24 21:30:19 2026] 127.0.0.1:52965 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:19 2026] 127.0.0.1:52965 Closing
+[Fri Apr 24 21:30:21 2026] 127.0.0.1:51938 Accepted
+[Fri Apr 24 21:30:21 2026] 127.0.0.1:51938 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:21 2026] 127.0.0.1:51938 Closing
+[Fri Apr 24 21:30:24 2026] 127.0.0.1:62280 Accepted
+[Fri Apr 24 21:30:24 2026] 127.0.0.1:62280 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:24 2026] 127.0.0.1:62280 Closing
+[Fri Apr 24 21:30:26 2026] 127.0.0.1:58700 Accepted
+[Fri Apr 24 21:30:26 2026] 127.0.0.1:58700 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:26 2026] 127.0.0.1:58700 Closing
+[Fri Apr 24 21:30:29 2026] 127.0.0.1:54669 Accepted
+[Fri Apr 24 21:30:29 2026] 127.0.0.1:54669 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:29 2026] 127.0.0.1:54669 Closing
+[Fri Apr 24 21:30:31 2026] 127.0.0.1:54212 Accepted
+[Fri Apr 24 21:30:31 2026] 127.0.0.1:54212 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:31 2026] 127.0.0.1:54212 Closing
+[Fri Apr 24 21:30:33 2026] 127.0.0.1:61329 Accepted
+[Fri Apr 24 21:30:33 2026] 127.0.0.1:61329 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:33 2026] 127.0.0.1:61329 Closing
+[Fri Apr 24 21:30:35 2026] 127.0.0.1:59476 Accepted
+[Fri Apr 24 21:30:35 2026] 127.0.0.1:59476 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:35 2026] 127.0.0.1:59476 Closing
+[Fri Apr 24 21:30:38 2026] 127.0.0.1:49425 Accepted
+[Fri Apr 24 21:30:38 2026] 127.0.0.1:49425 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:38 2026] 127.0.0.1:49425 Closing
+[Fri Apr 24 21:30:40 2026] 127.0.0.1:52224 Accepted
+[Fri Apr 24 21:30:40 2026] 127.0.0.1:52224 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:40 2026] 127.0.0.1:52224 Closing
+[Fri Apr 24 21:30:43 2026] 127.0.0.1:58048 Accepted
+[Fri Apr 24 21:30:43 2026] 127.0.0.1:58048 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:43 2026] 127.0.0.1:58048 Closing
+[Fri Apr 24 21:30:45 2026] 127.0.0.1:62601 Accepted
+[Fri Apr 24 21:30:45 2026] 127.0.0.1:62601 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:45 2026] 127.0.0.1:62601 Closing
+[Fri Apr 24 21:30:48 2026] 127.0.0.1:64848 Accepted
+[Fri Apr 24 21:30:48 2026] 127.0.0.1:64848 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:48 2026] 127.0.0.1:64848 Closing
+[Fri Apr 24 21:30:50 2026] 127.0.0.1:63503 Accepted
+[Fri Apr 24 21:30:50 2026] 127.0.0.1:63503 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:50 2026] 127.0.0.1:63503 Closing
+[Fri Apr 24 21:30:53 2026] 127.0.0.1:51010 Accepted
+[Fri Apr 24 21:30:53 2026] 127.0.0.1:51010 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:53 2026] 127.0.0.1:51010 Closing
+[Fri Apr 24 21:30:55 2026] 127.0.0.1:64745 Accepted
+[Fri Apr 24 21:30:55 2026] 127.0.0.1:64745 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:55 2026] 127.0.0.1:64745 Closing
+[Fri Apr 24 21:30:58 2026] 127.0.0.1:50791 Accepted
+[Fri Apr 24 21:30:58 2026] 127.0.0.1:50791 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:30:58 2026] 127.0.0.1:50791 Closing
+[Fri Apr 24 21:31:00 2026] 127.0.0.1:59299 Accepted
+[Fri Apr 24 21:31:00 2026] 127.0.0.1:59299 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:00 2026] 127.0.0.1:59299 Closing
+[Fri Apr 24 21:31:03 2026] 127.0.0.1:60631 Accepted
+[Fri Apr 24 21:31:03 2026] 127.0.0.1:60631 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:03 2026] 127.0.0.1:60631 Closing
+[Fri Apr 24 21:31:05 2026] 127.0.0.1:60612 Accepted
+[Fri Apr 24 21:31:05 2026] 127.0.0.1:60612 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:05 2026] 127.0.0.1:60612 Closing
+[Fri Apr 24 21:31:08 2026] 127.0.0.1:49397 Accepted
+[Fri Apr 24 21:31:08 2026] 127.0.0.1:49397 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:08 2026] 127.0.0.1:49397 Closing
+[Fri Apr 24 21:31:10 2026] 127.0.0.1:58708 Accepted
+[Fri Apr 24 21:31:10 2026] 127.0.0.1:58708 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:10 2026] 127.0.0.1:58708 Closing
+[Fri Apr 24 21:31:13 2026] 127.0.0.1:51134 Accepted
+[Fri Apr 24 21:31:13 2026] 127.0.0.1:51134 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:13 2026] 127.0.0.1:51134 Closing
+[Fri Apr 24 21:31:15 2026] 127.0.0.1:63018 Accepted
+[Fri Apr 24 21:31:15 2026] 127.0.0.1:63018 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:15 2026] 127.0.0.1:63018 Closing
+[Fri Apr 24 21:31:18 2026] 127.0.0.1:64466 Accepted
+[Fri Apr 24 21:31:18 2026] 127.0.0.1:64466 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:18 2026] 127.0.0.1:64466 Closing
+[Fri Apr 24 21:31:20 2026] 127.0.0.1:58890 Accepted
+[Fri Apr 24 21:31:20 2026] 127.0.0.1:58890 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:20 2026] 127.0.0.1:58890 Closing
+[Fri Apr 24 21:31:23 2026] 127.0.0.1:63696 Accepted
+[Fri Apr 24 21:31:23 2026] 127.0.0.1:63696 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:23 2026] 127.0.0.1:63696 Closing
+[Fri Apr 24 21:31:25 2026] 127.0.0.1:51699 Accepted
+[Fri Apr 24 21:31:25 2026] 127.0.0.1:51699 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:25 2026] 127.0.0.1:51699 Closing
+[Fri Apr 24 21:31:28 2026] 127.0.0.1:62259 Accepted
+[Fri Apr 24 21:31:28 2026] 127.0.0.1:62259 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:28 2026] 127.0.0.1:62259 Closing
+[Fri Apr 24 21:31:30 2026] 127.0.0.1:58876 Accepted
+[Fri Apr 24 21:31:30 2026] 127.0.0.1:58876 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:30 2026] 127.0.0.1:58876 Closing
+[Fri Apr 24 21:31:33 2026] 127.0.0.1:60333 Accepted
+[Fri Apr 24 21:31:33 2026] 127.0.0.1:60333 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:33 2026] 127.0.0.1:60333 Closing
+[Fri Apr 24 21:31:35 2026] 127.0.0.1:53464 Accepted
+[Fri Apr 24 21:31:35 2026] 127.0.0.1:53464 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:35 2026] 127.0.0.1:53464 Closing
+[Fri Apr 24 21:31:38 2026] 127.0.0.1:58782 Accepted
+[Fri Apr 24 21:31:38 2026] 127.0.0.1:58782 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:38 2026] 127.0.0.1:58782 Closing
+[Fri Apr 24 21:31:40 2026] 127.0.0.1:58187 Accepted
+[Fri Apr 24 21:31:40 2026] 127.0.0.1:58187 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:40 2026] 127.0.0.1:58187 Closing
+[Fri Apr 24 21:31:43 2026] 127.0.0.1:56742 Accepted
+[Fri Apr 24 21:31:43 2026] 127.0.0.1:56742 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:43 2026] 127.0.0.1:56742 Closing
+[Fri Apr 24 21:31:45 2026] 127.0.0.1:54216 Accepted
+[Fri Apr 24 21:31:45 2026] 127.0.0.1:54216 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:45 2026] 127.0.0.1:54216 Closing
+[Fri Apr 24 21:31:48 2026] 127.0.0.1:53835 Accepted
+[Fri Apr 24 21:31:48 2026] 127.0.0.1:53835 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:48 2026] 127.0.0.1:53835 Closing
+[Fri Apr 24 21:31:50 2026] 127.0.0.1:53873 Accepted
+[Fri Apr 24 21:31:50 2026] 127.0.0.1:53873 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:50 2026] 127.0.0.1:53873 Closing
+[Fri Apr 24 21:31:53 2026] 127.0.0.1:63444 Accepted
+[Fri Apr 24 21:31:53 2026] 127.0.0.1:63444 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:53 2026] 127.0.0.1:63444 Closing
+[Fri Apr 24 21:31:55 2026] 127.0.0.1:65170 Accepted
+[Fri Apr 24 21:31:55 2026] 127.0.0.1:65170 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:55 2026] 127.0.0.1:65170 Closing
+[Fri Apr 24 21:31:58 2026] 127.0.0.1:50831 Accepted
+[Fri Apr 24 21:31:58 2026] 127.0.0.1:50831 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:31:58 2026] 127.0.0.1:50831 Closing
+[Fri Apr 24 21:32:00 2026] 127.0.0.1:50318 Accepted
+[Fri Apr 24 21:32:00 2026] 127.0.0.1:50318 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:00 2026] 127.0.0.1:50318 Closing
+[Fri Apr 24 21:32:03 2026] 127.0.0.1:59006 Accepted
+[Fri Apr 24 21:32:03 2026] 127.0.0.1:59006 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:03 2026] 127.0.0.1:59006 Closing
+[Fri Apr 24 21:32:05 2026] 127.0.0.1:59714 Accepted
+[Fri Apr 24 21:32:05 2026] 127.0.0.1:59714 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:05 2026] 127.0.0.1:59714 Closing
+[Fri Apr 24 21:32:08 2026] 127.0.0.1:59731 Accepted
+[Fri Apr 24 21:32:08 2026] 127.0.0.1:59731 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:08 2026] 127.0.0.1:59731 Closing
+[Fri Apr 24 21:32:10 2026] 127.0.0.1:55774 Accepted
+[Fri Apr 24 21:32:10 2026] 127.0.0.1:55774 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:10 2026] 127.0.0.1:55774 Closing
+[Fri Apr 24 21:32:13 2026] 127.0.0.1:62572 Accepted
+[Fri Apr 24 21:32:13 2026] 127.0.0.1:62572 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:13 2026] 127.0.0.1:62572 Closing
+[Fri Apr 24 21:32:15 2026] 127.0.0.1:49527 Accepted
+[Fri Apr 24 21:32:15 2026] 127.0.0.1:49527 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:15 2026] 127.0.0.1:49527 Closing
+[Fri Apr 24 21:32:18 2026] 127.0.0.1:60221 Accepted
+[Fri Apr 24 21:32:18 2026] 127.0.0.1:60221 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:18 2026] 127.0.0.1:60221 Closing
+[Fri Apr 24 21:32:20 2026] 127.0.0.1:49346 Accepted
+[Fri Apr 24 21:32:20 2026] 127.0.0.1:49346 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:20 2026] 127.0.0.1:49346 Closing
+[Fri Apr 24 21:32:23 2026] 127.0.0.1:50270 Accepted
+[Fri Apr 24 21:32:23 2026] 127.0.0.1:50270 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:23 2026] 127.0.0.1:50270 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:65528 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:65528 [200]: GET /Views/FrontOffice/home.php
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:65528 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:60008 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:60008 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:52900 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:60008 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:56725 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:52900 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:56725 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:52900 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:56725 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:55247 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:55247 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:55247 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:64240 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:64240 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:64240 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:60614 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:55316 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:60614 [200]: GET /assets/images/projects/project-thumb.svg
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:59994 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:55316 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:59994 [200]: GET /assets/images/challenges/challenge-card.svg
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:60614 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:55316 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:59994 Closing
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:62347 Accepted
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:62347 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:24 2026] 127.0.0.1:62347 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:58436 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:58436 [200]: GET /Views/FrontOffice/home.php
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:58436 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:53226 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:49860 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:52814 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:53226 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:49860 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:52814 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:53226 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:49860 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:52814 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:57967 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:65402 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:57967 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:65402 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:57967 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:65402 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:51522 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:51522 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:64335 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:51522 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:64335 [200]: GET /assets/images/projects/project-thumb.svg
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:64335 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:64520 Accepted
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:64520 [200]: GET /assets/images/challenges/challenge-card.svg
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:64520 Closing
+[Fri Apr 24 21:32:37 2026] 127.0.0.1:56314 Accepted
+[Fri Apr 24 21:32:38 2026] 127.0.0.1:56314 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:38 2026] 127.0.0.1:56314 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51596 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51596 [200]: GET /Views/FrontOffice/home.php
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51596 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:64417 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:54831 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:59597 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:64417 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:54831 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:59597 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:64417 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:54831 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:59597 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51502 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51502 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51502 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:55767 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:55767 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:55767 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:58007 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51568 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:58007 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51568 [200]: GET /assets/images/projects/project-thumb.svg
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51821 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51821 [200]: GET /assets/images/challenges/challenge-card.svg
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:58007 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51568 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51821 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:57215 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:57215 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:57215 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:56653 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:56653 [200]: GET /Views/FrontOffice/profile.php
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:56653 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:55408 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:61619 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:55408 [200]: GET /assets/css/profile.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51949 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:55408 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:56122 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:61619 [200]: GET /assets/css/profile-light.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:61619 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:49613 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:63902 Accepted
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51949 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:51949 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:56122 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:56122 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:49613 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:63902 [200]: GET /assets/css/user-form.css
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:49613 Closing
+[Fri Apr 24 21:32:50 2026] 127.0.0.1:63902 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58196 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58196 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58196 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:64369 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:64369 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:64369 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:60843 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:60843 [200]: GET /assets/js/globe-explorer.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:60843 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:55227 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:55227 [200]: GET /assets/js/user.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:55227 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:65222 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:65222 [200]: GET /assets/js/profile.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:65222 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:64060 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:64060 [200]: GET /Views/FrontOffice/profile.php?action=profile_social_data
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:64060 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:56984 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:56984 [200]: GET /Views/FrontOffice/profile.php?action=profile_social_data
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:56984 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:49551 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:49551 [200]: GET /Views/FrontOffice/messages.php
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:49551 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:59624 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:56799 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:51036 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:52146 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58553 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:59624 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:56799 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:51036 [200]: GET /assets/css/profile.css
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:52146 [200]: GET /assets/css/profile-light.css
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:49472 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58553 [200]: GET /assets/js/stories_messages_p2a.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:49472 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:59624 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:56799 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:51036 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:52146 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58553 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:49472 Closing
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58655 Accepted
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58655 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:51 2026] 127.0.0.1:58655 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:50442 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:50442 [200]: GET /Views/FrontOffice/profile.php?action=profile_social_data
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:50442 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:53247 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:53247 [200]: GET /Views/FrontOffice/live.php
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:53247 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:53607 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:53607 [200]: GET /Views/FrontOffice/profile.php?action=profile_call_relay&mode=poll
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:53607 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58985 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:57289 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58985 [200]: GET /assets/css/live.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58346 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:57289 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:64853 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58346 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:52475 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:64853 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58985 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:61666 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:52475 [200]: GET /assets/js/live.js
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:57289 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:61666 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58346 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:64853 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:52475 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:61666 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:59838 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:59838 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:59838 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:56953 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:56953 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:56953 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:55110 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:64517 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58145 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:55110 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:64517 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:50150 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58145 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:60991 Accepted
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:50150 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:55110 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:60991 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:64517 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:58145 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:50150 Closing
+[Fri Apr 24 21:32:52 2026] 127.0.0.1:60991 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:57443 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:57443 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:57443 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:64515 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:64515 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:64515 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:53924 Accepted
+[Fri Apr 24 21:32:53 2026] CandidatureController::backfillFromLegacyApplications - SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '0' for key 'PRIMARY'
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:53924 [200]: GET /Views/FrontOffice/jobOffer.php
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:53924 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50814 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:53075 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50814 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:52150 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:53075 [200]: GET /assets/js/mvc-inline-validation.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:58124 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:52150 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:55453 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:58124 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50814 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:55738 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:55453 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:53075 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:55738 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:52150 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:58124 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:55453 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:55738 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50596 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50596 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50596 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:56179 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:56179 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:56179 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:59098 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:59098 [200]: GET /Views/FrontOffice/projects.php
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:59098 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:60574 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:58707 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:51543 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:51543 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:61229 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:60574 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:58707 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50318 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:51543 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:49409 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:61229 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50318 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:49409 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:60574 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:58707 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50611 Accepted
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50611 [200]: GET /assets/js/mvc-inline-validation.js
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:61229 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50318 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:49409 Closing
+[Fri Apr 24 21:32:53 2026] 127.0.0.1:50611 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50350 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50350 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50350 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59153 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59153 [200]: GET /Views/FrontOffice/contracts.php
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59153 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:55150 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:61354 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59313 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:56203 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:49175 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:54647 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:55150 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:61354 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59313 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:56203 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:49175 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:54647 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:55150 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:61354 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59313 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:56203 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:49175 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:54647 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:63789 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:63789 [200]: GET /assets/js/mvc-inline-validation.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:63789 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:64772 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:64772 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:64772 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59307 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59307 [200]: GET /Views/FrontOffice/social.php
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59307 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50208 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59664 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:54320 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50208 [200]: GET /assets/css/social.css
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:53282 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50566 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59664 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50208 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:58735 Accepted
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:54320 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:53282 [200]: GET /assets/js/social.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50566 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:58735 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:59664 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:54320 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:53282 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:50566 Closing
+[Fri Apr 24 21:32:54 2026] 127.0.0.1:58735 Closing
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:63804 Accepted
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:63804 [200]: GET /Views/FrontOffice/challenges.php
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:63804 Closing
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:60240 Accepted
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:63621 Accepted
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:50485 Accepted
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:60240 [200]: GET /assets/css/challenges.css
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:57990 Accepted
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:63621 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:60240 Closing
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:53646 Accepted
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:50485 [200]: GET /assets/js/challenges.js
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:57990 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:53646 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:63621 Closing
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:50485 Closing
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:57990 Closing
+[Fri Apr 24 21:32:55 2026] 127.0.0.1:53646 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:60637 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:60637 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:60637 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:54489 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:54489 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:58837 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:52680 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:50993 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:54489 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:58837 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:52680 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:50993 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:59754 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:59754 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:58837 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:52680 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:50993 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:59754 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:51010 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:51010 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:51010 Closing
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:54290 Accepted
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:54290 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:28 2026] 127.0.0.1:54290 Closing
+[Fri Apr 24 21:33:31 2026] 127.0.0.1:53763 Accepted
+[Fri Apr 24 21:33:31 2026] 127.0.0.1:53763 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:31 2026] 127.0.0.1:53763 Closing
+[Fri Apr 24 21:33:33 2026] 127.0.0.1:50060 Accepted
+[Fri Apr 24 21:33:33 2026] 127.0.0.1:50060 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:33 2026] 127.0.0.1:50060 Closing
+[Fri Apr 24 21:33:36 2026] 127.0.0.1:64192 Accepted
+[Fri Apr 24 21:33:36 2026] 127.0.0.1:64192 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:36 2026] 127.0.0.1:64192 Closing
+[Fri Apr 24 21:33:38 2026] 127.0.0.1:57515 Accepted
+[Fri Apr 24 21:33:38 2026] 127.0.0.1:57515 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:38 2026] 127.0.0.1:57515 Closing
+[Fri Apr 24 21:33:41 2026] 127.0.0.1:59190 Accepted
+[Fri Apr 24 21:33:41 2026] 127.0.0.1:59190 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:41 2026] 127.0.0.1:59190 Closing
+[Fri Apr 24 21:33:43 2026] 127.0.0.1:65518 Accepted
+[Fri Apr 24 21:33:43 2026] 127.0.0.1:65518 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:43 2026] 127.0.0.1:65518 Closing
+[Fri Apr 24 21:33:46 2026] 127.0.0.1:64297 Accepted
+[Fri Apr 24 21:33:46 2026] 127.0.0.1:64297 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:46 2026] 127.0.0.1:64297 Closing
+[Fri Apr 24 21:33:48 2026] 127.0.0.1:51498 Accepted
+[Fri Apr 24 21:33:48 2026] 127.0.0.1:51498 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:48 2026] 127.0.0.1:51498 Closing
+[Fri Apr 24 21:33:51 2026] 127.0.0.1:60909 Accepted
+[Fri Apr 24 21:33:51 2026] 127.0.0.1:60909 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:51 2026] 127.0.0.1:60909 Closing
+[Fri Apr 24 21:33:53 2026] 127.0.0.1:56278 Accepted
+[Fri Apr 24 21:33:53 2026] 127.0.0.1:56278 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:53 2026] 127.0.0.1:56278 Closing
+[Fri Apr 24 21:33:56 2026] 127.0.0.1:57984 Accepted
+[Fri Apr 24 21:33:56 2026] 127.0.0.1:57984 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:56 2026] 127.0.0.1:57984 Closing
+[Fri Apr 24 21:33:58 2026] 127.0.0.1:51670 Accepted
+[Fri Apr 24 21:33:58 2026] 127.0.0.1:51670 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:33:58 2026] 127.0.0.1:51670 Closing
+[Fri Apr 24 21:34:01 2026] 127.0.0.1:56104 Accepted
+[Fri Apr 24 21:34:01 2026] 127.0.0.1:56104 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:01 2026] 127.0.0.1:56104 Closing
+[Fri Apr 24 21:34:03 2026] 127.0.0.1:61511 Accepted
+[Fri Apr 24 21:34:03 2026] 127.0.0.1:61511 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:03 2026] 127.0.0.1:61511 Closing
+[Fri Apr 24 21:34:06 2026] 127.0.0.1:50109 Accepted
+[Fri Apr 24 21:34:06 2026] 127.0.0.1:50109 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:06 2026] 127.0.0.1:50109 Closing
+[Fri Apr 24 21:34:08 2026] 127.0.0.1:57247 Accepted
+[Fri Apr 24 21:34:08 2026] 127.0.0.1:57247 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:08 2026] 127.0.0.1:57247 Closing
+[Fri Apr 24 21:34:11 2026] 127.0.0.1:55044 Accepted
+[Fri Apr 24 21:34:11 2026] 127.0.0.1:55044 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:11 2026] 127.0.0.1:55044 Closing
+[Fri Apr 24 21:34:13 2026] 127.0.0.1:54633 Accepted
+[Fri Apr 24 21:34:13 2026] 127.0.0.1:54633 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:13 2026] 127.0.0.1:54633 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:49678 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:49678 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:49678 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:60522 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:52714 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:53652 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:65046 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:61945 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:60522 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:52714 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:53652 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:65046 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:61945 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:60522 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:52714 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:53652 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:65046 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:61945 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:50553 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:50553 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:50553 Closing
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:50476 Accepted
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:50476 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:14 2026] 127.0.0.1:50476 Closing
+[Fri Apr 24 21:34:17 2026] 127.0.0.1:55290 Accepted
+[Fri Apr 24 21:34:17 2026] 127.0.0.1:55290 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:17 2026] 127.0.0.1:55290 Closing
+[Fri Apr 24 21:34:19 2026] 127.0.0.1:60570 Accepted
+[Fri Apr 24 21:34:19 2026] 127.0.0.1:60570 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:19 2026] 127.0.0.1:60570 Closing
+[Fri Apr 24 21:34:22 2026] 127.0.0.1:62047 Accepted
+[Fri Apr 24 21:34:22 2026] 127.0.0.1:62047 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:22 2026] 127.0.0.1:62047 Closing
+[Fri Apr 24 21:34:24 2026] 127.0.0.1:53810 Accepted
+[Fri Apr 24 21:34:24 2026] 127.0.0.1:53810 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:24 2026] 127.0.0.1:53810 Closing
+[Fri Apr 24 21:34:27 2026] 127.0.0.1:58213 Accepted
+[Fri Apr 24 21:34:27 2026] 127.0.0.1:58213 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:27 2026] 127.0.0.1:58213 Closing
+[Fri Apr 24 21:34:29 2026] 127.0.0.1:52263 Accepted
+[Fri Apr 24 21:34:29 2026] 127.0.0.1:52263 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:29 2026] 127.0.0.1:52263 Closing
+[Fri Apr 24 21:34:32 2026] 127.0.0.1:49948 Accepted
+[Fri Apr 24 21:34:32 2026] 127.0.0.1:49948 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:32 2026] 127.0.0.1:49948 Closing
+[Fri Apr 24 21:34:34 2026] 127.0.0.1:56506 Accepted
+[Fri Apr 24 21:34:34 2026] 127.0.0.1:56506 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:34 2026] 127.0.0.1:56506 Closing
+[Fri Apr 24 21:34:37 2026] 127.0.0.1:54660 Accepted
+[Fri Apr 24 21:34:37 2026] 127.0.0.1:54660 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:37 2026] 127.0.0.1:54660 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:49715 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:49715 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:49715 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57550 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:53958 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57550 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:53958 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:55232 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57480 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57550 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:61916 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:53958 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:55232 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57480 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:61916 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:55232 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57480 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:61916 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:52940 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:52940 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:52940 Closing
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57269 Accepted
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57269 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:39 2026] 127.0.0.1:57269 Closing
+[Fri Apr 24 21:34:41 2026] 127.0.0.1:62386 Accepted
+[Fri Apr 24 21:34:41 2026] 127.0.0.1:62386 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:41 2026] 127.0.0.1:62386 Closing
+[Fri Apr 24 21:34:44 2026] 127.0.0.1:55694 Accepted
+[Fri Apr 24 21:34:44 2026] 127.0.0.1:55694 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:44 2026] 127.0.0.1:55694 Closing
+[Fri Apr 24 21:34:46 2026] 127.0.0.1:51945 Accepted
+[Fri Apr 24 21:34:46 2026] 127.0.0.1:51945 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:46 2026] 127.0.0.1:51945 Closing
+[Fri Apr 24 21:34:49 2026] 127.0.0.1:59240 Accepted
+[Fri Apr 24 21:34:49 2026] 127.0.0.1:59240 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:49 2026] 127.0.0.1:59240 Closing
+[Fri Apr 24 21:34:51 2026] 127.0.0.1:65254 Accepted
+[Fri Apr 24 21:34:51 2026] 127.0.0.1:65254 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:51 2026] 127.0.0.1:65254 Closing
+[Fri Apr 24 21:34:54 2026] 127.0.0.1:56491 Accepted
+[Fri Apr 24 21:34:54 2026] 127.0.0.1:56491 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:54 2026] 127.0.0.1:56491 Closing
+[Fri Apr 24 21:34:56 2026] 127.0.0.1:53971 Accepted
+[Fri Apr 24 21:34:56 2026] 127.0.0.1:53971 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:56 2026] 127.0.0.1:53971 Closing
+[Fri Apr 24 21:34:59 2026] 127.0.0.1:52933 Accepted
+[Fri Apr 24 21:34:59 2026] 127.0.0.1:52933 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:34:59 2026] 127.0.0.1:52933 Closing
+[Fri Apr 24 21:35:01 2026] 127.0.0.1:61329 Accepted
+[Fri Apr 24 21:35:01 2026] 127.0.0.1:61329 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:01 2026] 127.0.0.1:61329 Closing
+[Fri Apr 24 21:35:04 2026] 127.0.0.1:59484 Accepted
+[Fri Apr 24 21:35:04 2026] 127.0.0.1:59484 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:04 2026] 127.0.0.1:59484 Closing
+[Fri Apr 24 21:35:06 2026] 127.0.0.1:58483 Accepted
+[Fri Apr 24 21:35:06 2026] 127.0.0.1:58483 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:06 2026] 127.0.0.1:58483 Closing
+[Fri Apr 24 21:35:09 2026] 127.0.0.1:50338 Accepted
+[Fri Apr 24 21:35:09 2026] 127.0.0.1:50338 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:09 2026] 127.0.0.1:50338 Closing
+[Fri Apr 24 21:35:11 2026] 127.0.0.1:55953 Accepted
+[Fri Apr 24 21:35:11 2026] 127.0.0.1:55953 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:11 2026] 127.0.0.1:55953 Closing
+[Fri Apr 24 21:35:14 2026] 127.0.0.1:59192 Accepted
+[Fri Apr 24 21:35:14 2026] 127.0.0.1:59192 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:14 2026] 127.0.0.1:59192 Closing
+[Fri Apr 24 21:35:16 2026] 127.0.0.1:56237 Accepted
+[Fri Apr 24 21:35:16 2026] 127.0.0.1:56237 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:16 2026] 127.0.0.1:56237 Closing
+[Fri Apr 24 21:35:19 2026] 127.0.0.1:61576 Accepted
+[Fri Apr 24 21:35:19 2026] 127.0.0.1:61576 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:19 2026] 127.0.0.1:61576 Closing
+[Fri Apr 24 21:35:21 2026] 127.0.0.1:62361 Accepted
+[Fri Apr 24 21:35:21 2026] 127.0.0.1:62361 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:21 2026] 127.0.0.1:62361 Closing
+[Fri Apr 24 21:35:24 2026] 127.0.0.1:61630 Accepted
+[Fri Apr 24 21:35:24 2026] 127.0.0.1:61630 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:24 2026] 127.0.0.1:61630 Closing
+[Fri Apr 24 21:35:27 2026] 127.0.0.1:59015 Accepted
+[Fri Apr 24 21:35:27 2026] 127.0.0.1:59015 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:27 2026] 127.0.0.1:59015 Closing
+[Fri Apr 24 21:35:30 2026] 127.0.0.1:65521 Accepted
+[Fri Apr 24 21:35:30 2026] 127.0.0.1:65521 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:30 2026] 127.0.0.1:65521 Closing
+[Fri Apr 24 21:35:32 2026] 127.0.0.1:63666 Accepted
+[Fri Apr 24 21:35:32 2026] 127.0.0.1:63666 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:32 2026] 127.0.0.1:63666 Closing
+[Fri Apr 24 21:35:35 2026] 127.0.0.1:54886 Accepted
+[Fri Apr 24 21:35:35 2026] 127.0.0.1:54886 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:35 2026] 127.0.0.1:54886 Closing
+[Fri Apr 24 21:35:37 2026] 127.0.0.1:56559 Accepted
+[Fri Apr 24 21:35:37 2026] 127.0.0.1:56559 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:37 2026] 127.0.0.1:56559 Closing
+[Fri Apr 24 21:35:40 2026] 127.0.0.1:58162 Accepted
+[Fri Apr 24 21:35:40 2026] 127.0.0.1:58162 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:40 2026] 127.0.0.1:58162 Closing
+[Fri Apr 24 21:35:42 2026] 127.0.0.1:64530 Accepted
+[Fri Apr 24 21:35:42 2026] 127.0.0.1:64530 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:42 2026] 127.0.0.1:64530 Closing
+[Fri Apr 24 21:35:45 2026] 127.0.0.1:52457 Accepted
+[Fri Apr 24 21:35:45 2026] 127.0.0.1:52457 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:45 2026] 127.0.0.1:52457 Closing
+[Fri Apr 24 21:35:47 2026] 127.0.0.1:55696 Accepted
+[Fri Apr 24 21:35:47 2026] 127.0.0.1:55696 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:47 2026] 127.0.0.1:55696 Closing
+[Fri Apr 24 21:35:50 2026] 127.0.0.1:57300 Accepted
+[Fri Apr 24 21:35:50 2026] 127.0.0.1:57300 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:50 2026] 127.0.0.1:57300 Closing
+[Fri Apr 24 21:35:52 2026] 127.0.0.1:60248 Accepted
+[Fri Apr 24 21:35:52 2026] 127.0.0.1:60248 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:52 2026] 127.0.0.1:60248 Closing
+[Fri Apr 24 21:35:55 2026] 127.0.0.1:62791 Accepted
+[Fri Apr 24 21:35:55 2026] 127.0.0.1:62791 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:55 2026] 127.0.0.1:62791 Closing
+[Fri Apr 24 21:35:57 2026] 127.0.0.1:55518 Accepted
+[Fri Apr 24 21:35:57 2026] 127.0.0.1:55518 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:35:57 2026] 127.0.0.1:55518 Closing
+[Fri Apr 24 21:36:00 2026] 127.0.0.1:58968 Accepted
+[Fri Apr 24 21:36:00 2026] 127.0.0.1:58968 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:36:00 2026] 127.0.0.1:58968 Closing
+[Fri Apr 24 21:36:02 2026] 127.0.0.1:63418 Accepted
+[Fri Apr 24 21:36:02 2026] 127.0.0.1:63418 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:36:02 2026] 127.0.0.1:63418 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:65114 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:65114 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:65114 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:54526 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:54526 [200]: GET /Views/FrontOffice/home.php
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:54526 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:65480 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:65480 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:62768 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:65480 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:55289 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:62768 [200]: GET /assets/css/home.css
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:55289 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:62768 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:55289 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:63047 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:62134 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:63047 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:62134 [200]: GET /assets/js/mouse-tracking.js
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:63047 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:62134 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:55157 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:55157 [200]: GET /assets/js/home.js
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:55157 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:57539 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:53633 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:57539 [200]: GET /assets/images/projects/project-thumb.svg
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:53633 [200]: GET /assets/images/challenges/challenge-card.svg
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:57539 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:53633 Closing
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:51522 Accepted
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:51522 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:36:05 2026] 127.0.0.1:51522 Closing
+[Fri Apr 24 21:36:25 2026] 127.0.0.1:65236 Accepted
+[Fri Apr 24 21:36:25 2026] 127.0.0.1:65236 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:36:25 2026] 127.0.0.1:65236 Closing
+[Fri Apr 24 21:36:45 2026] 127.0.0.1:51872 Accepted
+[Fri Apr 24 21:36:45 2026] 127.0.0.1:51872 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:36:45 2026] 127.0.0.1:51872 Closing
+[Fri Apr 24 21:37:05 2026] 127.0.0.1:50060 Accepted
+[Fri Apr 24 21:37:05 2026] 127.0.0.1:50060 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:37:05 2026] 127.0.0.1:50060 Closing
+[Fri Apr 24 21:37:26 2026] 127.0.0.1:53036 Accepted
+[Fri Apr 24 21:37:26 2026] 127.0.0.1:53036 [200]: GET /Views/FrontOffice/profile.php?action=profile_live_stream&mode=list
+[Fri Apr 24 21:37:26 2026] 127.0.0.1:53036 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:64684 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:64684 [200]: GET /Views/FrontOffice/ai-agent.php
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:64684 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:51609 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:51609 [200]: GET /assets/css/global.css
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:61455 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:61455 [200]: GET /assets/css/sidebar.css
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:51609 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:61455 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:54081 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:54081 [200]: GET /assets/css/ai-agent.css
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:54081 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:61222 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:61222 [200]: GET /assets/js/main.js
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:61222 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:59550 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:59550 [200]: GET /assets/js/ai-agent.js
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:59550 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:60960 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:60960 [200]: GET /index.php?action=assistant_status
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:60960 Closing
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:52806 Accepted
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:52806 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:41 2026] 127.0.0.1:52806 Closing
+[Fri Apr 24 21:37:45 2026] 127.0.0.1:65269 Accepted
+[Fri Apr 24 21:37:45 2026] 127.0.0.1:65269 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:45 2026] 127.0.0.1:65269 Closing
+[Fri Apr 24 21:37:47 2026] 127.0.0.1:63830 Accepted
+[Fri Apr 24 21:37:47 2026] 127.0.0.1:63830 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:47 2026] 127.0.0.1:63830 Closing
+[Fri Apr 24 21:37:50 2026] 127.0.0.1:64608 Accepted
+[Fri Apr 24 21:37:50 2026] 127.0.0.1:64608 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:50 2026] 127.0.0.1:64608 Closing
+[Fri Apr 24 21:37:52 2026] 127.0.0.1:59616 Accepted
+[Fri Apr 24 21:37:52 2026] 127.0.0.1:59616 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:52 2026] 127.0.0.1:59616 Closing
+[Fri Apr 24 21:37:55 2026] 127.0.0.1:61026 Accepted
+[Fri Apr 24 21:37:55 2026] 127.0.0.1:61026 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:55 2026] 127.0.0.1:61026 Closing
+[Fri Apr 24 21:37:57 2026] 127.0.0.1:64277 Accepted
+[Fri Apr 24 21:37:57 2026] 127.0.0.1:64277 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:57 2026] 127.0.0.1:64277 Closing
+[Fri Apr 24 21:37:59 2026] 127.0.0.1:49281 Accepted
+[Fri Apr 24 21:37:59 2026] 127.0.0.1:49281 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:37:59 2026] 127.0.0.1:49281 Closing
+[Fri Apr 24 21:38:01 2026] 127.0.0.1:62821 Accepted
+[Fri Apr 24 21:38:01 2026] 127.0.0.1:62821 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:01 2026] 127.0.0.1:62821 Closing
+[Fri Apr 24 21:38:04 2026] 127.0.0.1:64307 Accepted
+[Fri Apr 24 21:38:04 2026] 127.0.0.1:64307 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:04 2026] 127.0.0.1:64307 Closing
+[Fri Apr 24 21:38:06 2026] 127.0.0.1:57434 Accepted
+[Fri Apr 24 21:38:06 2026] 127.0.0.1:57434 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:06 2026] 127.0.0.1:57434 Closing
+[Fri Apr 24 21:38:09 2026] 127.0.0.1:55720 Accepted
+[Fri Apr 24 21:38:09 2026] 127.0.0.1:55720 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:09 2026] 127.0.0.1:55720 Closing
+[Fri Apr 24 21:38:11 2026] 127.0.0.1:56273 Accepted
+[Fri Apr 24 21:38:11 2026] 127.0.0.1:56273 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:11 2026] 127.0.0.1:56273 Closing
+[Fri Apr 24 21:38:14 2026] 127.0.0.1:65076 Accepted
+[Fri Apr 24 21:38:14 2026] 127.0.0.1:65076 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:14 2026] 127.0.0.1:65076 Closing
+[Fri Apr 24 21:38:16 2026] 127.0.0.1:53335 Accepted
+[Fri Apr 24 21:38:16 2026] 127.0.0.1:53335 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:16 2026] 127.0.0.1:53335 Closing
+[Fri Apr 24 21:38:19 2026] 127.0.0.1:56440 Accepted
+[Fri Apr 24 21:38:19 2026] 127.0.0.1:56440 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:19 2026] 127.0.0.1:56440 Closing
+[Fri Apr 24 21:38:22 2026] 127.0.0.1:50633 Accepted
+[Fri Apr 24 21:38:22 2026] 127.0.0.1:50633 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:22 2026] 127.0.0.1:50633 Closing
+[Fri Apr 24 21:38:25 2026] 127.0.0.1:60947 Accepted
+[Fri Apr 24 21:38:25 2026] 127.0.0.1:60947 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:25 2026] 127.0.0.1:60947 Closing
+[Fri Apr 24 21:38:27 2026] 127.0.0.1:64537 Accepted
+[Fri Apr 24 21:38:27 2026] 127.0.0.1:64537 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:27 2026] 127.0.0.1:64537 Closing
+[Fri Apr 24 21:38:30 2026] 127.0.0.1:63046 Accepted
+[Fri Apr 24 21:38:30 2026] 127.0.0.1:63046 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:30 2026] 127.0.0.1:63046 Closing
+[Fri Apr 24 21:38:32 2026] 127.0.0.1:64028 Accepted
+[Fri Apr 24 21:38:32 2026] 127.0.0.1:64028 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:32 2026] 127.0.0.1:64028 Closing
+[Fri Apr 24 21:38:35 2026] 127.0.0.1:52592 Accepted
+[Fri Apr 24 21:38:35 2026] 127.0.0.1:52592 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:35 2026] 127.0.0.1:52592 Closing
+[Fri Apr 24 21:38:37 2026] 127.0.0.1:60851 Accepted
+[Fri Apr 24 21:38:37 2026] 127.0.0.1:60851 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:37 2026] 127.0.0.1:60851 Closing
+[Fri Apr 24 21:38:40 2026] 127.0.0.1:57296 Accepted
+[Fri Apr 24 21:38:40 2026] 127.0.0.1:57296 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:40 2026] 127.0.0.1:57296 Closing
+[Fri Apr 24 21:38:42 2026] 127.0.0.1:58985 Accepted
+[Fri Apr 24 21:38:42 2026] 127.0.0.1:58985 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:42 2026] 127.0.0.1:58985 Closing
+[Fri Apr 24 21:38:45 2026] 127.0.0.1:53552 Accepted
+[Fri Apr 24 21:38:45 2026] 127.0.0.1:53552 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:45 2026] 127.0.0.1:53552 Closing
+[Fri Apr 24 21:38:47 2026] 127.0.0.1:57347 Accepted
+[Fri Apr 24 21:38:47 2026] 127.0.0.1:57347 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:47 2026] 127.0.0.1:57347 Closing
+[Fri Apr 24 21:38:50 2026] 127.0.0.1:54512 Accepted
+[Fri Apr 24 21:38:50 2026] 127.0.0.1:54512 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:50 2026] 127.0.0.1:54512 Closing
+[Fri Apr 24 21:38:52 2026] 127.0.0.1:49575 Accepted
+[Fri Apr 24 21:38:52 2026] 127.0.0.1:49575 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:52 2026] 127.0.0.1:49575 Closing
+[Fri Apr 24 21:38:55 2026] 127.0.0.1:54984 Accepted
+[Fri Apr 24 21:38:55 2026] 127.0.0.1:54984 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:55 2026] 127.0.0.1:54984 Closing
+[Fri Apr 24 21:38:57 2026] 127.0.0.1:54636 Accepted
+[Fri Apr 24 21:38:57 2026] 127.0.0.1:54636 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:38:57 2026] 127.0.0.1:54636 Closing
+[Fri Apr 24 21:39:00 2026] 127.0.0.1:52985 Accepted
+[Fri Apr 24 21:39:00 2026] 127.0.0.1:52985 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:00 2026] 127.0.0.1:52985 Closing
+[Fri Apr 24 21:39:02 2026] 127.0.0.1:56202 Accepted
+[Fri Apr 24 21:39:02 2026] 127.0.0.1:56202 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:02 2026] 127.0.0.1:56202 Closing
+[Fri Apr 24 21:39:05 2026] 127.0.0.1:50711 Accepted
+[Fri Apr 24 21:39:05 2026] 127.0.0.1:50711 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:05 2026] 127.0.0.1:50711 Closing
+[Fri Apr 24 21:39:07 2026] 127.0.0.1:52757 Accepted
+[Fri Apr 24 21:39:07 2026] 127.0.0.1:52757 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:07 2026] 127.0.0.1:52757 Closing
+[Fri Apr 24 21:39:10 2026] 127.0.0.1:64037 Accepted
+[Fri Apr 24 21:39:10 2026] 127.0.0.1:64037 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:10 2026] 127.0.0.1:64037 Closing
+[Fri Apr 24 21:39:12 2026] 127.0.0.1:61057 Accepted
+[Fri Apr 24 21:39:12 2026] 127.0.0.1:61057 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:12 2026] 127.0.0.1:61057 Closing
+[Fri Apr 24 21:39:15 2026] 127.0.0.1:49548 Accepted
+[Fri Apr 24 21:39:15 2026] 127.0.0.1:49548 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:15 2026] 127.0.0.1:49548 Closing
+[Fri Apr 24 21:39:17 2026] 127.0.0.1:62546 Accepted
+[Fri Apr 24 21:39:17 2026] 127.0.0.1:62546 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:17 2026] 127.0.0.1:62546 Closing
+[Fri Apr 24 21:39:20 2026] 127.0.0.1:62376 Accepted
+[Fri Apr 24 21:39:20 2026] 127.0.0.1:62376 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:20 2026] 127.0.0.1:62376 Closing
+[Fri Apr 24 21:39:22 2026] 127.0.0.1:60761 Accepted
+[Fri Apr 24 21:39:22 2026] 127.0.0.1:60761 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:22 2026] 127.0.0.1:60761 Closing
+[Fri Apr 24 21:39:25 2026] 127.0.0.1:58702 Accepted
+[Fri Apr 24 21:39:25 2026] 127.0.0.1:58702 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:25 2026] 127.0.0.1:58702 Closing
+[Fri Apr 24 21:39:27 2026] 127.0.0.1:56939 Accepted
+[Fri Apr 24 21:39:27 2026] 127.0.0.1:56939 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:27 2026] 127.0.0.1:56939 Closing
+[Fri Apr 24 21:39:30 2026] 127.0.0.1:55746 Accepted
+[Fri Apr 24 21:39:30 2026] 127.0.0.1:55746 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:30 2026] 127.0.0.1:55746 Closing
+[Fri Apr 24 21:39:32 2026] 127.0.0.1:64061 Accepted
+[Fri Apr 24 21:39:32 2026] 127.0.0.1:64061 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:32 2026] 127.0.0.1:64061 Closing
+[Fri Apr 24 21:39:35 2026] 127.0.0.1:60222 Accepted
+[Fri Apr 24 21:39:35 2026] 127.0.0.1:60222 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:35 2026] 127.0.0.1:60222 Closing
+[Fri Apr 24 21:39:37 2026] 127.0.0.1:56571 Accepted
+[Fri Apr 24 21:39:37 2026] 127.0.0.1:56571 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:37 2026] 127.0.0.1:56571 Closing
+[Fri Apr 24 21:39:40 2026] 127.0.0.1:64151 Accepted
+[Fri Apr 24 21:39:40 2026] 127.0.0.1:64151 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:40 2026] 127.0.0.1:64151 Closing
+[Fri Apr 24 21:39:42 2026] 127.0.0.1:65070 Accepted
+[Fri Apr 24 21:39:42 2026] 127.0.0.1:65070 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:42 2026] 127.0.0.1:65070 Closing
+[Fri Apr 24 21:39:45 2026] 127.0.0.1:49635 Accepted
+[Fri Apr 24 21:39:45 2026] 127.0.0.1:49635 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:45 2026] 127.0.0.1:49635 Closing
+[Fri Apr 24 21:39:47 2026] 127.0.0.1:64537 Accepted
+[Fri Apr 24 21:39:47 2026] 127.0.0.1:64537 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:47 2026] 127.0.0.1:64537 Closing
+[Fri Apr 24 21:39:50 2026] 127.0.0.1:59633 Accepted
+[Fri Apr 24 21:39:50 2026] 127.0.0.1:59633 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:50 2026] 127.0.0.1:59633 Closing
+[Fri Apr 24 21:39:52 2026] 127.0.0.1:62052 Accepted
+[Fri Apr 24 21:39:52 2026] 127.0.0.1:62052 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:52 2026] 127.0.0.1:62052 Closing
+[Fri Apr 24 21:39:55 2026] 127.0.0.1:63457 Accepted
+[Fri Apr 24 21:39:55 2026] 127.0.0.1:63457 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:55 2026] 127.0.0.1:63457 Closing
+[Fri Apr 24 21:39:57 2026] 127.0.0.1:62053 Accepted
+[Fri Apr 24 21:39:57 2026] 127.0.0.1:62053 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:39:57 2026] 127.0.0.1:62053 Closing
+[Fri Apr 24 21:40:00 2026] 127.0.0.1:54664 Accepted
+[Fri Apr 24 21:40:00 2026] 127.0.0.1:54664 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:00 2026] 127.0.0.1:54664 Closing
+[Fri Apr 24 21:40:02 2026] 127.0.0.1:63314 Accepted
+[Fri Apr 24 21:40:02 2026] 127.0.0.1:63314 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:02 2026] 127.0.0.1:63314 Closing
+[Fri Apr 24 21:40:05 2026] 127.0.0.1:63463 Accepted
+[Fri Apr 24 21:40:05 2026] 127.0.0.1:63463 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:05 2026] 127.0.0.1:63463 Closing
+[Fri Apr 24 21:40:07 2026] 127.0.0.1:56538 Accepted
+[Fri Apr 24 21:40:07 2026] 127.0.0.1:56538 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:07 2026] 127.0.0.1:56538 Closing
+[Fri Apr 24 21:40:10 2026] 127.0.0.1:64193 Accepted
+[Fri Apr 24 21:40:10 2026] 127.0.0.1:64193 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:10 2026] 127.0.0.1:64193 Closing
+[Fri Apr 24 21:40:12 2026] 127.0.0.1:65517 Accepted
+[Fri Apr 24 21:40:12 2026] 127.0.0.1:65517 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:12 2026] 127.0.0.1:65517 Closing
+[Fri Apr 24 21:40:15 2026] 127.0.0.1:65504 Accepted
+[Fri Apr 24 21:40:15 2026] 127.0.0.1:65504 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:15 2026] 127.0.0.1:65504 Closing
+[Fri Apr 24 21:40:17 2026] 127.0.0.1:56813 Accepted
+[Fri Apr 24 21:40:17 2026] 127.0.0.1:56813 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:17 2026] 127.0.0.1:56813 Closing
+[Fri Apr 24 21:40:20 2026] 127.0.0.1:59072 Accepted
+[Fri Apr 24 21:40:20 2026] 127.0.0.1:59072 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:20 2026] 127.0.0.1:59072 Closing
+[Fri Apr 24 21:40:22 2026] 127.0.0.1:55411 Accepted
+[Fri Apr 24 21:40:22 2026] 127.0.0.1:55411 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:22 2026] 127.0.0.1:55411 Closing
+[Fri Apr 24 21:40:25 2026] 127.0.0.1:57286 Accepted
+[Fri Apr 24 21:40:25 2026] 127.0.0.1:57286 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:25 2026] 127.0.0.1:57286 Closing
+[Fri Apr 24 21:40:27 2026] 127.0.0.1:64558 Accepted
+[Fri Apr 24 21:40:27 2026] 127.0.0.1:64558 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:27 2026] 127.0.0.1:64558 Closing
+[Fri Apr 24 21:40:30 2026] 127.0.0.1:51656 Accepted
+[Fri Apr 24 21:40:30 2026] 127.0.0.1:51656 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:30 2026] 127.0.0.1:51656 Closing
+[Fri Apr 24 21:40:32 2026] 127.0.0.1:50060 Accepted
+[Fri Apr 24 21:40:32 2026] 127.0.0.1:50060 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:32 2026] 127.0.0.1:50060 Closing
+[Fri Apr 24 21:40:35 2026] 127.0.0.1:52168 Accepted
+[Fri Apr 24 21:40:35 2026] 127.0.0.1:52168 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:35 2026] 127.0.0.1:52168 Closing
+[Fri Apr 24 21:40:37 2026] 127.0.0.1:52185 Accepted
+[Fri Apr 24 21:40:37 2026] 127.0.0.1:52185 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:37 2026] 127.0.0.1:52185 Closing
+[Fri Apr 24 21:40:40 2026] 127.0.0.1:61766 Accepted
+[Fri Apr 24 21:40:40 2026] 127.0.0.1:61766 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:40 2026] 127.0.0.1:61766 Closing
+[Fri Apr 24 21:40:42 2026] 127.0.0.1:54112 Accepted
+[Fri Apr 24 21:40:42 2026] 127.0.0.1:54112 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:42 2026] 127.0.0.1:54112 Closing
+[Fri Apr 24 21:40:45 2026] 127.0.0.1:64839 Accepted
+[Fri Apr 24 21:40:45 2026] 127.0.0.1:64839 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:45 2026] 127.0.0.1:64839 Closing
+[Fri Apr 24 21:40:47 2026] 127.0.0.1:62428 Accepted
+[Fri Apr 24 21:40:47 2026] 127.0.0.1:62428 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:47 2026] 127.0.0.1:62428 Closing
+[Fri Apr 24 21:40:50 2026] 127.0.0.1:56259 Accepted
+[Fri Apr 24 21:40:50 2026] 127.0.0.1:56259 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:50 2026] 127.0.0.1:56259 Closing
+[Fri Apr 24 21:40:52 2026] 127.0.0.1:57786 Accepted
+[Fri Apr 24 21:40:52 2026] 127.0.0.1:57786 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:52 2026] 127.0.0.1:57786 Closing
+[Fri Apr 24 21:40:55 2026] 127.0.0.1:50789 Accepted
+[Fri Apr 24 21:40:55 2026] 127.0.0.1:50789 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:55 2026] 127.0.0.1:50789 Closing
+[Fri Apr 24 21:40:57 2026] 127.0.0.1:56268 Accepted
+[Fri Apr 24 21:40:57 2026] 127.0.0.1:56268 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:40:57 2026] 127.0.0.1:56268 Closing
+[Fri Apr 24 21:41:00 2026] 127.0.0.1:55457 Accepted
+[Fri Apr 24 21:41:00 2026] 127.0.0.1:55457 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:00 2026] 127.0.0.1:55457 Closing
+[Fri Apr 24 21:41:02 2026] 127.0.0.1:58125 Accepted
+[Fri Apr 24 21:41:02 2026] 127.0.0.1:58125 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:02 2026] 127.0.0.1:58125 Closing
+[Fri Apr 24 21:41:05 2026] 127.0.0.1:62904 Accepted
+[Fri Apr 24 21:41:05 2026] 127.0.0.1:62904 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:05 2026] 127.0.0.1:62904 Closing
+[Fri Apr 24 21:41:07 2026] 127.0.0.1:61761 Accepted
+[Fri Apr 24 21:41:07 2026] 127.0.0.1:61761 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:07 2026] 127.0.0.1:61761 Closing
+[Fri Apr 24 21:41:10 2026] 127.0.0.1:49645 Accepted
+[Fri Apr 24 21:41:10 2026] 127.0.0.1:49645 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:10 2026] 127.0.0.1:49645 Closing
+[Fri Apr 24 21:41:12 2026] 127.0.0.1:64437 Accepted
+[Fri Apr 24 21:41:12 2026] 127.0.0.1:64437 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:12 2026] 127.0.0.1:64437 Closing
+[Fri Apr 24 21:41:15 2026] 127.0.0.1:64333 Accepted
+[Fri Apr 24 21:41:15 2026] 127.0.0.1:64333 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:15 2026] 127.0.0.1:64333 Closing
+[Fri Apr 24 21:41:17 2026] 127.0.0.1:63803 Accepted
+[Fri Apr 24 21:41:17 2026] 127.0.0.1:63803 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:17 2026] 127.0.0.1:63803 Closing
+[Fri Apr 24 21:41:20 2026] 127.0.0.1:54903 Accepted
+[Fri Apr 24 21:41:20 2026] 127.0.0.1:54903 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:20 2026] 127.0.0.1:54903 Closing
+[Fri Apr 24 21:41:22 2026] 127.0.0.1:56069 Accepted
+[Fri Apr 24 21:41:22 2026] 127.0.0.1:56069 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:22 2026] 127.0.0.1:56069 Closing
+[Fri Apr 24 21:41:25 2026] 127.0.0.1:56374 Accepted
+[Fri Apr 24 21:41:25 2026] 127.0.0.1:56374 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:25 2026] 127.0.0.1:56374 Closing
+[Fri Apr 24 21:41:27 2026] 127.0.0.1:59044 Accepted
+[Fri Apr 24 21:41:27 2026] 127.0.0.1:59044 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:27 2026] 127.0.0.1:59044 Closing
+[Fri Apr 24 21:41:30 2026] 127.0.0.1:57561 Accepted
+[Fri Apr 24 21:41:30 2026] 127.0.0.1:57561 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:30 2026] 127.0.0.1:57561 Closing
+[Fri Apr 24 21:41:32 2026] 127.0.0.1:57879 Accepted
+[Fri Apr 24 21:41:32 2026] 127.0.0.1:57879 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:32 2026] 127.0.0.1:57879 Closing
+[Fri Apr 24 21:41:35 2026] 127.0.0.1:56359 Accepted
+[Fri Apr 24 21:41:35 2026] 127.0.0.1:56359 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:35 2026] 127.0.0.1:56359 Closing
+[Fri Apr 24 21:41:37 2026] 127.0.0.1:58870 Accepted
+[Fri Apr 24 21:41:37 2026] 127.0.0.1:58870 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:37 2026] 127.0.0.1:58870 Closing
+[Fri Apr 24 21:41:40 2026] 127.0.0.1:52107 Accepted
+[Fri Apr 24 21:41:40 2026] 127.0.0.1:52107 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:40 2026] 127.0.0.1:52107 Closing
+[Fri Apr 24 21:41:42 2026] 127.0.0.1:60640 Accepted
+[Fri Apr 24 21:41:42 2026] 127.0.0.1:60640 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:42 2026] 127.0.0.1:60640 Closing
+[Fri Apr 24 21:41:45 2026] 127.0.0.1:60247 Accepted
+[Fri Apr 24 21:41:45 2026] 127.0.0.1:60247 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:45 2026] 127.0.0.1:60247 Closing
+[Fri Apr 24 21:41:47 2026] 127.0.0.1:55358 Accepted
+[Fri Apr 24 21:41:47 2026] 127.0.0.1:55358 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:47 2026] 127.0.0.1:55358 Closing
+[Fri Apr 24 21:41:50 2026] 127.0.0.1:57866 Accepted
+[Fri Apr 24 21:41:50 2026] 127.0.0.1:57866 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:50 2026] 127.0.0.1:57866 Closing
+[Fri Apr 24 21:41:52 2026] 127.0.0.1:64992 Accepted
+[Fri Apr 24 21:41:52 2026] 127.0.0.1:64992 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:52 2026] 127.0.0.1:64992 Closing
+[Fri Apr 24 21:41:55 2026] 127.0.0.1:58140 Accepted
+[Fri Apr 24 21:41:55 2026] 127.0.0.1:58140 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:55 2026] 127.0.0.1:58140 Closing
+[Fri Apr 24 21:41:57 2026] 127.0.0.1:64483 Accepted
+[Fri Apr 24 21:41:57 2026] 127.0.0.1:64483 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:41:57 2026] 127.0.0.1:64483 Closing
+[Fri Apr 24 21:42:00 2026] 127.0.0.1:63808 Accepted
+[Fri Apr 24 21:42:00 2026] 127.0.0.1:63808 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:00 2026] 127.0.0.1:63808 Closing
+[Fri Apr 24 21:42:02 2026] 127.0.0.1:65250 Accepted
+[Fri Apr 24 21:42:02 2026] 127.0.0.1:65250 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:02 2026] 127.0.0.1:65250 Closing
+[Fri Apr 24 21:42:05 2026] 127.0.0.1:49213 Accepted
+[Fri Apr 24 21:42:05 2026] 127.0.0.1:49213 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:05 2026] 127.0.0.1:49213 Closing
+[Fri Apr 24 21:42:07 2026] 127.0.0.1:63241 Accepted
+[Fri Apr 24 21:42:07 2026] 127.0.0.1:63241 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:07 2026] 127.0.0.1:63241 Closing
+[Fri Apr 24 21:42:10 2026] 127.0.0.1:57681 Accepted
+[Fri Apr 24 21:42:10 2026] 127.0.0.1:57681 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:10 2026] 127.0.0.1:57681 Closing
+[Fri Apr 24 21:42:12 2026] 127.0.0.1:61945 Accepted
+[Fri Apr 24 21:42:12 2026] 127.0.0.1:61945 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:12 2026] 127.0.0.1:61945 Closing
+[Fri Apr 24 21:42:15 2026] 127.0.0.1:50653 Accepted
+[Fri Apr 24 21:42:15 2026] 127.0.0.1:50653 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:15 2026] 127.0.0.1:50653 Closing
+[Fri Apr 24 21:42:17 2026] 127.0.0.1:62829 Accepted
+[Fri Apr 24 21:42:17 2026] 127.0.0.1:62829 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:17 2026] 127.0.0.1:62829 Closing
+[Fri Apr 24 21:42:20 2026] 127.0.0.1:64260 Accepted
+[Fri Apr 24 21:42:20 2026] 127.0.0.1:64260 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:20 2026] 127.0.0.1:64260 Closing
+[Fri Apr 24 21:42:22 2026] 127.0.0.1:53953 Accepted
+[Fri Apr 24 21:42:22 2026] 127.0.0.1:53953 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:22 2026] 127.0.0.1:53953 Closing
+[Fri Apr 24 21:42:25 2026] 127.0.0.1:62752 Accepted
+[Fri Apr 24 21:42:25 2026] 127.0.0.1:62752 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:25 2026] 127.0.0.1:62752 Closing
+[Fri Apr 24 21:42:27 2026] 127.0.0.1:49641 Accepted
+[Fri Apr 24 21:42:27 2026] 127.0.0.1:49641 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:27 2026] 127.0.0.1:49641 Closing
+[Fri Apr 24 21:42:30 2026] 127.0.0.1:63208 Accepted
+[Fri Apr 24 21:42:30 2026] 127.0.0.1:63208 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:30 2026] 127.0.0.1:63208 Closing
+[Fri Apr 24 21:42:32 2026] 127.0.0.1:54385 Accepted
+[Fri Apr 24 21:42:32 2026] 127.0.0.1:54385 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:32 2026] 127.0.0.1:54385 Closing
+[Fri Apr 24 21:42:35 2026] 127.0.0.1:60585 Accepted
+[Fri Apr 24 21:42:35 2026] 127.0.0.1:60585 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:35 2026] 127.0.0.1:60585 Closing
+[Fri Apr 24 21:42:37 2026] 127.0.0.1:52674 Accepted
+[Fri Apr 24 21:42:37 2026] 127.0.0.1:52674 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:37 2026] 127.0.0.1:52674 Closing
+[Fri Apr 24 21:42:40 2026] 127.0.0.1:53950 Accepted
+[Fri Apr 24 21:42:40 2026] 127.0.0.1:53950 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:40 2026] 127.0.0.1:53950 Closing
+[Fri Apr 24 21:42:42 2026] 127.0.0.1:56004 Accepted
+[Fri Apr 24 21:42:42 2026] 127.0.0.1:56004 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:42 2026] 127.0.0.1:56004 Closing
+[Fri Apr 24 21:42:45 2026] 127.0.0.1:58369 Accepted
+[Fri Apr 24 21:42:45 2026] 127.0.0.1:58369 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:45 2026] 127.0.0.1:58369 Closing
+[Fri Apr 24 21:42:47 2026] 127.0.0.1:50323 Accepted
+[Fri Apr 24 21:42:47 2026] 127.0.0.1:50323 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:47 2026] 127.0.0.1:50323 Closing
+[Fri Apr 24 21:42:50 2026] 127.0.0.1:51037 Accepted
+[Fri Apr 24 21:42:50 2026] 127.0.0.1:51037 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:50 2026] 127.0.0.1:51037 Closing
+[Fri Apr 24 21:42:51 2026] 127.0.0.1:59714 Accepted
+[Fri Apr 24 21:42:51 2026] 127.0.0.1:59714 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:51 2026] 127.0.0.1:59714 Closing
+[Fri Apr 24 21:42:55 2026] 127.0.0.1:64700 Accepted
+[Fri Apr 24 21:42:55 2026] 127.0.0.1:64700 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:55 2026] 127.0.0.1:64700 Closing
+[Fri Apr 24 21:42:57 2026] 127.0.0.1:56152 Accepted
+[Fri Apr 24 21:42:57 2026] 127.0.0.1:56152 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:42:57 2026] 127.0.0.1:56152 Closing
+[Fri Apr 24 21:43:00 2026] 127.0.0.1:62694 Accepted
+[Fri Apr 24 21:43:00 2026] 127.0.0.1:62694 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:00 2026] 127.0.0.1:62694 Closing
+[Fri Apr 24 21:43:02 2026] 127.0.0.1:49280 Accepted
+[Fri Apr 24 21:43:02 2026] 127.0.0.1:49280 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:02 2026] 127.0.0.1:49280 Closing
+[Fri Apr 24 21:43:05 2026] 127.0.0.1:57010 Accepted
+[Fri Apr 24 21:43:05 2026] 127.0.0.1:57010 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:05 2026] 127.0.0.1:57010 Closing
+[Fri Apr 24 21:43:07 2026] 127.0.0.1:59142 Accepted
+[Fri Apr 24 21:43:07 2026] 127.0.0.1:59142 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:07 2026] 127.0.0.1:59142 Closing
+[Fri Apr 24 21:43:10 2026] 127.0.0.1:61462 Accepted
+[Fri Apr 24 21:43:10 2026] 127.0.0.1:61462 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:10 2026] 127.0.0.1:61462 Closing
+[Fri Apr 24 21:43:12 2026] 127.0.0.1:65454 Accepted
+[Fri Apr 24 21:43:12 2026] 127.0.0.1:65454 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:12 2026] 127.0.0.1:65454 Closing
+[Fri Apr 24 21:43:15 2026] 127.0.0.1:63805 Accepted
+[Fri Apr 24 21:43:15 2026] 127.0.0.1:63805 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:15 2026] 127.0.0.1:63805 Closing
+[Fri Apr 24 21:43:17 2026] 127.0.0.1:63838 Accepted
+[Fri Apr 24 21:43:17 2026] 127.0.0.1:63838 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:17 2026] 127.0.0.1:63838 Closing
+[Fri Apr 24 21:43:20 2026] 127.0.0.1:62913 Accepted
+[Fri Apr 24 21:43:20 2026] 127.0.0.1:62913 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:20 2026] 127.0.0.1:62913 Closing
+[Fri Apr 24 21:43:22 2026] 127.0.0.1:55236 Accepted
+[Fri Apr 24 21:43:22 2026] 127.0.0.1:55236 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:22 2026] 127.0.0.1:55236 Closing
+[Fri Apr 24 21:43:25 2026] 127.0.0.1:56772 Accepted
+[Fri Apr 24 21:43:25 2026] 127.0.0.1:56772 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:25 2026] 127.0.0.1:56772 Closing
+[Fri Apr 24 21:43:27 2026] 127.0.0.1:56891 Accepted
+[Fri Apr 24 21:43:27 2026] 127.0.0.1:56891 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:27 2026] 127.0.0.1:56891 Closing
+[Fri Apr 24 21:43:30 2026] 127.0.0.1:54467 Accepted
+[Fri Apr 24 21:43:30 2026] 127.0.0.1:54467 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:30 2026] 127.0.0.1:54467 Closing
+[Fri Apr 24 21:43:32 2026] 127.0.0.1:56122 Accepted
+[Fri Apr 24 21:43:32 2026] 127.0.0.1:56122 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:32 2026] 127.0.0.1:56122 Closing
+[Fri Apr 24 21:43:35 2026] 127.0.0.1:59752 Accepted
+[Fri Apr 24 21:43:35 2026] 127.0.0.1:59752 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:35 2026] 127.0.0.1:59752 Closing
+[Fri Apr 24 21:43:37 2026] 127.0.0.1:58674 Accepted
+[Fri Apr 24 21:43:37 2026] 127.0.0.1:58674 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:37 2026] 127.0.0.1:58674 Closing
+[Fri Apr 24 21:43:40 2026] 127.0.0.1:61083 Accepted
+[Fri Apr 24 21:43:40 2026] 127.0.0.1:61083 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:40 2026] 127.0.0.1:61083 Closing
+[Fri Apr 24 21:43:42 2026] 127.0.0.1:59910 Accepted
+[Fri Apr 24 21:43:42 2026] 127.0.0.1:59910 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:42 2026] 127.0.0.1:59910 Closing
+[Fri Apr 24 21:43:45 2026] 127.0.0.1:49393 Accepted
+[Fri Apr 24 21:43:45 2026] 127.0.0.1:49393 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:45 2026] 127.0.0.1:49393 Closing
+[Fri Apr 24 21:43:47 2026] 127.0.0.1:51762 Accepted
+[Fri Apr 24 21:43:47 2026] 127.0.0.1:51762 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:47 2026] 127.0.0.1:51762 Closing
+[Fri Apr 24 21:43:50 2026] 127.0.0.1:55729 Accepted
+[Fri Apr 24 21:43:50 2026] 127.0.0.1:55729 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:50 2026] 127.0.0.1:55729 Closing
+[Fri Apr 24 21:43:52 2026] 127.0.0.1:60309 Accepted
+[Fri Apr 24 21:43:52 2026] 127.0.0.1:60309 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:52 2026] 127.0.0.1:60309 Closing
+[Fri Apr 24 21:43:55 2026] 127.0.0.1:60004 Accepted
+[Fri Apr 24 21:43:55 2026] 127.0.0.1:60004 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:55 2026] 127.0.0.1:60004 Closing
+[Fri Apr 24 21:43:57 2026] 127.0.0.1:61960 Accepted
+[Fri Apr 24 21:43:57 2026] 127.0.0.1:61960 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:43:57 2026] 127.0.0.1:61960 Closing
+[Fri Apr 24 21:44:00 2026] 127.0.0.1:54944 Accepted
+[Fri Apr 24 21:44:00 2026] 127.0.0.1:54944 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:00 2026] 127.0.0.1:54944 Closing
+[Fri Apr 24 21:44:02 2026] 127.0.0.1:54398 Accepted
+[Fri Apr 24 21:44:02 2026] 127.0.0.1:54398 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:02 2026] 127.0.0.1:54398 Closing
+[Fri Apr 24 21:44:05 2026] 127.0.0.1:52599 Accepted
+[Fri Apr 24 21:44:05 2026] 127.0.0.1:52599 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:05 2026] 127.0.0.1:52599 Closing
+[Fri Apr 24 21:44:07 2026] 127.0.0.1:49618 Accepted
+[Fri Apr 24 21:44:07 2026] 127.0.0.1:49618 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:07 2026] 127.0.0.1:49618 Closing
+[Fri Apr 24 21:44:10 2026] 127.0.0.1:51504 Accepted
+[Fri Apr 24 21:44:10 2026] 127.0.0.1:51504 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:10 2026] 127.0.0.1:51504 Closing
+[Fri Apr 24 21:44:12 2026] 127.0.0.1:54553 Accepted
+[Fri Apr 24 21:44:12 2026] 127.0.0.1:54553 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:12 2026] 127.0.0.1:54553 Closing
+[Fri Apr 24 21:44:15 2026] 127.0.0.1:53466 Accepted
+[Fri Apr 24 21:44:15 2026] 127.0.0.1:53466 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:15 2026] 127.0.0.1:53466 Closing
+[Fri Apr 24 21:44:17 2026] 127.0.0.1:56116 Accepted
+[Fri Apr 24 21:44:17 2026] 127.0.0.1:56116 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:17 2026] 127.0.0.1:56116 Closing
+[Fri Apr 24 21:44:20 2026] 127.0.0.1:60477 Accepted
+[Fri Apr 24 21:44:20 2026] 127.0.0.1:60477 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:20 2026] 127.0.0.1:60477 Closing
+[Fri Apr 24 21:44:22 2026] 127.0.0.1:52168 Accepted
+[Fri Apr 24 21:44:22 2026] 127.0.0.1:52168 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:22 2026] 127.0.0.1:52168 Closing
+[Fri Apr 24 21:44:25 2026] 127.0.0.1:49620 Accepted
+[Fri Apr 24 21:44:25 2026] 127.0.0.1:49620 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:25 2026] 127.0.0.1:49620 Closing
+[Fri Apr 24 21:44:27 2026] 127.0.0.1:59204 Accepted
+[Fri Apr 24 21:44:27 2026] 127.0.0.1:59204 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:27 2026] 127.0.0.1:59204 Closing
+[Fri Apr 24 21:44:30 2026] 127.0.0.1:50840 Accepted
+[Fri Apr 24 21:44:30 2026] 127.0.0.1:50840 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:30 2026] 127.0.0.1:50840 Closing
+[Fri Apr 24 21:44:32 2026] 127.0.0.1:54703 Accepted
+[Fri Apr 24 21:44:32 2026] 127.0.0.1:54703 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:32 2026] 127.0.0.1:54703 Closing
+[Fri Apr 24 21:44:35 2026] 127.0.0.1:60263 Accepted
+[Fri Apr 24 21:44:35 2026] 127.0.0.1:60263 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:35 2026] 127.0.0.1:60263 Closing
+[Fri Apr 24 21:44:37 2026] 127.0.0.1:61517 Accepted
+[Fri Apr 24 21:44:37 2026] 127.0.0.1:61517 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:37 2026] 127.0.0.1:61517 Closing
+[Fri Apr 24 21:44:40 2026] 127.0.0.1:56499 Accepted
+[Fri Apr 24 21:44:40 2026] 127.0.0.1:56499 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:40 2026] 127.0.0.1:56499 Closing
+[Fri Apr 24 21:44:42 2026] 127.0.0.1:64868 Accepted
+[Fri Apr 24 21:44:42 2026] 127.0.0.1:64868 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:42 2026] 127.0.0.1:64868 Closing
+[Fri Apr 24 21:44:45 2026] 127.0.0.1:61275 Accepted
+[Fri Apr 24 21:44:45 2026] 127.0.0.1:61275 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:45 2026] 127.0.0.1:61275 Closing
+[Fri Apr 24 21:44:47 2026] 127.0.0.1:59423 Accepted
+[Fri Apr 24 21:44:47 2026] 127.0.0.1:59423 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:47 2026] 127.0.0.1:59423 Closing
+[Fri Apr 24 21:44:50 2026] 127.0.0.1:59689 Accepted
+[Fri Apr 24 21:44:50 2026] 127.0.0.1:59689 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:50 2026] 127.0.0.1:59689 Closing
+[Fri Apr 24 21:44:52 2026] 127.0.0.1:56404 Accepted
+[Fri Apr 24 21:44:52 2026] 127.0.0.1:56404 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:52 2026] 127.0.0.1:56404 Closing
+[Fri Apr 24 21:44:55 2026] 127.0.0.1:51728 Accepted
+[Fri Apr 24 21:44:55 2026] 127.0.0.1:51728 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:55 2026] 127.0.0.1:51728 Closing
+[Fri Apr 24 21:44:57 2026] 127.0.0.1:57075 Accepted
+[Fri Apr 24 21:44:57 2026] 127.0.0.1:57075 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:44:57 2026] 127.0.0.1:57075 Closing
+[Fri Apr 24 21:45:00 2026] 127.0.0.1:56613 Accepted
+[Fri Apr 24 21:45:00 2026] 127.0.0.1:56613 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:00 2026] 127.0.0.1:56613 Closing
+[Fri Apr 24 21:45:02 2026] 127.0.0.1:53791 Accepted
+[Fri Apr 24 21:45:02 2026] 127.0.0.1:53791 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:02 2026] 127.0.0.1:53791 Closing
+[Fri Apr 24 21:45:05 2026] 127.0.0.1:61285 Accepted
+[Fri Apr 24 21:45:05 2026] 127.0.0.1:61285 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:05 2026] 127.0.0.1:61285 Closing
+[Fri Apr 24 21:45:07 2026] 127.0.0.1:63351 Accepted
+[Fri Apr 24 21:45:07 2026] 127.0.0.1:63351 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:07 2026] 127.0.0.1:63351 Closing
+[Fri Apr 24 21:45:10 2026] 127.0.0.1:53318 Accepted
+[Fri Apr 24 21:45:10 2026] 127.0.0.1:53318 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:10 2026] 127.0.0.1:53318 Closing
+[Fri Apr 24 21:45:12 2026] 127.0.0.1:55329 Accepted
+[Fri Apr 24 21:45:12 2026] 127.0.0.1:55329 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:12 2026] 127.0.0.1:55329 Closing
+[Fri Apr 24 21:45:15 2026] 127.0.0.1:58156 Accepted
+[Fri Apr 24 21:45:15 2026] 127.0.0.1:58156 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:15 2026] 127.0.0.1:58156 Closing
+[Fri Apr 24 21:45:17 2026] 127.0.0.1:57462 Accepted
+[Fri Apr 24 21:45:17 2026] 127.0.0.1:57462 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:17 2026] 127.0.0.1:57462 Closing
+[Fri Apr 24 21:45:20 2026] 127.0.0.1:58618 Accepted
+[Fri Apr 24 21:45:20 2026] 127.0.0.1:58618 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:20 2026] 127.0.0.1:58618 Closing
+[Fri Apr 24 21:45:22 2026] 127.0.0.1:64206 Accepted
+[Fri Apr 24 21:45:22 2026] 127.0.0.1:64206 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:22 2026] 127.0.0.1:64206 Closing
+[Fri Apr 24 21:45:25 2026] 127.0.0.1:60668 Accepted
+[Fri Apr 24 21:45:25 2026] 127.0.0.1:60668 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:25 2026] 127.0.0.1:60668 Closing
+[Fri Apr 24 21:45:27 2026] 127.0.0.1:51868 Accepted
+[Fri Apr 24 21:45:27 2026] 127.0.0.1:51868 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:27 2026] 127.0.0.1:51868 Closing
+[Fri Apr 24 21:45:30 2026] 127.0.0.1:57227 Accepted
+[Fri Apr 24 21:45:30 2026] 127.0.0.1:57227 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:30 2026] 127.0.0.1:57227 Closing
+[Fri Apr 24 21:45:32 2026] 127.0.0.1:53246 Accepted
+[Fri Apr 24 21:45:32 2026] 127.0.0.1:53246 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:32 2026] 127.0.0.1:53246 Closing
+[Fri Apr 24 21:45:35 2026] 127.0.0.1:64608 Accepted
+[Fri Apr 24 21:45:35 2026] 127.0.0.1:64608 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:35 2026] 127.0.0.1:64608 Closing
+[Fri Apr 24 21:45:37 2026] 127.0.0.1:63173 Accepted
+[Fri Apr 24 21:45:37 2026] 127.0.0.1:63173 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:37 2026] 127.0.0.1:63173 Closing
+[Fri Apr 24 21:45:40 2026] 127.0.0.1:57054 Accepted
+[Fri Apr 24 21:45:40 2026] 127.0.0.1:57054 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:40 2026] 127.0.0.1:57054 Closing
+[Fri Apr 24 21:45:42 2026] 127.0.0.1:51400 Accepted
+[Fri Apr 24 21:45:42 2026] 127.0.0.1:51400 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:42 2026] 127.0.0.1:51400 Closing
+[Fri Apr 24 21:45:45 2026] 127.0.0.1:55508 Accepted
+[Fri Apr 24 21:45:45 2026] 127.0.0.1:55508 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:45 2026] 127.0.0.1:55508 Closing
+[Fri Apr 24 21:45:47 2026] 127.0.0.1:62385 Accepted
+[Fri Apr 24 21:45:47 2026] 127.0.0.1:62385 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:47 2026] 127.0.0.1:62385 Closing
+[Fri Apr 24 21:45:50 2026] 127.0.0.1:50705 Accepted
+[Fri Apr 24 21:45:50 2026] 127.0.0.1:50705 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:50 2026] 127.0.0.1:50705 Closing
+[Fri Apr 24 21:45:52 2026] 127.0.0.1:55321 Accepted
+[Fri Apr 24 21:45:52 2026] 127.0.0.1:55321 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:52 2026] 127.0.0.1:55321 Closing
+[Fri Apr 24 21:45:55 2026] 127.0.0.1:55373 Accepted
+[Fri Apr 24 21:45:55 2026] 127.0.0.1:55373 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:55 2026] 127.0.0.1:55373 Closing
+[Fri Apr 24 21:45:57 2026] 127.0.0.1:60010 Accepted
+[Fri Apr 24 21:45:57 2026] 127.0.0.1:60010 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:45:57 2026] 127.0.0.1:60010 Closing
+[Fri Apr 24 21:46:00 2026] 127.0.0.1:51503 Accepted
+[Fri Apr 24 21:46:00 2026] 127.0.0.1:51503 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:00 2026] 127.0.0.1:51503 Closing
+[Fri Apr 24 21:46:02 2026] 127.0.0.1:52422 Accepted
+[Fri Apr 24 21:46:02 2026] 127.0.0.1:52422 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:02 2026] 127.0.0.1:52422 Closing
+[Fri Apr 24 21:46:05 2026] 127.0.0.1:54163 Accepted
+[Fri Apr 24 21:46:05 2026] 127.0.0.1:54163 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:05 2026] 127.0.0.1:54163 Closing
+[Fri Apr 24 21:46:07 2026] 127.0.0.1:55532 Accepted
+[Fri Apr 24 21:46:07 2026] 127.0.0.1:55532 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:07 2026] 127.0.0.1:55532 Closing
+[Fri Apr 24 21:46:10 2026] 127.0.0.1:56969 Accepted
+[Fri Apr 24 21:46:10 2026] 127.0.0.1:56969 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:10 2026] 127.0.0.1:56969 Closing
+[Fri Apr 24 21:46:12 2026] 127.0.0.1:49562 Accepted
+[Fri Apr 24 21:46:12 2026] 127.0.0.1:49562 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:12 2026] 127.0.0.1:49562 Closing
+[Fri Apr 24 21:46:15 2026] 127.0.0.1:65031 Accepted
+[Fri Apr 24 21:46:15 2026] 127.0.0.1:65031 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:15 2026] 127.0.0.1:65031 Closing
+[Fri Apr 24 21:46:17 2026] 127.0.0.1:50215 Accepted
+[Fri Apr 24 21:46:17 2026] 127.0.0.1:50215 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:17 2026] 127.0.0.1:50215 Closing
+[Fri Apr 24 21:46:20 2026] 127.0.0.1:52403 Accepted
+[Fri Apr 24 21:46:20 2026] 127.0.0.1:52403 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:20 2026] 127.0.0.1:52403 Closing
+[Fri Apr 24 21:46:22 2026] 127.0.0.1:51669 Accepted
+[Fri Apr 24 21:46:22 2026] 127.0.0.1:51669 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:22 2026] 127.0.0.1:51669 Closing
+[Fri Apr 24 21:46:25 2026] 127.0.0.1:50457 Accepted
+[Fri Apr 24 21:46:25 2026] 127.0.0.1:50457 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:25 2026] 127.0.0.1:50457 Closing
+[Fri Apr 24 21:46:27 2026] 127.0.0.1:64760 Accepted
+[Fri Apr 24 21:46:27 2026] 127.0.0.1:64760 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:27 2026] 127.0.0.1:64760 Closing
+[Fri Apr 24 21:46:30 2026] 127.0.0.1:58806 Accepted
+[Fri Apr 24 21:46:30 2026] 127.0.0.1:58806 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:30 2026] 127.0.0.1:58806 Closing
+[Fri Apr 24 21:46:32 2026] 127.0.0.1:50979 Accepted
+[Fri Apr 24 21:46:32 2026] 127.0.0.1:50979 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:32 2026] 127.0.0.1:50979 Closing
+[Fri Apr 24 21:46:35 2026] 127.0.0.1:63496 Accepted
+[Fri Apr 24 21:46:35 2026] 127.0.0.1:63496 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:35 2026] 127.0.0.1:63496 Closing
+[Fri Apr 24 21:46:37 2026] 127.0.0.1:64112 Accepted
+[Fri Apr 24 21:46:37 2026] 127.0.0.1:64112 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:37 2026] 127.0.0.1:64112 Closing
+[Fri Apr 24 21:46:40 2026] 127.0.0.1:63552 Accepted
+[Fri Apr 24 21:46:40 2026] 127.0.0.1:63552 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:40 2026] 127.0.0.1:63552 Closing
+[Fri Apr 24 21:46:42 2026] 127.0.0.1:53124 Accepted
+[Fri Apr 24 21:46:42 2026] 127.0.0.1:53124 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:42 2026] 127.0.0.1:53124 Closing
+[Fri Apr 24 21:46:45 2026] 127.0.0.1:61129 Accepted
+[Fri Apr 24 21:46:45 2026] 127.0.0.1:61129 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:45 2026] 127.0.0.1:61129 Closing
+[Fri Apr 24 21:46:47 2026] 127.0.0.1:53897 Accepted
+[Fri Apr 24 21:46:47 2026] 127.0.0.1:53897 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:47 2026] 127.0.0.1:53897 Closing
+[Fri Apr 24 21:46:50 2026] 127.0.0.1:65350 Accepted
+[Fri Apr 24 21:46:50 2026] 127.0.0.1:65350 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:50 2026] 127.0.0.1:65350 Closing
+[Fri Apr 24 21:46:52 2026] 127.0.0.1:53556 Accepted
+[Fri Apr 24 21:46:52 2026] 127.0.0.1:53556 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:52 2026] 127.0.0.1:53556 Closing
+[Fri Apr 24 21:46:55 2026] 127.0.0.1:65163 Accepted
+[Fri Apr 24 21:46:55 2026] 127.0.0.1:65163 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:55 2026] 127.0.0.1:65163 Closing
+[Fri Apr 24 21:46:57 2026] 127.0.0.1:54692 Accepted
+[Fri Apr 24 21:46:57 2026] 127.0.0.1:54692 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:46:57 2026] 127.0.0.1:54692 Closing
+[Fri Apr 24 21:47:00 2026] 127.0.0.1:57879 Accepted
+[Fri Apr 24 21:47:00 2026] 127.0.0.1:57879 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:00 2026] 127.0.0.1:57879 Closing
+[Fri Apr 24 21:47:02 2026] 127.0.0.1:56250 Accepted
+[Fri Apr 24 21:47:02 2026] 127.0.0.1:56250 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:02 2026] 127.0.0.1:56250 Closing
+[Fri Apr 24 21:47:05 2026] 127.0.0.1:56079 Accepted
+[Fri Apr 24 21:47:05 2026] 127.0.0.1:56079 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:05 2026] 127.0.0.1:56079 Closing
+[Fri Apr 24 21:47:07 2026] 127.0.0.1:57610 Accepted
+[Fri Apr 24 21:47:07 2026] 127.0.0.1:57610 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:07 2026] 127.0.0.1:57610 Closing
+[Fri Apr 24 21:47:10 2026] 127.0.0.1:49833 Accepted
+[Fri Apr 24 21:47:10 2026] 127.0.0.1:49833 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:10 2026] 127.0.0.1:49833 Closing
+[Fri Apr 24 21:47:12 2026] 127.0.0.1:53017 Accepted
+[Fri Apr 24 21:47:12 2026] 127.0.0.1:53017 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:12 2026] 127.0.0.1:53017 Closing
+[Fri Apr 24 21:47:15 2026] 127.0.0.1:65356 Accepted
+[Fri Apr 24 21:47:15 2026] 127.0.0.1:65356 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:15 2026] 127.0.0.1:65356 Closing
+[Fri Apr 24 21:47:17 2026] 127.0.0.1:52772 Accepted
+[Fri Apr 24 21:47:17 2026] 127.0.0.1:52772 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:17 2026] 127.0.0.1:52772 Closing
+[Fri Apr 24 21:47:20 2026] 127.0.0.1:64053 Accepted
+[Fri Apr 24 21:47:20 2026] 127.0.0.1:64053 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:20 2026] 127.0.0.1:64053 Closing
+[Fri Apr 24 21:47:22 2026] 127.0.0.1:61487 Accepted
+[Fri Apr 24 21:47:22 2026] 127.0.0.1:61487 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:22 2026] 127.0.0.1:61487 Closing
+[Fri Apr 24 21:47:25 2026] 127.0.0.1:61271 Accepted
+[Fri Apr 24 21:47:25 2026] 127.0.0.1:61271 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:25 2026] 127.0.0.1:61271 Closing
+[Fri Apr 24 21:47:27 2026] 127.0.0.1:61343 Accepted
+[Fri Apr 24 21:47:27 2026] 127.0.0.1:61343 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:27 2026] 127.0.0.1:61343 Closing
+[Fri Apr 24 21:47:30 2026] 127.0.0.1:61577 Accepted
+[Fri Apr 24 21:47:30 2026] 127.0.0.1:61577 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:30 2026] 127.0.0.1:61577 Closing
+[Fri Apr 24 21:47:32 2026] 127.0.0.1:57682 Accepted
+[Fri Apr 24 21:47:32 2026] 127.0.0.1:57682 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:32 2026] 127.0.0.1:57682 Closing
+[Fri Apr 24 21:47:35 2026] 127.0.0.1:57828 Accepted
+[Fri Apr 24 21:47:35 2026] 127.0.0.1:57828 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:35 2026] 127.0.0.1:57828 Closing
+[Fri Apr 24 21:47:37 2026] 127.0.0.1:64126 Accepted
+[Fri Apr 24 21:47:37 2026] 127.0.0.1:64126 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:37 2026] 127.0.0.1:64126 Closing
+[Fri Apr 24 21:47:40 2026] 127.0.0.1:51717 Accepted
+[Fri Apr 24 21:47:40 2026] 127.0.0.1:51717 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:40 2026] 127.0.0.1:51717 Closing
+[Fri Apr 24 21:47:42 2026] 127.0.0.1:61642 Accepted
+[Fri Apr 24 21:47:42 2026] 127.0.0.1:61642 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:42 2026] 127.0.0.1:61642 Closing
+[Fri Apr 24 21:47:45 2026] 127.0.0.1:65334 Accepted
+[Fri Apr 24 21:47:45 2026] 127.0.0.1:65334 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:45 2026] 127.0.0.1:65334 Closing
+[Fri Apr 24 21:47:47 2026] 127.0.0.1:57779 Accepted
+[Fri Apr 24 21:47:47 2026] 127.0.0.1:57779 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:47 2026] 127.0.0.1:57779 Closing
+[Fri Apr 24 21:47:50 2026] 127.0.0.1:56844 Accepted
+[Fri Apr 24 21:47:50 2026] 127.0.0.1:56844 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:50 2026] 127.0.0.1:56844 Closing
+[Fri Apr 24 21:47:52 2026] 127.0.0.1:53034 Accepted
+[Fri Apr 24 21:47:52 2026] 127.0.0.1:53034 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:47:52 2026] 127.0.0.1:53034 Closing
+[Fri Apr 24 21:48:52 2026] 127.0.0.1:62856 Accepted
+[Fri Apr 24 21:48:52 2026] 127.0.0.1:62856 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:48:52 2026] 127.0.0.1:62856 Closing
+[Fri Apr 24 21:49:52 2026] 127.0.0.1:62694 Accepted
+[Fri Apr 24 21:49:52 2026] 127.0.0.1:62694 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:49:52 2026] 127.0.0.1:62694 Closing
+[Fri Apr 24 21:50:52 2026] 127.0.0.1:56631 Accepted
+[Fri Apr 24 21:50:52 2026] 127.0.0.1:56631 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:50:52 2026] 127.0.0.1:56631 Closing
+[Fri Apr 24 21:51:52 2026] 127.0.0.1:63768 Accepted
+[Fri Apr 24 21:51:52 2026] 127.0.0.1:63768 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:51:52 2026] 127.0.0.1:63768 Closing
+[Fri Apr 24 21:52:52 2026] 127.0.0.1:49185 Accepted
+[Fri Apr 24 21:52:52 2026] 127.0.0.1:49185 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:52:52 2026] 127.0.0.1:49185 Closing
+[Fri Apr 24 21:53:52 2026] 127.0.0.1:53155 Accepted
+[Fri Apr 24 21:53:52 2026] 127.0.0.1:53155 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:53:52 2026] 127.0.0.1:53155 Closing
+[Fri Apr 24 21:54:52 2026] 127.0.0.1:61362 Accepted
+[Fri Apr 24 21:54:52 2026] 127.0.0.1:61362 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:54:52 2026] 127.0.0.1:61362 Closing
+[Fri Apr 24 21:55:52 2026] 127.0.0.1:51396 Accepted
+[Fri Apr 24 21:55:52 2026] 127.0.0.1:51396 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:55:52 2026] 127.0.0.1:51396 Closing
+[Fri Apr 24 21:56:52 2026] 127.0.0.1:50228 Accepted
+[Fri Apr 24 21:56:52 2026] 127.0.0.1:50228 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:56:52 2026] 127.0.0.1:50228 Closing
+[Fri Apr 24 21:57:52 2026] 127.0.0.1:63630 Accepted
+[Fri Apr 24 21:57:52 2026] 127.0.0.1:63630 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:57:52 2026] 127.0.0.1:63630 Closing
+[Fri Apr 24 21:58:52 2026] 127.0.0.1:50304 Accepted
+[Fri Apr 24 21:58:52 2026] 127.0.0.1:50304 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:58:52 2026] 127.0.0.1:50304 Closing
+[Fri Apr 24 21:59:52 2026] 127.0.0.1:61068 Accepted
+[Fri Apr 24 21:59:52 2026] 127.0.0.1:61068 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:59:52 2026] 127.0.0.1:61068 Closing
+[Fri Apr 24 21:59:59 2026] 127.0.0.1:55788 Accepted
+[Fri Apr 24 21:59:59 2026] 127.0.0.1:55788 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:59:59 2026] 127.0.0.1:55788 Closing
+[Fri Apr 24 21:59:59 2026] 127.0.0.1:54044 Accepted
+[Fri Apr 24 21:59:59 2026] 127.0.0.1:54044 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 21:59:59 2026] 127.0.0.1:54044 Closing
+[Fri Apr 24 22:00:01 2026] 127.0.0.1:53709 Accepted
+[Fri Apr 24 22:00:01 2026] 127.0.0.1:53709 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:01 2026] 127.0.0.1:53709 Closing
+[Fri Apr 24 22:00:04 2026] 127.0.0.1:49980 Accepted
+[Fri Apr 24 22:00:04 2026] 127.0.0.1:49980 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:04 2026] 127.0.0.1:49980 Closing
+[Fri Apr 24 22:00:06 2026] 127.0.0.1:55304 Accepted
+[Fri Apr 24 22:00:06 2026] 127.0.0.1:55304 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:06 2026] 127.0.0.1:55304 Closing
+[Fri Apr 24 22:00:09 2026] 127.0.0.1:50784 Accepted
+[Fri Apr 24 22:00:09 2026] 127.0.0.1:50784 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:09 2026] 127.0.0.1:50784 Closing
+[Fri Apr 24 22:00:11 2026] 127.0.0.1:54676 Accepted
+[Fri Apr 24 22:00:11 2026] 127.0.0.1:54676 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:11 2026] 127.0.0.1:54676 Closing
+[Fri Apr 24 22:00:14 2026] 127.0.0.1:58638 Accepted
+[Fri Apr 24 22:00:14 2026] 127.0.0.1:58638 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:14 2026] 127.0.0.1:58638 Closing
+[Fri Apr 24 22:00:16 2026] 127.0.0.1:61353 Accepted
+[Fri Apr 24 22:00:16 2026] 127.0.0.1:61353 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:16 2026] 127.0.0.1:61353 Closing
+[Fri Apr 24 22:00:19 2026] 127.0.0.1:55942 Accepted
+[Fri Apr 24 22:00:19 2026] 127.0.0.1:55942 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:19 2026] 127.0.0.1:55942 Closing
+[Fri Apr 24 22:00:21 2026] 127.0.0.1:60502 Accepted
+[Fri Apr 24 22:00:21 2026] 127.0.0.1:60502 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:21 2026] 127.0.0.1:60502 Closing
+[Fri Apr 24 22:00:24 2026] 127.0.0.1:51659 Accepted
+[Fri Apr 24 22:00:24 2026] 127.0.0.1:51659 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:24 2026] 127.0.0.1:51659 Closing
+[Fri Apr 24 22:00:26 2026] 127.0.0.1:57948 Accepted
+[Fri Apr 24 22:00:26 2026] 127.0.0.1:57948 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:26 2026] 127.0.0.1:57948 Closing
+[Fri Apr 24 22:00:29 2026] 127.0.0.1:62751 Accepted
+[Fri Apr 24 22:00:29 2026] 127.0.0.1:62751 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:29 2026] 127.0.0.1:62751 Closing
+[Fri Apr 24 22:00:31 2026] 127.0.0.1:54457 Accepted
+[Fri Apr 24 22:00:31 2026] 127.0.0.1:54457 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:31 2026] 127.0.0.1:54457 Closing
+[Fri Apr 24 22:00:34 2026] 127.0.0.1:53360 Accepted
+[Fri Apr 24 22:00:34 2026] 127.0.0.1:53360 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:34 2026] 127.0.0.1:53360 Closing
+[Fri Apr 24 22:00:36 2026] 127.0.0.1:57575 Accepted
+[Fri Apr 24 22:00:36 2026] 127.0.0.1:57575 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:36 2026] 127.0.0.1:57575 Closing
+[Fri Apr 24 22:00:39 2026] 127.0.0.1:51433 Accepted
+[Fri Apr 24 22:00:39 2026] 127.0.0.1:51433 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:39 2026] 127.0.0.1:51433 Closing
+[Fri Apr 24 22:00:41 2026] 127.0.0.1:57366 Accepted
+[Fri Apr 24 22:00:41 2026] 127.0.0.1:57366 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:41 2026] 127.0.0.1:57366 Closing
+[Fri Apr 24 22:00:45 2026] 127.0.0.1:56168 Accepted
+[Fri Apr 24 22:00:45 2026] 127.0.0.1:56168 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:45 2026] 127.0.0.1:56168 Closing
+[Fri Apr 24 22:00:47 2026] 127.0.0.1:55108 Accepted
+[Fri Apr 24 22:00:47 2026] 127.0.0.1:55108 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:47 2026] 127.0.0.1:55108 Closing
+[Fri Apr 24 22:00:50 2026] 127.0.0.1:55585 Accepted
+[Fri Apr 24 22:00:50 2026] 127.0.0.1:55585 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:50 2026] 127.0.0.1:55585 Closing
+[Fri Apr 24 22:00:52 2026] 127.0.0.1:57989 Accepted
+[Fri Apr 24 22:00:52 2026] 127.0.0.1:57989 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:52 2026] 127.0.0.1:57989 Closing
+[Fri Apr 24 22:00:55 2026] 127.0.0.1:64942 Accepted
+[Fri Apr 24 22:00:55 2026] 127.0.0.1:64942 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:55 2026] 127.0.0.1:64942 Closing
+[Fri Apr 24 22:00:57 2026] 127.0.0.1:58018 Accepted
+[Fri Apr 24 22:00:57 2026] 127.0.0.1:58018 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:00:57 2026] 127.0.0.1:58018 Closing
+[Fri Apr 24 22:01:00 2026] 127.0.0.1:50671 Accepted
+[Fri Apr 24 22:01:00 2026] 127.0.0.1:50671 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:00 2026] 127.0.0.1:50671 Closing
+[Fri Apr 24 22:01:02 2026] 127.0.0.1:63227 Accepted
+[Fri Apr 24 22:01:02 2026] 127.0.0.1:63227 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:02 2026] 127.0.0.1:63227 Closing
+[Fri Apr 24 22:01:05 2026] 127.0.0.1:54581 Accepted
+[Fri Apr 24 22:01:05 2026] 127.0.0.1:54581 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:05 2026] 127.0.0.1:54581 Closing
+[Fri Apr 24 22:01:07 2026] 127.0.0.1:59871 Accepted
+[Fri Apr 24 22:01:07 2026] 127.0.0.1:59871 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:07 2026] 127.0.0.1:59871 Closing
+[Fri Apr 24 22:01:10 2026] 127.0.0.1:52555 Accepted
+[Fri Apr 24 22:01:10 2026] 127.0.0.1:52555 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:10 2026] 127.0.0.1:52555 Closing
+[Fri Apr 24 22:01:12 2026] 127.0.0.1:62595 Accepted
+[Fri Apr 24 22:01:12 2026] 127.0.0.1:62595 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:12 2026] 127.0.0.1:62595 Closing
+[Fri Apr 24 22:01:15 2026] 127.0.0.1:59915 Accepted
+[Fri Apr 24 22:01:15 2026] 127.0.0.1:59915 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:15 2026] 127.0.0.1:59915 Closing
+[Fri Apr 24 22:01:17 2026] 127.0.0.1:61263 Accepted
+[Fri Apr 24 22:01:17 2026] 127.0.0.1:61263 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:17 2026] 127.0.0.1:61263 Closing
+[Fri Apr 24 22:01:20 2026] 127.0.0.1:65217 Accepted
+[Fri Apr 24 22:01:20 2026] 127.0.0.1:65217 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:20 2026] 127.0.0.1:65217 Closing
+[Fri Apr 24 22:01:22 2026] 127.0.0.1:58795 Accepted
+[Fri Apr 24 22:01:22 2026] 127.0.0.1:58795 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:22 2026] 127.0.0.1:58795 Closing
+[Fri Apr 24 22:01:25 2026] 127.0.0.1:61471 Accepted
+[Fri Apr 24 22:01:25 2026] 127.0.0.1:61471 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:25 2026] 127.0.0.1:61471 Closing
+[Fri Apr 24 22:01:27 2026] 127.0.0.1:64140 Accepted
+[Fri Apr 24 22:01:27 2026] 127.0.0.1:64140 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:27 2026] 127.0.0.1:64140 Closing
+[Fri Apr 24 22:01:30 2026] 127.0.0.1:63385 Accepted
+[Fri Apr 24 22:01:30 2026] 127.0.0.1:63385 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:30 2026] 127.0.0.1:63385 Closing
+[Fri Apr 24 22:01:32 2026] 127.0.0.1:55945 Accepted
+[Fri Apr 24 22:01:32 2026] 127.0.0.1:55945 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:32 2026] 127.0.0.1:55945 Closing
+[Fri Apr 24 22:01:35 2026] 127.0.0.1:61051 Accepted
+[Fri Apr 24 22:01:35 2026] 127.0.0.1:61051 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:35 2026] 127.0.0.1:61051 Closing
+[Fri Apr 24 22:01:37 2026] 127.0.0.1:57163 Accepted
+[Fri Apr 24 22:01:37 2026] 127.0.0.1:57163 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:37 2026] 127.0.0.1:57163 Closing
+[Fri Apr 24 22:01:40 2026] 127.0.0.1:58015 Accepted
+[Fri Apr 24 22:01:40 2026] 127.0.0.1:58015 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:40 2026] 127.0.0.1:58015 Closing
+[Fri Apr 24 22:01:42 2026] 127.0.0.1:56274 Accepted
+[Fri Apr 24 22:01:42 2026] 127.0.0.1:56274 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:42 2026] 127.0.0.1:56274 Closing
+[Fri Apr 24 22:01:45 2026] 127.0.0.1:65287 Accepted
+[Fri Apr 24 22:01:45 2026] 127.0.0.1:65287 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:45 2026] 127.0.0.1:65287 Closing
+[Fri Apr 24 22:01:47 2026] 127.0.0.1:61350 Accepted
+[Fri Apr 24 22:01:47 2026] 127.0.0.1:61350 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:47 2026] 127.0.0.1:61350 Closing
+[Fri Apr 24 22:01:50 2026] 127.0.0.1:50866 Accepted
+[Fri Apr 24 22:01:50 2026] 127.0.0.1:50866 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:50 2026] 127.0.0.1:50866 Closing
+[Fri Apr 24 22:01:52 2026] 127.0.0.1:64965 Accepted
+[Fri Apr 24 22:01:52 2026] 127.0.0.1:64965 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:52 2026] 127.0.0.1:64965 Closing
+[Fri Apr 24 22:01:55 2026] 127.0.0.1:55409 Accepted
+[Fri Apr 24 22:01:55 2026] 127.0.0.1:55409 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:55 2026] 127.0.0.1:55409 Closing
+[Fri Apr 24 22:01:57 2026] 127.0.0.1:51935 Accepted
+[Fri Apr 24 22:01:57 2026] 127.0.0.1:51935 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:01:57 2026] 127.0.0.1:51935 Closing
+[Fri Apr 24 22:02:00 2026] 127.0.0.1:53855 Accepted
+[Fri Apr 24 22:02:00 2026] 127.0.0.1:53855 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:00 2026] 127.0.0.1:53855 Closing
+[Fri Apr 24 22:02:02 2026] 127.0.0.1:64911 Accepted
+[Fri Apr 24 22:02:02 2026] 127.0.0.1:64911 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:02 2026] 127.0.0.1:64911 Closing
+[Fri Apr 24 22:02:05 2026] 127.0.0.1:57393 Accepted
+[Fri Apr 24 22:02:05 2026] 127.0.0.1:57393 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:05 2026] 127.0.0.1:57393 Closing
+[Fri Apr 24 22:02:07 2026] 127.0.0.1:58358 Accepted
+[Fri Apr 24 22:02:07 2026] 127.0.0.1:58358 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:07 2026] 127.0.0.1:58358 Closing
+[Fri Apr 24 22:02:10 2026] 127.0.0.1:65049 Accepted
+[Fri Apr 24 22:02:10 2026] 127.0.0.1:65049 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:10 2026] 127.0.0.1:65049 Closing
+[Fri Apr 24 22:02:12 2026] 127.0.0.1:49603 Accepted
+[Fri Apr 24 22:02:12 2026] 127.0.0.1:49603 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:12 2026] 127.0.0.1:49603 Closing
+[Fri Apr 24 22:02:15 2026] 127.0.0.1:63264 Accepted
+[Fri Apr 24 22:02:15 2026] 127.0.0.1:63264 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:15 2026] 127.0.0.1:63264 Closing
+[Fri Apr 24 22:02:17 2026] 127.0.0.1:53622 Accepted
+[Fri Apr 24 22:02:17 2026] 127.0.0.1:53622 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:17 2026] 127.0.0.1:53622 Closing
+[Fri Apr 24 22:02:20 2026] 127.0.0.1:55779 Accepted
+[Fri Apr 24 22:02:20 2026] 127.0.0.1:55779 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:20 2026] 127.0.0.1:55779 Closing
+[Fri Apr 24 22:02:22 2026] 127.0.0.1:63194 Accepted
+[Fri Apr 24 22:02:22 2026] 127.0.0.1:63194 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:22 2026] 127.0.0.1:63194 Closing
+[Fri Apr 24 22:02:25 2026] 127.0.0.1:58954 Accepted
+[Fri Apr 24 22:02:25 2026] 127.0.0.1:58954 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:25 2026] 127.0.0.1:58954 Closing
+[Fri Apr 24 22:02:27 2026] 127.0.0.1:62940 Accepted
+[Fri Apr 24 22:02:27 2026] 127.0.0.1:62940 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:27 2026] 127.0.0.1:62940 Closing
+[Fri Apr 24 22:02:30 2026] 127.0.0.1:51980 Accepted
+[Fri Apr 24 22:02:30 2026] 127.0.0.1:51980 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:30 2026] 127.0.0.1:51980 Closing
+[Fri Apr 24 22:02:32 2026] 127.0.0.1:54536 Accepted
+[Fri Apr 24 22:02:32 2026] 127.0.0.1:54536 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:32 2026] 127.0.0.1:54536 Closing
+[Fri Apr 24 22:02:35 2026] 127.0.0.1:63384 Accepted
+[Fri Apr 24 22:02:35 2026] 127.0.0.1:63384 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:35 2026] 127.0.0.1:63384 Closing
+[Fri Apr 24 22:02:37 2026] 127.0.0.1:64096 Accepted
+[Fri Apr 24 22:02:37 2026] 127.0.0.1:64096 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:37 2026] 127.0.0.1:64096 Closing
+[Fri Apr 24 22:02:40 2026] 127.0.0.1:50503 Accepted
+[Fri Apr 24 22:02:40 2026] 127.0.0.1:50503 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:40 2026] 127.0.0.1:50503 Closing
+[Fri Apr 24 22:02:42 2026] 127.0.0.1:64260 Accepted
+[Fri Apr 24 22:02:42 2026] 127.0.0.1:64260 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:42 2026] 127.0.0.1:64260 Closing
+[Fri Apr 24 22:02:45 2026] 127.0.0.1:64392 Accepted
+[Fri Apr 24 22:02:45 2026] 127.0.0.1:64392 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:45 2026] 127.0.0.1:64392 Closing
+[Fri Apr 24 22:02:47 2026] 127.0.0.1:62243 Accepted
+[Fri Apr 24 22:02:47 2026] 127.0.0.1:62243 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:47 2026] 127.0.0.1:62243 Closing
+[Fri Apr 24 22:02:50 2026] 127.0.0.1:60315 Accepted
+[Fri Apr 24 22:02:50 2026] 127.0.0.1:60315 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:50 2026] 127.0.0.1:60315 Closing
+[Fri Apr 24 22:02:52 2026] 127.0.0.1:58434 Accepted
+[Fri Apr 24 22:02:52 2026] 127.0.0.1:58434 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:52 2026] 127.0.0.1:58434 Closing
+[Fri Apr 24 22:02:55 2026] 127.0.0.1:55424 Accepted
+[Fri Apr 24 22:02:55 2026] 127.0.0.1:55424 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:55 2026] 127.0.0.1:55424 Closing
+[Fri Apr 24 22:02:57 2026] 127.0.0.1:59348 Accepted
+[Fri Apr 24 22:02:57 2026] 127.0.0.1:59348 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:02:57 2026] 127.0.0.1:59348 Closing
+[Fri Apr 24 22:03:00 2026] 127.0.0.1:50986 Accepted
+[Fri Apr 24 22:03:00 2026] 127.0.0.1:50986 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:00 2026] 127.0.0.1:50986 Closing
+[Fri Apr 24 22:03:02 2026] 127.0.0.1:57419 Accepted
+[Fri Apr 24 22:03:02 2026] 127.0.0.1:57419 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:02 2026] 127.0.0.1:57419 Closing
+[Fri Apr 24 22:03:05 2026] 127.0.0.1:63340 Accepted
+[Fri Apr 24 22:03:05 2026] 127.0.0.1:63340 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:05 2026] 127.0.0.1:63340 Closing
+[Fri Apr 24 22:03:07 2026] 127.0.0.1:61076 Accepted
+[Fri Apr 24 22:03:07 2026] 127.0.0.1:61076 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:07 2026] 127.0.0.1:61076 Closing
+[Fri Apr 24 22:03:10 2026] 127.0.0.1:56126 Accepted
+[Fri Apr 24 22:03:10 2026] 127.0.0.1:56126 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:10 2026] 127.0.0.1:56126 Closing
+[Fri Apr 24 22:03:12 2026] 127.0.0.1:59462 Accepted
+[Fri Apr 24 22:03:12 2026] 127.0.0.1:59462 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:12 2026] 127.0.0.1:59462 Closing
+[Fri Apr 24 22:03:15 2026] 127.0.0.1:63757 Accepted
+[Fri Apr 24 22:03:15 2026] 127.0.0.1:63757 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:15 2026] 127.0.0.1:63757 Closing
+[Fri Apr 24 22:03:17 2026] 127.0.0.1:57049 Accepted
+[Fri Apr 24 22:03:17 2026] 127.0.0.1:57049 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:17 2026] 127.0.0.1:57049 Closing
+[Fri Apr 24 22:03:20 2026] 127.0.0.1:59104 Accepted
+[Fri Apr 24 22:03:20 2026] 127.0.0.1:59104 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:20 2026] 127.0.0.1:59104 Closing
+[Fri Apr 24 22:03:22 2026] 127.0.0.1:54916 Accepted
+[Fri Apr 24 22:03:22 2026] 127.0.0.1:54916 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:22 2026] 127.0.0.1:54916 Closing
+[Fri Apr 24 22:03:25 2026] 127.0.0.1:58641 Accepted
+[Fri Apr 24 22:03:25 2026] 127.0.0.1:58641 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:25 2026] 127.0.0.1:58641 Closing
+[Fri Apr 24 22:03:27 2026] 127.0.0.1:60563 Accepted
+[Fri Apr 24 22:03:27 2026] 127.0.0.1:60563 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:27 2026] 127.0.0.1:60563 Closing
+[Fri Apr 24 22:03:30 2026] 127.0.0.1:60937 Accepted
+[Fri Apr 24 22:03:30 2026] 127.0.0.1:60937 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:30 2026] 127.0.0.1:60937 Closing
+[Fri Apr 24 22:03:32 2026] 127.0.0.1:59828 Accepted
+[Fri Apr 24 22:03:32 2026] 127.0.0.1:59828 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:32 2026] 127.0.0.1:59828 Closing
+[Fri Apr 24 22:03:35 2026] 127.0.0.1:57775 Accepted
+[Fri Apr 24 22:03:35 2026] 127.0.0.1:57775 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:35 2026] 127.0.0.1:57775 Closing
+[Fri Apr 24 22:03:37 2026] 127.0.0.1:57971 Accepted
+[Fri Apr 24 22:03:37 2026] 127.0.0.1:57971 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:37 2026] 127.0.0.1:57971 Closing
+[Fri Apr 24 22:03:40 2026] 127.0.0.1:54328 Accepted
+[Fri Apr 24 22:03:40 2026] 127.0.0.1:54328 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:40 2026] 127.0.0.1:54328 Closing
+[Fri Apr 24 22:03:42 2026] 127.0.0.1:52865 Accepted
+[Fri Apr 24 22:03:42 2026] 127.0.0.1:52865 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:42 2026] 127.0.0.1:52865 Closing
+[Fri Apr 24 22:03:45 2026] 127.0.0.1:60206 Accepted
+[Fri Apr 24 22:03:45 2026] 127.0.0.1:60206 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:45 2026] 127.0.0.1:60206 Closing
+[Fri Apr 24 22:03:47 2026] 127.0.0.1:58696 Accepted
+[Fri Apr 24 22:03:47 2026] 127.0.0.1:58696 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:47 2026] 127.0.0.1:58696 Closing
+[Fri Apr 24 22:03:50 2026] 127.0.0.1:62141 Accepted
+[Fri Apr 24 22:03:50 2026] 127.0.0.1:62141 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:50 2026] 127.0.0.1:62141 Closing
+[Fri Apr 24 22:03:52 2026] 127.0.0.1:65116 Accepted
+[Fri Apr 24 22:03:52 2026] 127.0.0.1:65116 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:52 2026] 127.0.0.1:65116 Closing
+[Fri Apr 24 22:03:55 2026] 127.0.0.1:63028 Accepted
+[Fri Apr 24 22:03:55 2026] 127.0.0.1:63028 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:55 2026] 127.0.0.1:63028 Closing
+[Fri Apr 24 22:03:57 2026] 127.0.0.1:49240 Accepted
+[Fri Apr 24 22:03:57 2026] 127.0.0.1:49240 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:03:57 2026] 127.0.0.1:49240 Closing
+[Fri Apr 24 22:04:00 2026] 127.0.0.1:61512 Accepted
+[Fri Apr 24 22:04:00 2026] 127.0.0.1:61512 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:00 2026] 127.0.0.1:61512 Closing
+[Fri Apr 24 22:04:02 2026] 127.0.0.1:49404 Accepted
+[Fri Apr 24 22:04:02 2026] 127.0.0.1:49404 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:02 2026] 127.0.0.1:49404 Closing
+[Fri Apr 24 22:04:05 2026] 127.0.0.1:56605 Accepted
+[Fri Apr 24 22:04:05 2026] 127.0.0.1:56605 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:05 2026] 127.0.0.1:56605 Closing
+[Fri Apr 24 22:04:07 2026] 127.0.0.1:49520 Accepted
+[Fri Apr 24 22:04:07 2026] 127.0.0.1:49520 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:07 2026] 127.0.0.1:49520 Closing
+[Fri Apr 24 22:04:10 2026] 127.0.0.1:57530 Accepted
+[Fri Apr 24 22:04:10 2026] 127.0.0.1:57530 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:10 2026] 127.0.0.1:57530 Closing
+[Fri Apr 24 22:04:12 2026] 127.0.0.1:49446 Accepted
+[Fri Apr 24 22:04:12 2026] 127.0.0.1:49446 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:12 2026] 127.0.0.1:49446 Closing
+[Fri Apr 24 22:04:15 2026] 127.0.0.1:65292 Accepted
+[Fri Apr 24 22:04:15 2026] 127.0.0.1:65292 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:15 2026] 127.0.0.1:65292 Closing
+[Fri Apr 24 22:04:17 2026] 127.0.0.1:59268 Accepted
+[Fri Apr 24 22:04:17 2026] 127.0.0.1:59268 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:17 2026] 127.0.0.1:59268 Closing
+[Fri Apr 24 22:04:20 2026] 127.0.0.1:59750 Accepted
+[Fri Apr 24 22:04:20 2026] 127.0.0.1:59750 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:20 2026] 127.0.0.1:59750 Closing
+[Fri Apr 24 22:04:22 2026] 127.0.0.1:53886 Accepted
+[Fri Apr 24 22:04:22 2026] 127.0.0.1:53886 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:22 2026] 127.0.0.1:53886 Closing
+[Fri Apr 24 22:04:25 2026] 127.0.0.1:59633 Accepted
+[Fri Apr 24 22:04:25 2026] 127.0.0.1:59633 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:25 2026] 127.0.0.1:59633 Closing
+[Fri Apr 24 22:04:27 2026] 127.0.0.1:58129 Accepted
+[Fri Apr 24 22:04:27 2026] 127.0.0.1:58129 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:27 2026] 127.0.0.1:58129 Closing
+[Fri Apr 24 22:04:30 2026] 127.0.0.1:59336 Accepted
+[Fri Apr 24 22:04:30 2026] 127.0.0.1:59336 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:30 2026] 127.0.0.1:59336 Closing
+[Fri Apr 24 22:04:32 2026] 127.0.0.1:53849 Accepted
+[Fri Apr 24 22:04:32 2026] 127.0.0.1:53849 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:32 2026] 127.0.0.1:53849 Closing
+[Fri Apr 24 22:04:35 2026] 127.0.0.1:60737 Accepted
+[Fri Apr 24 22:04:35 2026] 127.0.0.1:60737 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:35 2026] 127.0.0.1:60737 Closing
+[Fri Apr 24 22:04:37 2026] 127.0.0.1:51376 Accepted
+[Fri Apr 24 22:04:37 2026] 127.0.0.1:51376 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:37 2026] 127.0.0.1:51376 Closing
+[Fri Apr 24 22:04:40 2026] 127.0.0.1:51995 Accepted
+[Fri Apr 24 22:04:40 2026] 127.0.0.1:51995 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:40 2026] 127.0.0.1:51995 Closing
+[Fri Apr 24 22:04:42 2026] 127.0.0.1:60422 Accepted
+[Fri Apr 24 22:04:42 2026] 127.0.0.1:60422 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:42 2026] 127.0.0.1:60422 Closing
+[Fri Apr 24 22:04:45 2026] 127.0.0.1:64426 Accepted
+[Fri Apr 24 22:04:45 2026] 127.0.0.1:64426 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:45 2026] 127.0.0.1:64426 Closing
+[Fri Apr 24 22:04:47 2026] 127.0.0.1:59273 Accepted
+[Fri Apr 24 22:04:47 2026] 127.0.0.1:59273 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:47 2026] 127.0.0.1:59273 Closing
+[Fri Apr 24 22:04:50 2026] 127.0.0.1:51413 Accepted
+[Fri Apr 24 22:04:50 2026] 127.0.0.1:51413 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:50 2026] 127.0.0.1:51413 Closing
+[Fri Apr 24 22:04:52 2026] 127.0.0.1:63788 Accepted
+[Fri Apr 24 22:04:52 2026] 127.0.0.1:63788 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:52 2026] 127.0.0.1:63788 Closing
+[Fri Apr 24 22:04:55 2026] 127.0.0.1:58402 Accepted
+[Fri Apr 24 22:04:55 2026] 127.0.0.1:58402 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:55 2026] 127.0.0.1:58402 Closing
+[Fri Apr 24 22:04:57 2026] 127.0.0.1:50716 Accepted
+[Fri Apr 24 22:04:57 2026] 127.0.0.1:50716 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:04:57 2026] 127.0.0.1:50716 Closing
+[Fri Apr 24 22:05:00 2026] 127.0.0.1:55220 Accepted
+[Fri Apr 24 22:05:00 2026] 127.0.0.1:55220 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:00 2026] 127.0.0.1:55220 Closing
+[Fri Apr 24 22:05:02 2026] 127.0.0.1:63171 Accepted
+[Fri Apr 24 22:05:02 2026] 127.0.0.1:63171 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:02 2026] 127.0.0.1:63171 Closing
+[Fri Apr 24 22:05:05 2026] 127.0.0.1:54342 Accepted
+[Fri Apr 24 22:05:05 2026] 127.0.0.1:54342 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:05 2026] 127.0.0.1:54342 Closing
+[Fri Apr 24 22:05:07 2026] 127.0.0.1:60607 Accepted
+[Fri Apr 24 22:05:07 2026] 127.0.0.1:60607 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:07 2026] 127.0.0.1:60607 Closing
+[Fri Apr 24 22:05:10 2026] 127.0.0.1:61148 Accepted
+[Fri Apr 24 22:05:10 2026] 127.0.0.1:61148 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:10 2026] 127.0.0.1:61148 Closing
+[Fri Apr 24 22:05:12 2026] 127.0.0.1:63358 Accepted
+[Fri Apr 24 22:05:12 2026] 127.0.0.1:63358 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:12 2026] 127.0.0.1:63358 Closing
+[Fri Apr 24 22:05:15 2026] 127.0.0.1:63657 Accepted
+[Fri Apr 24 22:05:15 2026] 127.0.0.1:63657 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:15 2026] 127.0.0.1:63657 Closing
+[Fri Apr 24 22:05:17 2026] 127.0.0.1:52870 Accepted
+[Fri Apr 24 22:05:17 2026] 127.0.0.1:52870 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:17 2026] 127.0.0.1:52870 Closing
+[Fri Apr 24 22:05:20 2026] 127.0.0.1:60591 Accepted
+[Fri Apr 24 22:05:20 2026] 127.0.0.1:60591 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:20 2026] 127.0.0.1:60591 Closing
+[Fri Apr 24 22:05:22 2026] 127.0.0.1:51891 Accepted
+[Fri Apr 24 22:05:22 2026] 127.0.0.1:51891 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:22 2026] 127.0.0.1:51891 Closing
+[Fri Apr 24 22:05:25 2026] 127.0.0.1:62967 Accepted
+[Fri Apr 24 22:05:25 2026] 127.0.0.1:62967 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:25 2026] 127.0.0.1:62967 Closing
+[Fri Apr 24 22:05:27 2026] 127.0.0.1:55252 Accepted
+[Fri Apr 24 22:05:27 2026] 127.0.0.1:55252 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:27 2026] 127.0.0.1:55252 Closing
+[Fri Apr 24 22:05:30 2026] 127.0.0.1:59638 Accepted
+[Fri Apr 24 22:05:30 2026] 127.0.0.1:59638 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:30 2026] 127.0.0.1:59638 Closing
+[Fri Apr 24 22:05:32 2026] 127.0.0.1:62196 Accepted
+[Fri Apr 24 22:05:32 2026] 127.0.0.1:62196 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:32 2026] 127.0.0.1:62196 Closing
+[Fri Apr 24 22:05:35 2026] 127.0.0.1:52163 Accepted
+[Fri Apr 24 22:05:35 2026] 127.0.0.1:52163 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:35 2026] 127.0.0.1:52163 Closing
+[Fri Apr 24 22:05:37 2026] 127.0.0.1:56432 Accepted
+[Fri Apr 24 22:05:37 2026] 127.0.0.1:56432 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:37 2026] 127.0.0.1:56432 Closing
+[Fri Apr 24 22:05:40 2026] 127.0.0.1:55726 Accepted
+[Fri Apr 24 22:05:40 2026] 127.0.0.1:55726 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:40 2026] 127.0.0.1:55726 Closing
+[Fri Apr 24 22:05:42 2026] 127.0.0.1:62369 Accepted
+[Fri Apr 24 22:05:42 2026] 127.0.0.1:62369 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:42 2026] 127.0.0.1:62369 Closing
+[Fri Apr 24 22:05:52 2026] 127.0.0.1:60138 Accepted
+[Fri Apr 24 22:05:52 2026] 127.0.0.1:60138 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:05:52 2026] 127.0.0.1:60138 Closing
+[Fri Apr 24 22:06:52 2026] 127.0.0.1:56289 Accepted
+[Fri Apr 24 22:06:52 2026] 127.0.0.1:56289 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:06:52 2026] 127.0.0.1:56289 Closing
+[Fri Apr 24 22:07:52 2026] 127.0.0.1:53230 Accepted
+[Fri Apr 24 22:07:52 2026] 127.0.0.1:53230 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:07:52 2026] 127.0.0.1:53230 Closing
+[Fri Apr 24 22:08:52 2026] 127.0.0.1:52324 Accepted
+[Fri Apr 24 22:08:52 2026] 127.0.0.1:52324 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:08:52 2026] 127.0.0.1:52324 Closing
+[Fri Apr 24 22:09:52 2026] 127.0.0.1:50385 Accepted
+[Fri Apr 24 22:09:52 2026] 127.0.0.1:50385 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:09:52 2026] 127.0.0.1:50385 Closing
+[Fri Apr 24 22:10:52 2026] 127.0.0.1:54644 Accepted
+[Fri Apr 24 22:10:52 2026] 127.0.0.1:54644 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:10:52 2026] 127.0.0.1:54644 Closing
+[Fri Apr 24 22:11:52 2026] 127.0.0.1:58162 Accepted
+[Fri Apr 24 22:11:52 2026] 127.0.0.1:58162 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:11:52 2026] 127.0.0.1:58162 Closing
+[Fri Apr 24 22:12:52 2026] 127.0.0.1:53326 Accepted
+[Fri Apr 24 22:12:52 2026] 127.0.0.1:53326 [200]: GET /index.php?action=assistant_task&task_id=task_20260424_141501_aa84ba02bb
+[Fri Apr 24 22:12:52 2026] 127.0.0.1:53326 Closing

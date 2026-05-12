@@ -1,0 +1,258 @@
+/* ============================================================
+   PROJECTS.CSS — Projects & collaborations page
+   ============================================================ */
+
+.projects-grid-section { padding-bottom: var(--sp-12); }
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+.projects-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-8);
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+
+.toolbar-filters {
+  display: flex;
+  gap: 4px;
+  background: var(--color-surface);
+  border: var(--glass-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  box-shadow: var(--shadow-xs);
+}
+
+[data-theme="dark"] .toolbar-filters {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.filter-btn {
+  padding: 0.45rem 1.15rem;
+  border-radius: var(--radius-full);
+  font-size: 0.84rem;
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+}
+
+.filter-btn:hover { color: var(--color-text-primary); }
+
+.filter-btn.active {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(var(--color-accent-rgb), 0.35);
+}
+
+/* ============================================================
+   PROJECT CARD
+   ============================================================ */
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+}
+
+.project-status {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.22rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-wide);
+}
+
+.status-active {
+  background: rgba(var(--color-accent-secondary-rgb), 0.1);
+  color: var(--color-accent-secondary);
+  border: 1px solid rgba(var(--color-accent-secondary-rgb), 0.2);
+}
+
+.status-completed {
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--color-accent-emerald);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.status-planning {
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--color-accent-amber);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.project-title {
+  font-size: 1.05rem;
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-primary);
+}
+
+.project-desc {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  line-height: var(--lh-relaxed);
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.project-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .progress-track { background: rgba(255,255,255,0.06); }
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.3s var(--ease-out);
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-secondary));
+}
+
+/* ============================================================
+   PROJECT META
+   ============================================================ */
+.project-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.project-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.avatar.mini {
+  width: 28px; height: 28px;
+  font-size: 0.6rem;
+  border: 2px solid var(--color-surface);
+  margin-left: -8px;
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+.avatar.mini:first-child { margin-left: 0; }
+
+/* ============================================================
+   PROJECT TIMELINE
+   ============================================================ */
+.project-timeline {
+  position: relative;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 19px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--color-accent), rgba(var(--color-accent-rgb), 0.08));
+}
+
+.timeline-item {
+  display: flex;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-8);
+  position: relative;
+}
+
+.timeline-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+  border: 2px solid var(--color-surface);
+  flex-shrink: 0;
+  margin-top: var(--sp-5);
+  z-index: 1;
+  position: relative;
+  left: 13px;
+  box-shadow: 0 0 0 2px var(--color-border);
+}
+
+.timeline-dot.dot-completed {
+  background: var(--color-accent-emerald);
+  border-color: var(--color-surface);
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.3), 0 0 0 2px rgba(5, 150, 105, 0.15);
+}
+
+.timeline-dot.dot-active {
+  background: var(--color-accent);
+  border-color: var(--color-surface);
+  box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.35), 0 0 0 2px rgba(var(--color-accent-rgb), 0.15);
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
+.timeline-content {
+  flex: 1;
+  padding: var(--sp-5);
+  margin-left: var(--sp-4);
+  transition: transform var(--t-normal);
+}
+
+.timeline-content:hover { transform: translateY(-2px) translateX(3px); }
+
+.timeline-active {
+  border-color: rgba(var(--color-accent-rgb), 0.25);
+  box-shadow: var(--shadow-glow), var(--shadow-card);
+}
+
+.timeline-date {
+  color: var(--color-accent);
+  font-weight: var(--fw-medium);
+  font-size: 0.8rem;
+  margin-bottom: var(--sp-1);
+}
+
+.timeline-content h4 {
+  font-size: 0.975rem;
+  margin-bottom: var(--sp-2);
+  font-weight: var(--fw-semibold);
+}
+
+.timeline-content p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: var(--lh-relaxed);
+}
+
+.timeline-avatars {
+  display: flex;
+  margin-top: var(--sp-4);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .toolbar-filters { overflow-x: auto; }
+}

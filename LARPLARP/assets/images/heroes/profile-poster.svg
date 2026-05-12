@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <rect width="1600" height="900" fill="#F8FBFF"/>
+  <rect x="80" y="80" width="1440" height="740" rx="42" fill="url(#bg)"/>
+  <circle cx="1280" cy="210" r="180" fill="url(#orb1)"/>
+  <circle cx="280" cy="700" r="220" fill="url(#orb2)"/>
+  <path d="M180 610C360 470 560 720 780 560C980 420 1100 600 1400 470" stroke="#4F8CFF" stroke-opacity="0.35" stroke-width="22" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="80" x2="1520" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF3FF"/>
+    </linearGradient>
+    <radialGradient id="orb1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1280 210) rotate(90) scale(180)">
+      <stop stop-color="#5EA3FF" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#5EA3FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(280 700) rotate(90) scale(220)">
+      <stop stop-color="#7E9CFF" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#7E9CFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

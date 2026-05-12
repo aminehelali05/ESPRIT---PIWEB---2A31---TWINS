@@ -1,5 +1,23 @@
+<<<<<<< Updated upstream
 ﻿<!DOCTYPE html>
 <html lang="en" data-theme="dark">
+=======
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+include_once(__DIR__ . '/../../Controllers/UserController.php');
+$sidebarUser = UserController::currentUser() ?? [];
+$sidebarFirstName = trim((string) ($sidebarUser['first_name'] ?? 'Guest'));
+$sidebarLastName = trim((string) ($sidebarUser['last_name'] ?? 'User'));
+$sidebarDisplayName = trim($sidebarFirstName . ' ' . $sidebarLastName);
+$sidebarDisplayName = $sidebarDisplayName !== '' ? $sidebarDisplayName : 'Guest User';
+$sidebarInitials = strtoupper(substr($sidebarFirstName ?: 'G', 0, 1) . substr($sidebarLastName ?: 'U', 0, 1));
+$isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === 'admin@diversity.is';
+?>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+>>>>>>> Stashed changes
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,6 +34,7 @@
     <div class="container">
       <a href="TemplateHome.php" class="navbar-brand"><div class="brand-icon">â¬¡</div>Diversity.is</a>
       <div class="navbar-nav" id="navbar-nav">
+<<<<<<< Updated upstream
         <a href="TemplateHome.php">Home</a>
         <a href="auth.html">Sign In</a>
         <a href="social.html">Feed</a>
@@ -23,6 +42,16 @@
         <a href="projects.html">Projects</a>
         <a href="reviews.html" class="active">Reviews</a>
         <a href="challenges.html">Challenges</a>
+=======
+        <a href="home.php">Home</a>
+        <a href="auth.php">Sign In</a>
+        <a href="social.php">Feed</a>
+        <a href="skills.php">Skills</a>
+        <a href="projects.php">Projects</a>
+        <a href="brainstormings.php">Brainstorming</a>
+        <a href="reviews.php" class="active">Reviews</a>
+        <a href="challenges.php">Challenges</a>
+>>>>>>> Stashed changes
       </div>
       <div class="navbar-actions">
         <!-- Theme Toggle -->
@@ -52,7 +81,36 @@
     </div>
   </nav>
 
-  <section class="section-half" style="padding-top:100px">
+  <main class="profile-main" id="main-content" tabindex="-1">
+    <div class="container profile-page-layout">
+      <aside class="home-left glass-card" aria-label="Quick profile and navigation">
+        <div class="left-profile">
+          <div class="left-avatar"><?= htmlspecialchars($sidebarInitials) ?></div>
+          <div>
+            <h4><?= htmlspecialchars($sidebarDisplayName) ?></h4>
+            <p>Level 12</p>
+          </div>
+        </div>
+        <nav class="left-nav">
+          <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span>Home Feed</span></a>
+          <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg><span>Social</span></a>
+          <a href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg><span>Profile</span></a>
+          <a href="skills.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Skills & Certificates</span></a>
+          <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg><span>Projects & Collaborators</span></a>
+          <a href="brainstormings.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6m-5 3h4M12 2a7 7 0 00-7 7c0 2.5 1.5 4.5 3 6v1a2 2 0 002 2h4a2 2 0 002-2v-1c1.5-1.5 3-3.5 3-6a7 7 0 00-7-7z" /></svg><span>Brainstorming</span></a>
+          <a class="active" href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z" /></svg><span>Reviews & Ratings</span></a>
+          <a href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Challenges & Daily Quiz</span></a>
+          <?php if ($isAdminSidebar): ?><a href="../BackOffice/dashboard.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M14 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V6z"/><path d="M4 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z"/></svg><span>User Management</span></a><?php endif; ?>
+        </nav>
+        <div class="left-gamification">
+          <div class="mini-score"><span>Reputation</span><strong>84</strong></div>
+          <div class="mini-score"><span>Daily Streak</span><strong>7 days</strong></div>
+        </div>
+      </aside>
+
+      <section class="profile-content-area">
+
+  <section class="section-half">
     <div class="container">
       <div class="section-header fade-in-section" style="text-align:center">
         <span class="section-tag">Feedback</span>
@@ -84,9 +142,9 @@
           <div class="rating-row"><span class="text-small">2 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:2%"></div></div><span class="text-small">2</span></div>
           <div class="rating-row"><span class="text-small">1 â˜…</span><div class="rating-bar-track"><div class="rating-bar-fill" style="width:1%"></div></div><span class="text-small">1</span></div>
         </div>
-      </div>
-    </div>
-  </section>
+            </div>
+          </div>
+        </section>
 
   <!-- Write Review -->
   <section class="write-review-section">
@@ -105,9 +163,9 @@
         <div style="display:flex;justify-content:flex-end">
           <button class="btn btn-primary" id="submit-review">Submit Review</button>
         </div>
-      </div>
-    </div>
-  </section>
+            </div>
+          </div>
+        </section>
 
   <!-- Reviews List -->
   <section class="reviews-list-section">
@@ -174,15 +232,25 @@
             <button class="helpful-btn" id="helpful-4"><i data-lucide="thumbs-up" class="w-3.5 h-3.5"></i> Helpful (15)</button>
           </div>
         </div>
-      </div>
-    </div>
+            </div>
+          </div>
   </section>
 
   <div style="height:var(--space-4xl)"></div>
 
+<<<<<<< Updated upstream
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/mouse-tracking.js"></script>
   <script src="../assets/js/reviews.js"></script>
+=======
+      </section>
+    </div>
+  </main>
+
+  <script src="../../assets/js/main.js"></script>
+  <script src="../../assets/js/mouse-tracking.js"></script>
+  <script src="../../assets/js/reviews.js"></script>
+>>>>>>> Stashed changes
 </body>
 </html>
 
