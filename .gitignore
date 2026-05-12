@@ -1,0 +1,12 @@
+node_modules/
+vendor/
+storage/
+libraries/
+*.log
+.env
+dist/
+build/
+.cache/
+.wwebjs_auth/
+.wwebjs_cache/
+*.tmp

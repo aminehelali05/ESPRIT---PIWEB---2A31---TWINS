@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360" fill="none">
+  <circle cx="180" cy="180" r="162" fill="url(#a)"/>
+  <circle cx="180" cy="180" r="122" fill="#FFFFFF" fill-opacity="0.9"/>
+  <path d="M180 104L200.908 146.354L247.657 153.146L213.829 186.118L221.816 232.68L180 210.701L138.184 232.68L146.171 186.118L112.343 153.146L159.092 146.354L180 104Z" fill="#5E8EFF"/>
+  <defs>
+    <linearGradient id="a" x1="18" y1="18" x2="342" y2="342" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#75A9FF"/>
+      <stop offset="1" stop-color="#3F7DFF"/>
+    </linearGradient>
+  </defs>
+</svg>

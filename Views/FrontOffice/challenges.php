@@ -1,3 +1,7 @@
+<<<<<<< Updated upstream
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+=======
 <?php
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
@@ -13,13 +17,14 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+>>>>>>> Stashed changes
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Test your knowledge with daily quizzes and coding challenges on Diversity.is.">
-  <title>Challenges — Diversity.is</title>
-  <link rel="stylesheet" href="../../assets/css/global.css">
-  <link rel="stylesheet" href="../../assets/css/challenges.css">
+  <title>Challenges â€” Diversity.is</title>
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/challenges.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="grid-dot-bg with-global-left-sidebar">
@@ -37,11 +42,12 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
       <a href="home.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span>Home Feed</span></a>
       <a href="social.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg><span>Social</span></a>
       <a href="profile.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg><span>Profile</span></a>
-      <a href="JobOffer.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Job Offers</span></a>
+      <a href="skills.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Skills & Certificates</span></a>
       <a href="projects.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg><span>Projects & Collaborators</span></a>
-      <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z" /></svg><span>Contracts</span></a>
+      <a href="brainstormings.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6m-5 3h4M12 2a7 7 0 00-7 7c0 2.5 1.5 4.5 3 6v1a2 2 0 002 2h4a2 2 0 002-2v-1c1.5-1.5 3-3.5 3-6a7 7 0 00-7-7z" /></svg><span>Brainstorming</span></a>
+      <a href="reviews.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.3 6.4 20.3l1.1-6.3L2.9 9.6l6.3-.9L12 3z" /></svg><span>Reviews & Ratings</span></a>
       <a class="active" href="challenges.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg><span>Challenges & Daily Quiz</span></a>
-      <?php if ($isAdminSidebar): ?><a href="../BackOffice/dashboardUser.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M14 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V6z"/><path d="M4 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z"/></svg><span>Dashboard</span></a><?php endif; ?>
+      <?php if ($isAdminSidebar): ?><a href="../BackOffice/dashboard.php"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M14 6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V6z"/><path d="M4 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2z"/><path d="M14 16a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z"/></svg><span>User Management</span></a><?php endif; ?>
     </nav>
     <div class="left-gamification">
       <div class="mini-score"><span>Reputation</span><strong>84</strong></div>
@@ -51,15 +57,26 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
 
   <nav class="navbar" id="navbar">
     <div class="container">
-      <a href="home.php" class="navbar-brand"><div class="brand-icon">⬡</div>Diversity.is</a>
+      <a href="TemplateHome.php" class="navbar-brand"><div class="brand-icon">â¬¡</div>Diversity.is</a>
       <div class="navbar-nav" id="navbar-nav">
+<<<<<<< Updated upstream
+        <a href="TemplateHome.php">Home</a>
+        <a href="auth.html">Sign In</a>
+        <a href="social.html">Feed</a>
+        <a href="skills.html">Skills</a>
+        <a href="projects.html">Projects</a>
+        <a href="reviews.html">Reviews</a>
+        <a href="challenges.html" class="active">Challenges</a>
+=======
         <a href="home.php">Home</a>
         <a href="auth.php">Sign In</a>
         <a href="social.php">Feed</a>
-        <a href="JobOffer.php">Job Offers</a>
+        <a href="skills.php">Skills</a>
         <a href="projects.php">Projects</a>
-        <a href="reviews.php">Contracts</a>
+        <a href="brainstormings.php">Brainstorming</a>
+        <a href="reviews.php">Reviews</a>
         <a href="challenges.php" class="active">Challenges</a>
+>>>>>>> Stashed changes
       </div>
       <div class="navbar-actions">
         <!-- Theme Toggle -->
@@ -78,10 +95,10 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
               <strong>Admin User</strong>
               <span>admin@diversity.is</span>
             </div>
-            <a href="profile.php" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
-            <a href="../BackOffice/dashboardUser.php" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
+            <a href="profile.html" class="nav-dropdown-item"><i data-lucide="user" class="w-4 h-4"></i> My Profile</a>
+            <a href="dashboard.html" class="nav-dropdown-item"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Dashboard</a>
             <a href="#settings" class="nav-dropdown-item"><i data-lucide="settings" class="w-4 h-4"></i> Settings</a>
-            <a href="auth.php" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
+            <a href="auth.html" class="nav-dropdown-item nav-dropdown-item-danger"><i data-lucide="log-out" class="w-4 h-4"></i> Sign Out</a>
           </div>
         </div>
       </div>
@@ -223,10 +240,9 @@ $isAdminSidebar = strtolower(trim((string) ($sidebarUser['email'] ?? ''))) === '
 
   <div style="height:var(--space-3xl)"></div>
 
-  <script src="../../assets/js/main.js"></script>
-  <script src="../../assets/js/mouse-tracking.js"></script>
-  <script src="../../assets/js/challenges.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/mouse-tracking.js"></script>
+  <script src="../assets/js/challenges.js"></script>
 </body>
 </html>
-
 
