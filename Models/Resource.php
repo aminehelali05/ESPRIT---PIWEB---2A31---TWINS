@@ -3,6 +3,8 @@
 class ResourceItem
 {
     private $id;
+    private $event_id;
+    private $user_id;
     private $type;
     private $title;
     private $description;
@@ -11,16 +13,20 @@ class ResourceItem
     private $updated_at;
 
     public function __construct(
-        $type = null, $title = null, $description = null, $status = 'active'
+        $user_id = null, $type = null, $title = null, $description = null, $status = 'active', $event_id = null
     ) {
+        $this->user_id = $user_id;
         $this->type = $type;
         $this->title = $title;
         $this->description = $description;
         $this->status = $status;
+        $this->event_id = $event_id;
     }
 
     // --- GETTERS ---
     public function getId() { return $this->id; }
+    public function getEventId() { return $this->event_id; }
+    public function getUserId() { return $this->user_id; }
     public function getType() { return $this->type; }
     public function getTitle() { return $this->title; }
     public function getDescription() { return $this->description; }
@@ -30,6 +36,8 @@ class ResourceItem
 
     // --- SETTERS ---
     public function setId($id) { $this->id = $id; }
+    public function setEventId($v) { $this->event_id = $v; }
+    public function setUserId($v) { $this->user_id = $v; }
     public function setType($v) { $this->type = $v; }
     public function setTitle($v) { $this->title = $v; }
     public function setDescription($v) { $this->description = $v; }
