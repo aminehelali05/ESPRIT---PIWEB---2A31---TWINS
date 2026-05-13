@@ -1,0 +1,49 @@
+{
+    "version": 1,
+    "updated_at": "2026-04-25T12:30:47+00:00",
+    "meta": {
+        "last_active_user_id": 1
+    },
+    "users": {
+        "1": {
+            "updated_at": "2026-04-25T12:30:47+00:00",
+            "last_active_user_id": 1,
+            "last_command": "Go to messages",
+            "last_source": "whatsapp",
+            "last_task_id": "task_20260425_123047_4827c07f23",
+            "last_plan_summary": "I’ll take you to your Messages section so you can view and manage your conversations.",
+            "recent_tasks": [
+                {
+                    "task_id": "task_20260425_123047_4827c07f23",
+                    "command": "Go to messages",
+                    "summary": "I’ll take you to your Messages section so you can view and manage your conversations.",
+                    "timestamp": "2026-04-25T12:30:47+00:00"
+                },
+                {
+                    "task_id": "task_20260425_123030_4f185d3156",
+                    "command": "What can you do?",
+                    "summary": "I can help you navigate Diversity.is, manage your profile, search for people, and message users (including via WhatsApp if enabled). Tell me what you want to do and any details like a name, keyword, or message text.",
+                    "timestamp": "2026-04-25T12:30:30+00:00"
+                },
+                {
+                    "task_id": "task_20260425_122711_fabfb94a8c",
+                    "command": "Send message to Omar tell him \"I love You\"",
+                    "summary": "I will open Omar’s WhatsApp chat and send the exact message: \"I love You\".",
+                    "timestamp": "2026-04-25T12:27:11+00:00"
+                },
+                {
+                    "task_id": "task_20260425_122638_08f07f6de6",
+                    "command": "Hey Bro",
+                    "summary": "Acknowledge the greeting and ask what they’d like help with (search, profile, messaging, or navigation).",
+                    "timestamp": "2026-04-25T12:26:38+00:00"
+                },
+                {
+                    "task_id": "task_20260424_202904_28f5a20b14",
+                    "command": "Search for users",
+                    "summary": "I can search the directory, but I need a name, username, or keyword (and any filters like location or role) to run the search.",
+                    "timestamp": "2026-04-24T20:29:04+00:00"
+                }
+            ]
+        }
+    }
+}
